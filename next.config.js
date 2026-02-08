@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const withPWA = require("next-pwa")({
   dest: "public",
-  disable: true, // Force disable PWA for now to debug update issues
-  register: false,
+  disable: process.env.NODE_ENV === "development",
+  register: true,
   skipWaiting: true,
 });
 
