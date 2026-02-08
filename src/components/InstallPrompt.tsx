@@ -49,44 +49,47 @@ export default function InstallPrompt() {
         <div
             style={{
                 position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                backgroundColor: "#111827",
-                color: "white",
-                zIndex: 99999, // Super high z-index
-                padding: "0.8rem 1rem",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                backgroundColor: "white",
+                color: "black",
+                zIndex: 999999,
+                padding: "2rem",
+                borderRadius: "1rem",
+                boxShadow: "0 0 0 1000px rgba(0,0,0,0.7)", // Dim background
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "space-between",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+                gap: "1rem",
+                width: "90%",
+                maxWidth: "400px",
+                textAlign: "center"
             }}
         >
-            <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-                <button
-                    onClick={handleInstallClick}
-                    className="flex-center gap-2"
-                    style={{
-                        backgroundColor: "#374151",
-                        border: "1px solid #6b7280",
-                        borderRadius: "9999px",
-                        padding: "0.5rem 1.2rem",
-                        fontSize: "0.95rem",
-                        fontWeight: "bold",
-                        color: "white",
-                        whiteSpace: "nowrap"
-                    }}
-                >
-                    <Download size={16} />
-                    홈화면 바로가기 설치
-                </button>
-            </div>
+            <h2 style={{ fontSize: "1.2rem", fontWeight: "bold" }}>앱 설치 안내</h2>
+            <p>원활한 사용을 위해<br />앱을 설치해주세요.</p>
+
+            <button
+                onClick={handleInstallClick}
+                style={{
+                    backgroundColor: "#ef4444", // Red button
+                    color: "white",
+                    padding: "1rem 2rem",
+                    borderRadius: "0.5rem",
+                    fontWeight: "bold",
+                    fontSize: "1.1rem",
+                    width: "100%"
+                }}
+            >
+                홈화면 바로가기 설치
+            </button>
 
             <button
                 onClick={() => setIsVisible(false)}
-                style={{ color: "#9ca3af", padding: "0.5rem", position: "absolute", right: "0.5rem" }}
+                style={{ textDecoration: "underline", color: "#6b7280" }}
             >
-                <X size={24} />
+                나중에 하기 (닫기)
             </button>
         </div>
     );
