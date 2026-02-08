@@ -4,17 +4,12 @@ import { useEffect, useState } from "react";
 import { X, ExternalLink, Download } from "lucide-react";
 
 export default function InstallPrompt() {
+    const [isVisible, setIsVisible] = useState(true);
     const [isIOS, setIsIOS] = useState(false);
     const [isAndroid, setIsAndroid] = useState(false);
-    const [isInAppBrowser, setIsInAppBrowser] = useState(false);
-    const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
         const userAgent = navigator.userAgent.toLowerCase();
-        const isKakao = userAgent.indexOf("kakao") > -1;
-        const isLine = userAgent.indexOf("line") > -1;
-        const isInstagram = userAgent.indexOf("instagram") > -1;
-        const isInApp = isKakao || isLine || isInstagram;
 
         // Detect OS
         const android = /android/i.test(userAgent);
@@ -23,29 +18,32 @@ export default function InstallPrompt() {
         setIsAndroid(android);
         setIsIOS(ios);
 
-        // Also check if running as PWA (standalone)
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
-
-        // Show on all mobile devices by default for reliability
-        if ((android || ios) && !isStandalone) {
-            setIsInAppBrowser(true);
+        // If NOT mobile, hide it. (Show by default on mobile)
+        if (!android && !ios) {
+            setIsVisible(false);
         }
+
+        // If already installed (standalone), hide it
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+        if (isStandalone) {
+            setIsVisible(false);
+        }
+
     }, []);
 
     const handleInstallClick = () => {
         if (isAndroid) {
-            // Android: Try to open in Chrome via Intent
-            // This url scheme forces Android to open the link in a browser app (preferably Chrome)
+            // Android Intent to open in Chrome
             const url = window.location.href.replace(/^https?:\/\//, '');
             const intentUrl = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
             window.location.href = intentUrl;
         } else {
-            // iOS or others: Show alert instruction
-            alert("아이폰에서는 우측 상단 메뉴(⋮) 또는 하단 공유(⬆) 버튼을 눌러 'Safari로 열기'를 선택해주세요.");
+            // iOS / Others
+            alert("아이폰: 하단 '공유' 버튼 -> 'Safari로 열기' -> '홈 화면에 추가'를 해주세요.");
         }
     };
 
-    if (!isInAppBrowser || !isVisible) return null;
+    if (!isVisible) return null;
 
     return (
         <div
@@ -54,14 +52,14 @@ export default function InstallPrompt() {
                 top: 0,
                 left: 0,
                 right: 0,
-                backgroundColor: "#111827", // Dark background like screenshot
+                backgroundColor: "#111827",
                 color: "white",
-                zIndex: 9999,
-                padding: "0.75rem 1rem",
+                zIndex: 99999, // Super high z-index
+                padding: "0.8rem 1rem",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
             }}
         >
             <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
@@ -69,25 +67,26 @@ export default function InstallPrompt() {
                     onClick={handleInstallClick}
                     className="flex-center gap-2"
                     style={{
-                        backgroundColor: "#374151", // Dark gray button
-                        border: "1px solid #4b5563",
+                        backgroundColor: "#374151",
+                        border: "1px solid #6b7280",
                         borderRadius: "9999px",
-                        padding: "0.5rem 1.25rem",
-                        fontSize: "0.9rem",
-                        fontWeight: "600",
+                        padding: "0.5rem 1.2rem",
+                        fontSize: "0.95rem",
+                        fontWeight: "bold",
                         color: "white",
                         whiteSpace: "nowrap"
                     }}
                 >
+                    <Download size={16} />
                     홈화면 바로가기 설치
                 </button>
             </div>
 
             <button
                 onClick={() => setIsVisible(false)}
-                style={{ color: "#9ca3af", padding: "0.25rem", position: "absolute", right: "1rem" }}
+                style={{ color: "#9ca3af", padding: "0.5rem", position: "absolute", right: "0.5rem" }}
             >
-                <X size={20} />
+                <X size={24} />
             </button>
         </div>
     );
