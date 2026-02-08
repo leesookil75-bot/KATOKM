@@ -8,7 +8,7 @@ export default function Home() {
     <main className={styles.main}>
       <header className={styles.hero}>
         <h1 className="heading-xl" style={{ marginBottom: "0.5rem", color: "var(--primary)" }}>
-          출결 매니저 v1.2
+          출결 매니저 v1.3 (최신)
         </h1>
         <p className="text-sub">간편한 학생 관리와 카톡 알림</p>
       </header>
