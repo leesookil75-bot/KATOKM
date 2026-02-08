@@ -26,7 +26,8 @@ export default function InstallPrompt() {
         // Also check if running as PWA (standalone)
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
 
-        if (isInApp && !isStandalone) {
+        // Show on all mobile devices by default for reliability
+        if ((android || ios) && !isStandalone) {
             setIsInAppBrowser(true);
         }
     }, []);
