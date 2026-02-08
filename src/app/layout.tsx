@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR } from "next/font/google";
+import InstallPrompt from "@/components/InstallPrompt";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -15,6 +16,20 @@ export const metadata: Metadata = {
   icons: {
     icon: "/icon.png",
     apple: "/icon.png",
+  },
+  openGraph: {
+    title: "카톡 출결 매니저",
+    description: "간편한 학생 출석 체크 및 알림 전송",
+    images: [
+      {
+        url: "/icon.png",
+        width: 192,
+        height: 192,
+        alt: "App Icon",
+      },
+    ],
+    locale: "ko_KR",
+    type: "website",
   },
 };
 
@@ -38,6 +53,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#4f46e5" />
       </head>
       <body className={notoSansKr.className}>
+        <InstallPrompt />
         <div className="container">
           {children}
         </div>
