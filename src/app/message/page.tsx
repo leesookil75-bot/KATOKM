@@ -245,14 +245,14 @@ export default function MessagePage() {
                         onChange={e => setMessage(e.target.value)}
                     />
 
-                    <div className="flex gap-md shrink-0" style={{ marginTop: "1rem" }}>
-                        <button className="btn btn-secondary py-3 flex-center gap-2 flex-1" onClick={() => {
+                    <div className="action-buttons">
+                        <button className="btn btn-secondary py-3 flex-center gap-2" onClick={() => {
                             navigator.clipboard.writeText(message);
                             alert("복사되었습니다.");
                         }}>
                             <Copy size={18} /> 내용 복사
                         </button>
-                        <button className="btn btn-primary py-3 flex-center gap-2 flex-1" onClick={handleSend}>
+                        <button className="btn btn-primary py-3 flex-center gap-2" onClick={handleSend}>
                             <Send size={18} /> 문자 전송
                         </button>
                     </div>
