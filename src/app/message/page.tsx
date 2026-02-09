@@ -158,12 +158,12 @@ export default function MessagePage() {
                 <div className="card split-panel-left gap-sm">
 
                     {/* Filters */}
-                    <div className="flex-center gap-2 mb-2 shrink-0">
-                        <select className="input text-sm p-1 flex-1" value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+                    <div className="flex-center gap-md mb-2 shrink-0">
+                        <select className="input text-sm p-2 flex-1" value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
                             <option value="all">전체 반</option>
                             {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                         </select>
-                        <select className="input text-sm p-1 flex-1" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
+                        <select className="input text-sm p-2 flex-1" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
                             <option value="all">전체 상태</option>
                             <option value="absent">결석/미처리</option>
                             <option value="present">출석</option>
@@ -245,14 +245,14 @@ export default function MessagePage() {
                         onChange={e => setMessage(e.target.value)}
                     />
 
-                    <div className="grid grid-cols-2 gap-2 shrink-0">
-                        <button className="btn btn-secondary py-3 flex-center gap-2" onClick={() => {
+                    <div className="flex gap-md shrink-0" style={{ marginTop: "1rem" }}>
+                        <button className="btn btn-secondary py-3 flex-center gap-2 flex-1" onClick={() => {
                             navigator.clipboard.writeText(message);
                             alert("복사되었습니다.");
                         }}>
                             <Copy size={18} /> 내용 복사
                         </button>
-                        <button className="btn btn-primary py-3 flex-center gap-2" onClick={handleSend}>
+                        <button className="btn btn-primary py-3 flex-center gap-2 flex-1" onClick={handleSend}>
                             <Send size={18} /> 문자 전송
                         </button>
                     </div>
