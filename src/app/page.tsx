@@ -26,12 +26,6 @@ export default function Home() {
           <p>주간/월간 출석 관리</p>
         </Link>
 
-        <Link href="/stats" className={styles.card}>
-          <BarChart2 size={32} color="#8b5cf6" style={{ marginBottom: "1rem" }} />
-          <h2>통계</h2>
-          <p>월별 출석 현황</p>
-        </Link>
-
         <Link href="/message" className={styles.card}>
           <MessageCircle size={32} color="#10b981" style={{ marginBottom: "1rem" }} />
           <h2>알림 전송</h2>
