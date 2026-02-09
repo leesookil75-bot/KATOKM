@@ -50,6 +50,20 @@ export async function GET(request: Request) {
       );
     `;
 
+    // 4. Tuition Records Table
+    await client.sql`
+      CREATE TABLE IF NOT EXISTS tuition_records (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+        year INTEGER NOT NULL,
+        month INTEGER NOT NULL,
+        status VARCHAR(20) NOT NULL CHECK (status IN ('paid', 'unpaid')),
+        payment_date DATE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(student_id, year, month)
+      );
+    `;
+
     // 3. Insert Dummy Data (Optional)
     const { searchParams } = new URL(request.url);
     if (searchParams.get('mode') === 'dummy') {

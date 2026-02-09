@@ -1,6 +1,6 @@
 import Image from "next/image";
 import styles from "./page.module.css";
-import { Users, CheckCircle, MessageCircle, Settings, Plus, BarChart2, Smartphone } from "lucide-react";
+import { Users, CheckCircle, MessageCircle, Settings, Plus, BarChart2, Smartphone, CreditCard } from "lucide-react";
 import Link from 'next/link';
 
 export default function Home() {
@@ -30,6 +30,12 @@ export default function Home() {
           <MessageCircle size={32} color="#10b981" style={{ marginBottom: "1rem" }} />
           <h2>알림 전송</h2>
           <p>학부모님께 메시지 보내기</p>
+        </Link>
+
+        <Link href="/tuition" className={styles.card}>
+          <CreditCard size={32} color="#f59e0b" style={{ marginBottom: "1rem" }} />
+          <h2>수강료 관리</h2>
+          <p>월별 수강료 납부 현황</p>
         </Link>
 
         <Link href="/kiosk" className={styles.card} style={{ borderColor: "#6366f1", backgroundColor: "#f5f3ff" }}>

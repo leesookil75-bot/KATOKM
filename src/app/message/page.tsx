@@ -24,10 +24,11 @@ export default function MessagePage() {
     const [classes, setClasses] = useState<{ id: number, name: string }[]>([]);
     const [templates, setTemplates] = useState<Template[]>([]);
     const [attendance, setAttendance] = useState<{ [key: string]: string }>({});
+    const [tuitionUnpaidIds, setTuitionUnpaidIds] = useState<Set<string>>(new Set());
 
     // UI State
     const [selectedClass, setSelectedClass] = useState("all");
-    const [selectedStatus, setSelectedStatus] = useState("all"); // all, absent, present
+    const [selectedStatus, setSelectedStatus] = useState("all"); // all, absent, present, tuition_unpaid
     const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
     const [message, setMessage] = useState("");
     const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -35,6 +36,8 @@ export default function MessagePage() {
 
     // Date for context (default today)
     const today = new Date().toISOString().split('T')[0];
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
 
     useEffect(() => {
         fetchInitialData();
@@ -42,23 +45,56 @@ export default function MessagePage() {
 
     const fetchInitialData = async () => {
         try {
-            const [resStudents, resClasses, resTemplates, resAttendance] = await Promise.all([
+            const [resStudents, resClasses, resTemplates, resAttendance, resTuition] = await Promise.all([
                 fetch('/api/students'),
                 fetch('/api/classes'),
                 fetch('/api/message-templates'),
-                fetch(`/api/attendance?date=${today}`) // Optimization: Fetch only today's
+                fetch(`/api/attendance?date=${today}`),
+                fetch(`/api/tuition?year=${currentYear}`)
             ]);
 
-            if (resStudents.ok) setStudents(await resStudents.json());
+            let studentsData: Student[] = [];
+
+            if (resStudents.ok) {
+                const data = await resStudents.json();
+                studentsData = data;
+                setStudents(data);
+            }
             if (resClasses.ok) setClasses(await resClasses.json());
             if (resTemplates.ok) setTemplates(await resTemplates.json());
 
             if (resAttendance.ok) {
                 const data = await resAttendance.json();
                 const map: any = {};
-                // Handle different response structures if needed, but assuming list of {student_id, status}
                 data.forEach((r: any) => map[r.student_id] = r.status);
                 setAttendance(map);
+            }
+
+            if (resTuition.ok) {
+                const data = await resTuition.json();
+                // Find students who have PAID for current month
+                const paidStudentIds = new Set(
+                    data.records
+                        .filter((r: any) => r.month === currentMonth && r.status === 'paid')
+                        .map((r: any) => r.student_id)
+                );
+
+                // Identify students who have NOT paid
+                // We need the full student list to determine who is missing from paid list
+                // If studentsData is available here use it, otherwise rely on state update flow?
+                // Actually easier to just store paid IDs and invert logic in filter
+
+                // BUT wait, we need to know who is unpaid. Unpaid = All Students - Paid Students.
+                // So let's just store the Paid IDs for the current month.
+                // Actually, let's store the UNPAID IDs directly for easier filtering.
+                if (studentsData.length > 0) {
+                    const unpaid = new Set(
+                        studentsData
+                            .filter((s: any) => !paidStudentIds.has(s.id))
+                            .map((s: any) => s.id)
+                    );
+                    setTuitionUnpaidIds(unpaid);
+                }
             }
         } catch (e) { console.error(e); }
     };
@@ -67,10 +103,11 @@ export default function MessagePage() {
     const filteredStudents = students.filter(s => {
         const matchClass = selectedClass === "all" || s.className === selectedClass;
         const status = attendance[s.id] || "미처리";
-        // Status Filter Mapping
+
         let matchStatus = true;
         if (selectedStatus === "absent") matchStatus = status === "결석" || status === "미처리";
         else if (selectedStatus === "present") matchStatus = status === "출석";
+        else if (selectedStatus === "tuition_unpaid") matchStatus = tuitionUnpaidIds.has(s.id);
 
         return matchClass && matchStatus;
     });
@@ -167,6 +204,7 @@ export default function MessagePage() {
                             <option value="all">전체 상태</option>
                             <option value="absent">결석/미처리</option>
                             <option value="present">출석</option>
+                            <option value="tuition_unpaid">수강료 미납 ({new Date().getMonth() + 1}월)</option>
                         </select>
                     </div>
 
