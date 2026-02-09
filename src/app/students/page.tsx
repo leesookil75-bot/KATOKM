@@ -110,12 +110,18 @@ export default function StudentManager() {
 
     const saveEdit = async () => {
         if (!editingCell) return;
+        await saveValue(editingCell.id, editingCell.field, tempValue);
+        setEditingCell(null);
+    };
 
-        const { id, field } = editingCell;
+    const saveValue = async (id: string, field: keyof Student, value: string) => {
         const student = students.find(s => s.id === id);
         if (!student) return;
 
-        const updatedStudent = { ...student, [field]: tempValue };
+        // Skip if value hasn't changed
+        if (student[field] === value) return;
+
+        const updatedStudent = { ...student, [field]: value };
 
         try {
             const res = await fetch(`/api/students/${id}`, {
@@ -127,14 +133,13 @@ export default function StudentManager() {
             if (res.ok) {
                 setStudents(prev => prev.map(s => s.id === id ? updatedStudent : s));
             } else {
+                console.error("Update failed");
                 alert("수정 실패");
             }
         } catch (e) {
             console.error(e);
             alert("오류 발생");
         }
-
-        setEditingCell(null);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -185,9 +190,14 @@ export default function StudentManager() {
                                             <select
                                                 className="input text-sm p-1 w-full"
                                                 value={tempValue}
-                                                onChange={e => setTempValue(e.target.value)}
-                                                onBlur={saveEdit}
+                                                onChange={async (e) => {
+                                                    const newVal = e.target.value;
+                                                    setTempValue(newVal);
+                                                    await saveValue(student.id, 'className', newVal);
+                                                    setEditingCell(null);
+                                                }}
                                                 onKeyDown={handleKeyDown}
+                                                onBlur={() => setEditingCell(null)}
                                                 autoFocus
                                             >
                                                 <option value="">선택</option>
