@@ -424,3 +424,24 @@ body {
     height: 100%;
   }
 }
+
+/* Action Buttons (Message Page) */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  /* Mobile: Stacked */
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+@media (min-width: 640px) {
+  .action-buttons {
+    flex-direction: row;
+    /* Desktop: Row */
+    gap: var(--spacing-md);
+  }
+
+  .action-buttons button {
+    flex: 1;
+  }
+}
