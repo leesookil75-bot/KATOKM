@@ -89,6 +89,8 @@ button {
 
 @media (min-width: 640px) {
   .container {
+    max-width: 1200px;
+    /* Expanded width for PC/Tablet */
     margin: var(--spacing-xl) auto;
     min-height: auto;
     border-radius: var(--radius-lg);
