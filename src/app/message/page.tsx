@@ -1,189 +1,288 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Copy } from "lucide-react";
+import { Send, Copy, Plus, Trash2, Users, Filter, ChevronDown } from "lucide-react";
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 type Student = {
     id: string;
     name: string;
     parentPhone: string;
+    className?: string; // class_name from DB
+};
+
+type Template = {
+    id: number;
+    content: string;
 };
 
 type AttendanceStatus = "출석" | "결석" | "지각" | "조퇴" | "미처리";
 
 export default function MessagePage() {
-    const router = useRouter();
+    // Data State
     const [students, setStudents] = useState<Student[]>([]);
-    const [attendance, setAttendance] = useState<{ [key: string]: AttendanceStatus }>({});
-    const [date, setDate] = useState("");
-    const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
-    const [messageTemplate, setMessageTemplate] = useState("");
+    const [classes, setClasses] = useState<{ id: number, name: string }[]>([]);
+    const [templates, setTemplates] = useState<Template[]>([]);
+    const [attendance, setAttendance] = useState<{ [key: string]: string }>({});
 
-    // Load data
+    // UI State
+    const [selectedClass, setSelectedClass] = useState("all");
+    const [selectedStatus, setSelectedStatus] = useState("all"); // all, absent, present
+    const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
+    const [message, setMessage] = useState("");
+    const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+    const [newTemplateContent, setNewTemplateContent] = useState("");
+
+    // Date for context (default today)
+    const today = new Date().toISOString().split('T')[0];
+
     useEffect(() => {
-        const today = new Date().toISOString().split('T')[0];
-        setDate(today);
-
-        const savedStudents = localStorage.getItem("students");
-        const savedAttendance = localStorage.getItem(`attendance-${today}`);
-
-        if (savedStudents) {
-            setStudents(JSON.parse(savedStudents));
-        }
-
-        if (savedAttendance) {
-            setAttendance(JSON.parse(savedAttendance));
-        }
+        fetchInitialData();
     }, []);
 
-    // Update Message Template when selection changes
-    useEffect(() => {
-        if (!selectedStudentId) {
-            setMessageTemplate("");
-            return;
-        }
-
-        const student = students.find(s => s.id === selectedStudentId);
-        if (!student) return;
-
-        const status = attendance[selectedStudentId] || "미처리";
-
-        let text = `[출결 알림]\n\n`;
-        text += `안녕하세요, ${student.name} 학부모님.\n`;
-        text += `${date} ${student.name} 학생의 출결 현황 안내드립니다.\n\n`;
-
-        const time = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-
-        switch (status) {
-            case "출석":
-                text += `✅ 등원 완료 (${time})\n`;
-                text += `오늘도 즐겁게 공부하고 안전하게 귀가하도록 지도하겠습니다.`;
-                break;
-            case "지각":
-                text += `⚠️ 지각 (${time})\n`;
-                text += `학생이 조금 늦게 등원하였습니다.`;
-                break;
-            case "조퇴":
-                text += `🏃 조퇴 (${time})\n`;
-                text += `사정이 있어 일찍 귀가하였습니다.`;
-                break;
-            case "결석":
-                text += `❌ 결석\n`;
-                text += `금일 결석 처리되었습니다.`;
-                break;
-            default:
-                text += `❓ 미처리\n`;
-                text += `아직 출석 체크가 완료되지 않았습니다.`;
-        }
-
-        setMessageTemplate(text);
-
-    }, [selectedStudentId, attendance, students, date]);
-
-    const handleCopy = async () => {
+    const fetchInitialData = async () => {
         try {
-            await navigator.clipboard.writeText(messageTemplate);
-            alert("메시지가 클립보드에 복사되었습니다.");
-        } catch (err) {
-            console.error('Failed to copy: ', err);
-            alert("복사에 실패했습니다.");
+            const [resStudents, resClasses, resTemplates, resAttendance] = await Promise.all([
+                fetch('/api/students'),
+                fetch('/api/classes'),
+                fetch('/api/message-templates'),
+                fetch(`/api/attendance?date=${today}`) // Optimization: Fetch only today's
+            ]);
+
+            if (resStudents.ok) setStudents(await resStudents.json());
+            if (resClasses.ok) setClasses(await resClasses.json());
+            if (resTemplates.ok) setTemplates(await resTemplates.json());
+
+            if (resAttendance.ok) {
+                const data = await resAttendance.json();
+                const map: any = {};
+                // Handle different response structures if needed, but assuming list of {student_id, status}
+                data.forEach((r: any) => map[r.student_id] = r.status);
+                setAttendance(map);
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    // Filter Logic
+    const filteredStudents = students.filter(s => {
+        const matchClass = selectedClass === "all" || s.className === selectedClass;
+        const status = attendance[s.id] || "미처리";
+        // Status Filter Mapping
+        let matchStatus = true;
+        if (selectedStatus === "absent") matchStatus = status === "결석" || status === "미처리";
+        else if (selectedStatus === "present") matchStatus = status === "출석";
+
+        return matchClass && matchStatus;
+    });
+
+    // Selection Handlers
+    const toggleSelectAll = () => {
+        if (selectedStudentIds.size === filteredStudents.length) {
+            setSelectedStudentIds(new Set());
+        } else {
+            setSelectedStudentIds(new Set(filteredStudents.map(s => s.id)));
         }
     };
 
-    const handleShare = async () => {
-        if (!messageTemplate) return;
+    const toggleStudent = (id: string) => {
+        const newSet = new Set(selectedStudentIds);
+        if (newSet.has(id)) newSet.delete(id);
+        else newSet.add(id);
+        setSelectedStudentIds(newSet);
+    };
 
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: '출결 알림',
-                    text: messageTemplate,
-                });
-            } catch (err) {
-                console.log('Error sharing:', err);
+    // Template Handlers
+    const handleAddTemplate = async () => {
+        if (!newTemplateContent.trim()) return;
+        try {
+            const res = await fetch('/api/message-templates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: newTemplateContent })
+            });
+            if (res.ok) {
+                setNewTemplateContent("");
+                // Refresh templates
+                const updated = await fetch('/api/message-templates');
+                setTemplates(await updated.json());
             }
-        } else {
-            // Fallback: Copy and try to open KakaoTalk
-            handleCopy();
-            // window.location.href = `kakaotalk://`; // This might not work reliably without SDK
-            // opening specific chat directly isn't possible via URL scheme without user interaction history or SDK
-            alert("PC에서는 '복사' 후 카카오톡 PC버전에 붙여넣기 해주세요.");
-        }
+        } catch (e) { console.error(e); }
+    };
+
+    const handleDeleteTemplate = async (id: number) => {
+        if (!confirm("이 템플릿을 삭제하시겠습니까?")) return;
+        try {
+            await fetch(`/api/message-templates?id=${id}`, { method: 'DELETE' });
+            setTemplates(prev => prev.filter(t => t.id !== id));
+        } catch (e) { console.error(e); }
+    };
+
+    const applyTemplate = (content: string) => {
+        setMessage(content);
+        setIsTemplateModalOpen(false);
+    };
+
+    // Send Logic
+    const handleSend = () => {
+        const targets = students.filter(s => selectedStudentIds.has(s.id));
+        if (targets.length === 0) return alert("받는 사람을 선택해주세요.");
+
+        const phones = targets.map(s => s.parentPhone).join(';'); // Android/iOS delimiter check? usually ; or ,
+
+        // Mobile only mostly
+        const ua = navigator.userAgent;
+        const sep = ua.match(/iPhone|iPad|iPod/i) ? '&' : '?';
+
+        // Note: Bulk SMS via sms: protocol is limited. 
+        // iOS: sms:open?addresses=1,2,3...
+        // Android: sms:1,2,3?body=...
+        // Let's try standard comma separated.
+
+        const phoneStr = targets.map(s => s.parentPhone).join(',');
+        window.location.href = `sms:${phoneStr}${sep}body=${encodeURIComponent(message)}`;
     };
 
     return (
         <div className="main flex-col gap-md" style={{ height: "100vh", overflow: "hidden" }}>
-            <header className="flex-center justify-between p-4 border-b">
-                <Link href="/" className="btn text-sm">← 홈으로</Link>
+            {/* Header */}
+            <header className="flex-center justify-between p-4 border-b bg-white z-10">
+                <Link href="/" className="btn text-sm">← 홈</Link>
                 <h1 className="heading-md">알림 전송</h1>
-                <div style={{ width: "80px" }}></div>
+                <div style={{ width: "40px" }}></div>
             </header>
 
-            <div className="flex-row gap-md" style={{ flex: 1, padding: "1rem", overflow: "hidden" }}>
-                {/* Left: Student List */}
-                <div className="card flex-col gap-sm" style={{ width: "35%", overflowY: "auto", padding: "0.5rem" }}>
-                    <h3 className="heading-sm text-center mb-2">학생 목록</h3>
-                    {students.map(student => (
-                        <button
-                            key={student.id}
-                            onClick={() => setSelectedStudentId(student.id)}
-                            className={`btn w-full justify-between text-sm p-2 rounded ${selectedStudentId === student.id
-                                    ? "bg-indigo-100 text-indigo-700 font-bold"
-                                    : "hover:bg-gray-50"
-                                }`}
-                            style={{
-                                textAlign: "left",
-                                backgroundColor: selectedStudentId === student.id ? "var(--primary-light)" : "transparent",
-                                color: selectedStudentId === student.id ? "white" : "inherit"
-                            }}
-                        >
-                            <span>{student.name}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${attendance[student.id] === '출석' ? 'bg-green-100 text-green-700' :
-                                    attendance[student.id] === '결석' ? 'bg-red-100 text-red-700' : 'bg-gray-100'
-                                }`}
-                                style={{
-                                    color: "inherit", opacity: 0.8
-                                }}>
-                                {attendance[student.id] || "-"}
-                            </span>
-                        </button>
-                    ))}
+            <div className="flex-row gap-md p-4" style={{ flex: 1, overflow: "hidden" }}>
+
+                {/* Left: Student List & Filters */}
+                <div className="card flex-col gap-sm" style={{ width: "40%", display: "flex", flexDirection: "column" }}>
+
+                    {/* Filters */}
+                    <div className="flex-center gap-2 mb-2">
+                        <select className="input text-sm p-1 flex-1" value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+                            <option value="all">전체 반</option>
+                            {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                        </select>
+                        <select className="input text-sm p-1 flex-1" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
+                            <option value="all">전체 상태</option>
+                            <option value="absent">결석/미처리</option>
+                            <option value="present">출석</option>
+                        </select>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex-center justify-between text-xs text-sub border-b pb-2">
+                        <label className="flex-center gap-2">
+                            <input type="checkbox"
+                                checked={filteredStudents.length > 0 && selectedStudentIds.size === filteredStudents.length}
+                                onChange={toggleSelectAll}
+                            />
+                            <span>전체 선택 ({filteredStudents.length}명)</span>
+                        </label>
+                        <span>{selectedStudentIds.size}명 선택됨</span>
+                    </div>
+
+                    {/* List */}
+                    <div className="flex-col gap-1 overflow-y-auto flex-1">
+                        {filteredStudents.map(student => (
+                            <div key={student.id}
+                                className={`flex-center justify-between p-2 rounded cursor-pointer ${selectedStudentIds.has(student.id) ? "bg-indigo-50" : "hover:bg-gray-50"}`}
+                                onClick={() => toggleStudent(student.id)}
+                            >
+                                <div className="flex-center gap-3">
+                                    <input type="checkbox" checked={selectedStudentIds.has(student.id)} readOnly />
+                                    <div>
+                                        <span className="text-sm font-bold block">{student.name}</span>
+                                        <span className="text-xs text-sub">{student.className || "반 없음"}</span>
+                                    </div>
+                                </div>
+                                <span className={`text-xs px-2 py-0.5 rounded ${attendance[student.id] === '출석' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                    {attendance[student.id] || "미처리"}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
-                {/* Right: Message Preview & Actions */}
-                <div className="card flex-col gap-md" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                    <h3 className="heading-sm text-center">메시지 미리보기</h3>
+                {/* Right: Message Input */}
+                <div className="card flex-col gap-md flex-1">
+                    <div className="flex-center justify-between">
+                        <h3 className="heading-sm">메시지 작성</h3>
+                        <button className="btn btn-secondary text-xs flex-center gap-1" onClick={() => setIsTemplateModalOpen(true)}>
+                            <Plus size={14} /> 템플릿 불러오기
+                        </button>
+                    </div>
+
                     <textarea
-                        className="input flex-1 p-4 resize-none text-sm leading-relaxed"
-                        style={{ flex: 1, fontFamily: "inherit" }}
-                        value={messageTemplate}
-                        onChange={(e) => setMessageTemplate(e.target.value)}
-                        placeholder="좌측 목록에서 학생을 선택해주세요."
+                        className="input flex-1 p-4 resize-none leading-relaxed"
+                        placeholder="전송할 내용을 입력하세요."
+                        value={message}
+                        onChange={e => setMessage(e.target.value)}
                     />
 
-                    <div className="grid grid-cols-2 gap-2 mt-auto">
-                        <button
-                            onClick={handleCopy}
-                            disabled={!selectedStudentId}
-                            className="btn btn-secondary flex-center gap-2 py-3"
-                        >
-                            <Copy size={18} />
-                            복사하기
+                    <div className="grid grid-cols-2 gap-2">
+                        <button className="btn btn-secondary py-3 flex-center gap-2" onClick={() => {
+                            navigator.clipboard.writeText(message);
+                            alert("복사되었습니다.");
+                        }}>
+                            <Copy size={18} /> 내용 복사
                         </button>
-                        <button
-                            onClick={handleShare}
-                            disabled={!selectedStudentId}
-                            className="btn flex-center gap-2 py-3 font-bold"
-                            style={{ backgroundColor: "#FAE100", color: "#3C1E1E" }}
-                        >
-                            <Send size={18} />
-                            카톡 전송
+                        <button className="btn btn-primary py-3 flex-center gap-2" onClick={handleSend}>
+                            <Send size={18} /> 문자 전송
                         </button>
                     </div>
                 </div>
             </div>
+
+            {/* Template Modal */}
+            {isTemplateModalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex-center z-50 p-4">
+                    <div className="card w-full max-w-md max-h-[80vh] flex-col">
+                        <div className="flex-center justify-between mb-4">
+                            <h3 className="heading-md">메시지 템플릿</h3>
+                            <button onClick={() => setIsTemplateModalOpen(false)}>✕</button>
+                        </div>
+
+                        {/* Valid Templates List */}
+                        <div className="flex-col gap-2 overflow-y-auto flex-1 mb-4" style={{ minHeight: "200px" }}>
+                            {templates.length === 0 ? (
+                                <p className="text-center text-sub py-8">저장된 템플릿이 없습니다.</p>
+                            ) : (
+                                templates.map(t => (
+                                    <div key={t.id} className="border rounded p-3 hover:bg-gray-50 group relative">
+                                        <p className="text-sm whitespace-pre-wrap cursor-pointer" onClick={() => applyTemplate(t.content)}>
+                                            {t.content}
+                                        </p>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(t.id); }}
+                                            className="absolute top-2 right-2 p-1 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        {/* Add New */}
+                        <div className="border-t pt-4">
+                            <textarea
+                                className="input w-full p-2 text-sm mb-2"
+                                rows={3}
+                                placeholder="새로운 템플릿 내용을 입력하세요..."
+                                value={newTemplateContent}
+                                onChange={e => setNewTemplateContent(e.target.value)}
+                            />
+                            <button
+                                className="btn btn-primary w-full"
+                                onClick={handleAddTemplate}
+                                disabled={!newTemplateContent.trim()}
+                            >
+                                + 템플릿 저장하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
