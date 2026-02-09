@@ -27,8 +27,13 @@ export async function GET(request: Request) {
             return NextResponse.json(rows);
         }
 
-        // Default: Empty or todo
-        return NextResponse.json([]);
+        // Default: Return ALL attendance logic (for Month/Week views)
+        // In a real app, strict date range filtering is better.
+        const { rows } = await sql`
+            SELECT student_id, date, status 
+            FROM attendance
+        `;
+        return NextResponse.json(rows);
     } catch (error) {
         return NextResponse.json({ error }, { status: 500 });
     }
