@@ -1,7 +1,7 @@
 import { db } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const client = await db.connect();
 
