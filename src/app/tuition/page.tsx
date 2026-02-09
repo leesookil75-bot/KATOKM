@@ -180,50 +180,51 @@ export default function TuitionPage() {
                 /* Table Container */
                 <div className="flex-1 overflow-auto p-4 table-container relative">
                     <table className="table text-sm w-full" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
-                    <thead className="sticky top-0 z-20 bg-gray-50 shadow-sm">
-                        <tr>
-                            <th className="sticky left-0 z-30 bg-gray-50 border-r" style={{ minWidth: '80px' }}>이름</th>
-                            <th className="sticky z-30 bg-gray-50 border-r" style={{ left: '80px', minWidth: '100px' }}>반</th>
-                            {months.map(m => (
-                                <th key={m} className="text-center min-w-[60px]">{m}월</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredStudents.map(student => (
-                            <tr key={student.id} className="hover:bg-gray-50">
-                                <td className="sticky left-0 z-10 bg-white border-r font-bold">{student.name}</td>
-                                <td className="sticky z-10 bg-white border-r text-xs text-sub" style={{ left: '80px' }}>{student.className}</td>
-                                {months.map(m => {
-                                    const key = `${student.id}-${m}`;
-                                    const record = tuitionRecords[key];
-                                    const isPaid = record?.status === 'paid';
-
-                                    return (
-                                        <td
-                                            key={m}
-                                            className={`text-center cursor-pointer hover:opacity-80 transition-colors ${isPaid ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-400'
-                                                }`}
-                                            onClick={() => handleCellClick(student.id, m)}
-                                        >
-                                            {isPaid ? (
-                                                <div className="flex flex-col items-center">
-                                                    <span className="font-bold">납부</span>
-                                                    <span className="text-[10px] text-blue-400">
-                                                        {record.payment_date ? new Date(record.payment_date).getMonth() + 1 + '/' + new Date(record.payment_date).getDate() : ''}
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-xs">미납</span>
-                                            )}
-                                        </td>
-                                    );
-                                })}
+                        <thead className="sticky top-0 z-20 bg-gray-50 shadow-sm">
+                            <tr>
+                                <th className="sticky left-0 z-30 bg-gray-50 border-r" style={{ minWidth: '80px' }}>이름</th>
+                                <th className="sticky z-30 bg-gray-50 border-r" style={{ left: '80px', minWidth: '100px' }}>반</th>
+                                {months.map(m => (
+                                    <th key={m} className="text-center min-w-[60px]">{m}월</th>
+                                ))}
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {filteredStudents.map(student => (
+                                <tr key={student.id} className="hover:bg-gray-50">
+                                    <td className="sticky left-0 z-10 bg-white border-r font-bold">{student.name}</td>
+                                    <td className="sticky z-10 bg-white border-r text-xs text-sub" style={{ left: '80px' }}>{student.className}</td>
+                                    {months.map(m => {
+                                        const key = `${student.id}-${m}`;
+                                        const record = tuitionRecords[key];
+                                        const isPaid = record?.status === 'paid';
+
+                                        return (
+                                            <td
+                                                key={m}
+                                                className={`text-center cursor-pointer hover:opacity-80 transition-colors ${isPaid ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-400'
+                                                    }`}
+                                                onClick={() => handleCellClick(student.id, m)}
+                                            >
+                                                {isPaid ? (
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="font-bold">납부</span>
+                                                        <span className="text-[10px] text-blue-400">
+                                                            {record.payment_date ? new Date(record.payment_date).getMonth() + 1 + '/' + new Date(record.payment_date).getDate() : ''}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs">미납</span>
+                                                )}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             <NavBar />
 
