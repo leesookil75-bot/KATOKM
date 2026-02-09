@@ -33,6 +33,8 @@ export default function TuitionPage() {
     const [selectedCell, setSelectedCell] = useState<{ studentId: string; month: number } | null>(null);
     const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
 
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
         fetchData();
     }, [year]);
@@ -40,18 +42,28 @@ export default function TuitionPage() {
     const fetchData = async () => {
         try {
             setLoading(true);
+            setError(null);
+
+            console.log("Fetching data for year:", year);
             const [studentsRes, classesRes, tuitionRes] = await Promise.all([
                 fetch("/api/students"),
                 fetch("/api/classes"),
                 fetch(`/api/tuition?year=${year}`)
             ]);
 
+            if (!studentsRes.ok) throw new Error(`Students API failed: ${studentsRes.status}`);
+            if (!classesRes.ok) throw new Error(`Classes API failed: ${classesRes.status}`);
+            if (!tuitionRes.ok) throw new Error(`Tuition API failed: ${tuitionRes.status}`);
+
             const studentsData = await studentsRes.json();
             const classesData = await classesRes.json();
             const tuitionData = await tuitionRes.json();
 
-            // Transform students to match interface
-            // API returns array directly
+            console.log("Students Data:", studentsData);
+            console.log("Classes Data:", classesData);
+            console.log("Tuition Data:", tuitionData);
+
+            // Transform students
             const validStudents = Array.isArray(studentsData) ? studentsData.map((s: any) => ({
                 id: s.id,
                 name: s.name,
@@ -59,10 +71,9 @@ export default function TuitionPage() {
             })) : [];
 
             // Transform classes
-            // API returns array directly
             const validClasses = Array.isArray(classesData) ? classesData : [];
 
-            // Transform tuition records to map: "studentId-month" -> Record
+            // Transform tuition records
             const recordMap: Record<string, TuitionRecord> = {};
             if (tuitionData && Array.isArray(tuitionData.records)) {
                 tuitionData.records.forEach((r: any) => {
@@ -73,8 +84,9 @@ export default function TuitionPage() {
             setStudents(validStudents);
             setClasses(validClasses);
             setTuitionRecords(recordMap);
-        } catch (error) {
-            console.error("Failed to fetch data", error);
+        } catch (err: any) {
+            console.error("Fetch error:", err);
+            setError(err.message || "데이터를 불러오는 중 오류가 발생했습니다.");
         } finally {
             setLoading(false);
         }
@@ -156,9 +168,18 @@ export default function TuitionPage() {
                 </select>
             </div>
 
-            {/* Table Container */}
-            <div className="flex-1 overflow-auto p-4 table-container relative">
-                <table className="table text-sm w-full" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+            {/* Content State */}
+            {loading ? (
+                <div className="flex-center flex-1 text-sub">데이터를 불러오는 중...</div>
+            ) : error ? (
+                <div className="flex-center flex-col flex-1 gap-4">
+                    <p className="text-red-500 font-bold">{error}</p>
+                    <button className="btn btn-secondary" onClick={fetchData}>다시 시도</button>
+                </div>
+            ) : (
+                /* Table Container */
+                <div className="flex-1 overflow-auto p-4 table-container relative">
+                    <table className="table text-sm w-full" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
                     <thead className="sticky top-0 z-20 bg-gray-50 shadow-sm">
                         <tr>
                             <th className="sticky left-0 z-30 bg-gray-50 border-r" style={{ minWidth: '80px' }}>이름</th>
