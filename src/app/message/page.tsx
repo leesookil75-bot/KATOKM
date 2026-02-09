@@ -145,19 +145,20 @@ export default function MessagePage() {
     return (
         <div className="main flex-col gap-md" style={{ height: "100vh", overflow: "hidden" }}>
             {/* Header */}
-            <header className="flex-center justify-between p-4 border-b bg-white z-10">
+            <header className="flex-center justify-between p-4 border-b bg-white z-10 shrink-0">
                 <Link href="/" className="btn text-sm">← 홈</Link>
                 <h1 className="heading-md">알림 전송</h1>
                 <div style={{ width: "40px" }}></div>
             </header>
 
-            <div className="flex-row gap-md p-4" style={{ flex: 1, overflow: "hidden" }}>
+            {/* Content Container: Column on Mobile, Row on Desktop */}
+            <div className="flex-1 flex flex-col md:flex-row gap-md p-4 overflow-hidden">
 
                 {/* Left: Student List & Filters */}
-                <div className="card flex-col gap-sm" style={{ width: "40%", display: "flex", flexDirection: "column" }}>
+                <div className="card flex flex-col gap-sm md:w-[45%] h-[50vh] md:h-auto overflow-hidden">
 
                     {/* Filters */}
-                    <div className="flex-center gap-2 mb-2">
+                    <div className="flex-center gap-2 mb-2 shrink-0">
                         <select className="input text-sm p-1 flex-1" value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
                             <option value="all">전체 반</option>
                             {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
@@ -169,9 +170,9 @@ export default function MessagePage() {
                         </select>
                     </div>
 
-                    {/* Stats */}
-                    <div className="flex-center justify-between text-xs text-sub border-b pb-2">
-                        <label className="flex-center gap-2">
+                    {/* Select All Bar */}
+                    <div className="flex-center justify-between text-xs text-sub border-b pb-2 shrink-0">
+                        <label className="flex-center gap-2 cursor-pointer">
                             <input type="checkbox"
                                 checked={filteredStudents.length > 0 && selectedStudentIds.size === filteredStudents.length}
                                 onChange={toggleSelectAll}
@@ -181,45 +182,70 @@ export default function MessagePage() {
                         <span>{selectedStudentIds.size}명 선택됨</span>
                     </div>
 
-                    {/* List */}
-                    <div className="flex-col gap-1 overflow-y-auto flex-1">
-                        {filteredStudents.map(student => (
-                            <div key={student.id}
-                                className={`flex-center justify-between p-2 rounded cursor-pointer ${selectedStudentIds.has(student.id) ? "bg-indigo-50" : "hover:bg-gray-50"}`}
-                                onClick={() => toggleStudent(student.id)}
-                            >
-                                <div className="flex-center gap-3">
-                                    <input type="checkbox" checked={selectedStudentIds.has(student.id)} readOnly />
-                                    <div>
-                                        <span className="text-sm font-bold block">{student.name}</span>
-                                        <span className="text-xs text-sub">{student.className || "반 없음"}</span>
-                                    </div>
-                                </div>
-                                <span className={`text-xs px-2 py-0.5 rounded ${attendance[student.id] === '출석' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                                    {attendance[student.id] || "미처리"}
-                                </span>
-                            </div>
-                        ))}
+                    {/* Table List */}
+                    <div className="table-container flex-1 overflow-y-auto">
+                        <table className="table text-sm">
+                            <thead className="sticky top-0 z-10 bg-gray-50">
+                                <tr>
+                                    <th style={{ width: "40px", textAlign: "center" }}>
+                                        <input type="checkbox"
+                                            checked={filteredStudents.length > 0 && selectedStudentIds.size === filteredStudents.length}
+                                            onChange={toggleSelectAll}
+                                        />
+                                    </th>
+                                    <th>이름/반</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredStudents.map(student => (
+                                    <tr key={student.id}
+                                        onClick={() => toggleStudent(student.id)}
+                                        className={`cursor-pointer ${selectedStudentIds.has(student.id) ? "bg-indigo-50" : "hover:bg-gray-50"}`}
+                                    >
+                                        <td className="text-center" onClick={e => e.stopPropagation()}>
+                                            <input type="checkbox"
+                                                checked={selectedStudentIds.has(student.id)}
+                                                onChange={() => toggleStudent(student.id)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-gray-800">{student.name}</span>
+                                                <span className="text-xs text-gray-500">{student.className || "-"}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className={`text-xs px-2 py-1 rounded-full ${attendance[student.id] === '출석' ? 'bg-green-100 text-green-700' :
+                                                    attendance[student.id] === '결석' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'
+                                                }`}>
+                                                {attendance[student.id] || "미처리"}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
                 {/* Right: Message Input */}
-                <div className="card flex-col gap-md flex-1">
-                    <div className="flex-center justify-between">
+                <div className="card flex flex-col gap-md flex-1 overflow-hidden h-full">
+                    <div className="flex-center justify-between shrink-0">
                         <h3 className="heading-sm">메시지 작성</h3>
                         <button className="btn btn-secondary text-xs flex-center gap-1" onClick={() => setIsTemplateModalOpen(true)}>
-                            <Plus size={14} /> 템플릿 불러오기
+                            <Plus size={14} /> 템플릿
                         </button>
                     </div>
 
                     <textarea
-                        className="input flex-1 p-4 resize-none leading-relaxed"
+                        className="input flex-1 p-4 resize-none leading-relaxed text-sm"
                         placeholder="전송할 내용을 입력하세요."
                         value={message}
                         onChange={e => setMessage(e.target.value)}
                     />
 
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 shrink-0">
                         <button className="btn btn-secondary py-3 flex-center gap-2" onClick={() => {
                             navigator.clipboard.writeText(message);
                             alert("복사되었습니다.");
@@ -236,8 +262,8 @@ export default function MessagePage() {
             {/* Template Modal */}
             {isTemplateModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex-center z-50 p-4">
-                    <div className="card w-full max-w-md max-h-[80vh] flex-col">
-                        <div className="flex-center justify-between mb-4">
+                    <div className="card w-full max-w-md max-h-[80vh] flex flex-col">
+                        <div className="flex-center justify-between mb-4 shrink-0">
                             <h3 className="heading-md">메시지 템플릿</h3>
                             <button onClick={() => setIsTemplateModalOpen(false)}>✕</button>
                         </div>
@@ -264,7 +290,7 @@ export default function MessagePage() {
                         </div>
 
                         {/* Add New */}
-                        <div className="border-t pt-4">
+                        <div className="border-t pt-4 shrink-0">
                             <textarea
                                 className="input w-full p-2 text-sm mb-2"
                                 rows={3}
