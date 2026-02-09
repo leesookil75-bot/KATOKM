@@ -117,8 +117,8 @@ export default function StudentManager() {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th style={{ minWidth: "100px" }}>수업</th>
-                            <th style={{ minWidth: "80px" }}>이름</th>
+                            <th style={{ minWidth: "100px", position: 'sticky', left: 0, zIndex: 20, backgroundColor: "#f3f4f6" }}>수업</th>
+                            <th style={{ minWidth: "80px", position: 'sticky', left: "100px", zIndex: 20, backgroundColor: "#f3f4f6" }}>이름</th>
                             <th style={{ minWidth: "120px" }}>연락처</th>
                             <th style={{ minWidth: "80px" }}>비밀번호</th>
                             <th style={{ width: "40%" }}>메모</th>
@@ -138,12 +138,14 @@ export default function StudentManager() {
                         ) : (
                             students.map(student => (
                                 <tr key={student.id}>
-                                    <td>
+                                    <td style={{ position: 'sticky', left: 0, zIndex: 10, backgroundColor: "white" }}>
                                         <span className="text-xs text-sub" style={{ padding: "2px 6px", backgroundColor: "#f3f4f6", borderRadius: "4px" }}>
                                             {student.className || "-"}
                                         </span>
                                     </td>
-                                    <td><span style={{ fontWeight: 600 }}>{student.name}</span></td>
+                                    <td style={{ position: 'sticky', left: "100px", zIndex: 10, backgroundColor: "white" }}>
+                                        <span style={{ fontWeight: 600 }}>{student.name}</span>
+                                    </td>
                                     <td><a href={`tel:${student.parentPhone}`}>{student.parentPhone}</a></td>
                                     <td><span className="text-primary" style={{ fontFamily: "monospace", fontWeight: 600 }}>{student.passcode}</span></td>
                                     <td><span className="text-muted text-sm">{student.memo}</span></td>
