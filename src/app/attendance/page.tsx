@@ -133,7 +133,7 @@ export default function AttendancePage() {
             {/* Header */}
             <div className="card p-4 flex-col gap-sm">
                 <div className="flex-center justify-between">
-                    <h1 className="heading-md">출석부 <span className="text-xs text-gray-400 font-normal">v1.3.1</span></h1>
+                    <h1 className="heading-md">출석부 <span className="text-xs text-gray-400 font-normal">v1.3.2</span></h1>
                     <div className="flex-center gap-xs bg-gray-100 p-1 rounded-md">
                         <button className={`btn text-xs ${view === 'week' ? 'btn-primary' : ''}`}
                             onClick={() => setView('week')} style={{ padding: "0.25rem 0.5rem" }}>주간</button>
