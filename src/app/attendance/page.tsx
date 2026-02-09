@@ -16,7 +16,7 @@ type ViewMode = "week" | "month";
 
 export default function AttendancePage() {
     const [students, setStudents] = useState<Student[]>([]);
-    const [attendance, setAttendance] = useState<{ [key: string]: string }>({}); // Map: "studentId-date" -> status
+    const [attendance, setAttendance] = useState<{ [key: string]: { status: string, memo?: string } }>({}); // Updated state structure
 
     const [view, setView] = useState<ViewMode>("week");
     const [date, setDate] = useState(new Date());
@@ -24,6 +24,7 @@ export default function AttendancePage() {
 
     // Modal State
     const [selectedCell, setSelectedCell] = useState<{ studentId: string, date: string } | null>(null);
+    const [tempMemo, setTempMemo] = useState("");
 
     // Helpers
     const dateStr = date.toISOString().split('T')[0];
@@ -33,7 +34,7 @@ export default function AttendancePage() {
     useEffect(() => {
         fetchStudents();
         fetchAttendance();
-    }, [date, view]); // Re-fetch when date/view changes
+    }, [date, view]);
 
     const fetchStudents = async () => {
         try {
@@ -43,45 +44,43 @@ export default function AttendancePage() {
     };
 
     const fetchAttendance = async () => {
-        // In a real app, we'd fetch range. currently we just trust the global state/cache or simple fetch
-        // For MVP, lets assume we fetch all or just rely on what we have (mock refresh)
         try {
-            const res = await fetch('/api/attendance'); // This gets ALL. Optimized would get by range.
+            const res = await fetch('/api/attendance');
             if (res.ok) {
                 const data = await res.json();
                 const map: any = {};
                 data.forEach((r: any) => {
-                    map[`${r.student_id}-${r.date.split('T')[0]}`] = r.status;
+                    map[`${r.student_id}-${r.date.split('T')[0]}`] = { status: r.status, memo: r.memo };
                 });
                 setAttendance(map);
             }
         } catch (e) { console.error(e); }
     };
 
-    const updateStatus = async (studentId: string, targetDate: string, status: string, sendSms: boolean) => {
+    const handleCellClick = (studentId: string, date: string) => {
+        const key = `${studentId}-${date}`;
+        const currentData = attendance[key];
+        setTempMemo(currentData?.memo || "");
+        setSelectedCell({ studentId, date });
+    };
+
+    const updateStatus = async (status: string) => {
+        if (!selectedCell) return;
+        const { studentId, date } = selectedCell;
+
         // Optimistic Update
-        const key = `${studentId}-${targetDate}`;
-        setAttendance(prev => ({ ...prev, [key]: status }));
-        setSelectedCell(null); // Close modal
+        const key = `${studentId}-${date}`;
+        setAttendance(prev => ({ ...prev, [key]: { status, memo: tempMemo } }));
 
         try {
             await fetch('/api/attendance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ studentId, date: targetDate, status })
+                body: JSON.stringify({ studentId, date, status, memo: tempMemo })
             });
-
-            if (sendSms) {
-                const student = students.find(s => s.id === studentId);
-                if (student) {
-                    const msg = `[출결알림] ${student.name} 학생이 출석하였습니다.`;
-                    // Open SMS App
-                    const ua = navigator.userAgent;
-                    const sep = ua.match(/iPhone|iPad|iPod/i) ? '&' : '?';
-                    window.location.href = `sms:${student.parentPhone}${sep}body=${encodeURIComponent(msg)}`;
-                }
-            }
         } catch (e) { console.error(e); }
+
+        setSelectedCell(null);
     };
 
     const changeDate = (direction: number) => {
@@ -95,7 +94,7 @@ export default function AttendancePage() {
     const getWeekDays = () => {
         const curr = new Date(date);
         const day = curr.getDay();
-        const diff = curr.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Mon
+        const diff = curr.getDate() - day + (day === 0 ? -6 : 1);
         const monday = new Date(curr.setDate(diff));
         const days = [];
         for (let i = 0; i < 5; i++) {
@@ -106,15 +105,13 @@ export default function AttendancePage() {
         return days;
     };
 
-    // Simple Month generator (just days in month)
     const getMonthDays = () => {
         const year = date.getFullYear();
         const month = date.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const days = [];
         for (let i = 1; i <= daysInMonth; i++) {
-            const d = new Date(year, month, i); // Local time
-            // Manual format to avoid timezone shifts
+            const d = new Date(year, month, i);
             const y = d.getFullYear();
             const m = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
@@ -177,30 +174,22 @@ export default function AttendancePage() {
                                     {student.name}
                                 </td>
                                 {displayDays.map(d => {
-                                    const status = attendance[`${student.id}-${d}`];
-                                    const isPresent = status === '출석';
+                                    const record = attendance[`${student.id}-${d}`];
+                                    const status = record?.status;
 
                                     return (
                                         <td key={d} className="text-center p-0">
                                             <button
-                                                onClick={() => {
-                                                    // If already present, toggle to absent? Or just do nothing/open modal too?
-                                                    // Spec: Click default 'X' -> "O" or "O+SMS".
-                                                    // Let's open modal for any interaction for clarity, or toggle if present.
-                                                    if (isPresent) {
-                                                        updateStatus(student.id, d, '결석', false); // Toggle off
-                                                    } else {
-                                                        setSelectedCell({ studentId: student.id, date: d });
-                                                    }
-                                                }}
+                                                onClick={() => handleCellClick(student.id, d)}
                                                 style={{
                                                     width: "100%", height: "40px",
                                                     display: "flex", alignItems: "center", justifyContent: "center",
-                                                    color: isPresent ? 'var(--primary)' : '#e5e7eb',
-                                                    fontWeight: 'bold'
+                                                    fontWeight: 'bold',
+                                                    color: status === '출석' ? '#2563eb' : status === '특이사항' ? '#16a34a' : status === '결석' ? '#dc2626' : '#e5e7eb'
                                                 }}
                                             >
-                                                {isPresent ? 'O' : 'X'}
+                                                {status === '출석' ? 'O' : status === '특이사항' ? '△' : status === '결석' ? 'X' : '-'}
+                                                {record?.memo && <span style={{ position: 'absolute', bottom: '2px', right: '2px', width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#6b7280' }}></span>}
                                             </button>
                                         </td>
                                     );
@@ -218,19 +207,42 @@ export default function AttendancePage() {
                     backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50,
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }} onClick={() => setSelectedCell(null)}>
-                    <div className="card" style={{ width: '90%', maxWidth: '300px' }} onClick={e => e.stopPropagation()}>
-                        <h3 className="heading-md mb-4 text-center">출석 처리</h3>
-                        <div className="flex-col gap-sm">
-                            <button onClick={() => updateStatus(selectedCell.studentId, selectedCell.date, '출석', false)}
-                                className="btn btn-secondary justify-between w-full p-4">
-                                <span>출석만 체크 (O)</span>
-                                <Check size={18} />
+                    <div className="card" style={{ width: '90%', maxWidth: '320px' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="heading-md">
+                                {students.find(s => s.id === selectedCell.studentId)?.name}
+                                <span className="text-sm font-normal text-gray-500 ml-2">{selectedCell.date}</span>
+                            </h3>
+                            <button onClick={() => setSelectedCell(null)}><X size={20} /></button>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 mb-4">
+                            <button onClick={() => updateStatus('출석')}
+                                className="btn flex-col gap-1 p-3" style={{ backgroundColor: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>
+                                <span className="text-xl font-bold">O</span>
+                                <span className="text-xs">출석</span>
                             </button>
-                            <button onClick={() => updateStatus(selectedCell.studentId, selectedCell.date, '출석', true)}
-                                className="btn btn-primary justify-between w-full p-4">
-                                <span>출석 + 문자전송</span>
-                                <MessageCircle size={18} />
+                            <button onClick={() => updateStatus('특이사항')}
+                                className="btn flex-col gap-1 p-3" style={{ backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
+                                <span className="text-xl font-bold">△</span>
+                                <span className="text-xs">특이사항</span>
                             </button>
+                            <button onClick={() => updateStatus('결석')}
+                                className="btn flex-col gap-1 p-3" style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
+                                <span className="text-xl font-bold">X</span>
+                                <span className="text-xs">결석</span>
+                            </button>
+                        </div>
+
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 mb-1 block">메모</label>
+                            <textarea
+                                className="input w-full text-sm"
+                                rows={3}
+                                placeholder="특이사항을 입력하세요..."
+                                value={tempMemo}
+                                onChange={(e) => setTempMemo(e.target.value)}
+                            />
                         </div>
                     </div>
                 </div>
