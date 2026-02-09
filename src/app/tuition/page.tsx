@@ -247,7 +247,8 @@ export default function TuitionPage() {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        backdropFilter: 'blur(2px)',
                         zIndex: 9999,
                         display: 'flex',
                         alignItems: 'center',
@@ -255,7 +256,14 @@ export default function TuitionPage() {
                         padding: '1rem'
                     }}
                 >
-                    <div className="card w-full max-w-sm flex flex-col gap-4 shadow-xl animate-in fade-in zoom-in duration-200" style={{ margin: 'auto' }}>
+                    <div
+                        className="card w-full max-w-sm flex flex-col gap-4 shadow-xl animate-in fade-in zoom-in duration-200"
+                        style={{
+                            margin: 'auto',
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            backdropFilter: 'blur(4px)'
+                        }}
+                    >
                         <h3 className="heading-md text-center">
                             {students.find(s => s.id === selectedCell.studentId)?.name} 학생<br />
                             <span className="text-base font-normal text-gray-600">
