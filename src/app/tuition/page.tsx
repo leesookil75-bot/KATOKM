@@ -229,37 +229,40 @@ export default function TuitionPage() {
 
             {/* Modal */}
             {modalOpen && selectedCell && (
-                <div className="fixed inset-0 bg-black/50 flex-center z-50 p-4">
-                    <div className="card w-full max-w-sm flex flex-col gap-4">
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="card w-full max-w-sm flex flex-col gap-4 shadow-xl animate-in fade-in zoom-in duration-200">
                         <h3 className="heading-md text-center">
-                            {year}년 {selectedCell.month}월 수강료 처리
+                            {students.find(s => s.id === selectedCell.studentId)?.name} 학생<br />
+                            <span className="text-base font-normal text-gray-600">
+                                {year}년 {selectedCell.month}월 수강료
+                            </span>
                         </h3>
 
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-bold">납부 날짜</label>
+                            <label className="text-sm font-bold text-gray-700">납부 날짜</label>
                             <input
                                 type="date"
-                                className="input"
+                                className="input w-full"
                                 value={paymentDate}
                                 onChange={e => setPaymentDate(e.target.value)}
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 mt-4">
+                        <div className="grid grid-cols-2 gap-3 mt-2">
                             <button
-                                className="btn bg-gray-200 hover:bg-gray-300 text-gray-800"
+                                className="btn bg-gray-100 hover:bg-gray-200 text-gray-700 py-3"
                                 onClick={() => handleUpdateStatus('unpaid')}
                             >
                                 미납 처리
                             </button>
                             <button
-                                className="btn btn-primary"
+                                className="btn btn-primary py-3"
                                 onClick={() => handleUpdateStatus('paid')}
                             >
                                 납부 완료
                             </button>
                         </div>
-                        <button className="text-sm text-sub underline mt-2 text-center" onClick={() => setModalOpen(false)}>
+                        <button className="text-sm text-sub underline mt-2 text-center p-2" onClick={() => setModalOpen(false)}>
                             닫기
                         </button>
                     </div>
