@@ -1,3 +1,4 @@
+const CACHE_NAME = 'katalk-attendance-v1.3.1';
 
 self.addEventListener('install', (event) => {
     // console.log('Service Worker installed');
