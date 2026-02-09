@@ -133,7 +133,7 @@ export default function AttendancePage() {
             {/* Header */}
             <div className="card p-4 flex-col gap-sm">
                 <div className="flex-center justify-between">
-                    <h1 className="heading-md">출석부 <span className="text-xs text-gray-400 font-normal">v1.3.2</span></h1>
+                    <h1 className="heading-md">출석부 <span className="text-xs text-gray-400 font-normal">v1.3.3</span></h1>
                     <div className="flex-center gap-xs bg-gray-100 p-1 rounded-md">
                         <button className={`btn text-xs ${view === 'week' ? 'btn-primary' : ''}`}
                             onClick={() => setView('week')} style={{ padding: "0.25rem 0.5rem" }}>주간</button>
@@ -221,22 +221,22 @@ export default function AttendancePage() {
                         <div className="flex justify-evenly items-center mb-8 mt-2">
                             <button onClick={() => updateStatus('출석')}
                                 className="flex flex-col items-center gap-3 p-2 transition-transform active:scale-95 group">
-                                <div className="p-4 rounded-full bg-blue-50 group-hover:bg-blue-100 transition-colors">
-                                    <span className="text-blue-600 font-extrabold text-5xl" style={{ lineHeight: '1' }}>O</span>
+                                <div className="p-4 rounded-full transition-colors" style={{ backgroundColor: '#eff6ff' }}> {/* bg-blue-50 */}
+                                    <span style={{ color: '#2563eb', fontSize: '3rem', fontWeight: '800', lineHeight: '1' }}>O</span> {/* text-blue-600 */}
                                 </div>
                                 <span className="text-sm text-gray-600 font-semibold">출석</span>
                             </button>
                             <button onClick={() => updateStatus('특이사항')}
                                 className="flex flex-col items-center gap-3 p-2 transition-transform active:scale-95 group">
-                                <div className="p-4 rounded-full bg-green-50 group-hover:bg-green-100 transition-colors">
-                                    <span className="text-green-600 font-extrabold text-5xl" style={{ lineHeight: '1' }}>△</span>
+                                <div className="p-4 rounded-full transition-colors" style={{ backgroundColor: '#f0fdf4' }}> {/* bg-green-50 */}
+                                    <span style={{ color: '#16a34a', fontSize: '3rem', fontWeight: '800', lineHeight: '1' }}>△</span> {/* text-green-600 */}
                                 </div>
                                 <span className="text-sm text-gray-600 font-semibold">특이사항</span>
                             </button>
                             <button onClick={() => updateStatus('결석')}
                                 className="flex flex-col items-center gap-3 p-2 transition-transform active:scale-95 group">
-                                <div className="p-4 rounded-full bg-red-50 group-hover:bg-red-100 transition-colors">
-                                    <span className="text-red-600 font-extrabold text-5xl" style={{ lineHeight: '1' }}>X</span>
+                                <div className="p-4 rounded-full transition-colors" style={{ backgroundColor: '#fef2f2' }}> {/* bg-red-50 */}
+                                    <span style={{ color: '#dc2626', fontSize: '3rem', fontWeight: '800', lineHeight: '1' }}>X</span> {/* text-red-600 */}
                                 </div>
                                 <span className="text-sm text-gray-600 font-semibold">결석</span>
                             </button>
