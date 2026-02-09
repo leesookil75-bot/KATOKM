@@ -292,7 +292,8 @@ button {
   border-radius: 4px;
 }
 
-background: #a8a8a8;
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 /* Navigation Bar Styles */

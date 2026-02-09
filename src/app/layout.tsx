@@ -11,6 +11,7 @@ const notoSansKr = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
   title: "카톡 출결 매니저",
   description: "학원/공부방 출결 관리 및 알림 전송 서비스",
   manifest: "/manifest.json",
