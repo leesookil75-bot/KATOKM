@@ -198,13 +198,17 @@ export default function TuitionPage() {
                                         const key = `${student.id}-${m}`;
                                         const record = tuitionRecords[key];
                                         const isPaid = record?.status === 'paid';
+                                        const isSelected = selectedCell?.studentId === student.id && selectedCell?.month === m;
 
                                         return (
                                             <td
                                                 key={m}
-                                                className={`text-center cursor-pointer hover:opacity-80 transition-colors ${isPaid ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-400'
-                                                    }`}
+                                                className={`text-center cursor-pointer transition-all duration-200 
+                                                    ${isPaid ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-500'}
+                                                    ${isSelected ? 'ring-2 ring-indigo-600 z-10 font-bold scale-105 shadow-md' : 'hover:opacity-80'}
+                                                `}
                                                 onClick={() => handleCellClick(student.id, m)}
+                                                style={{ position: isSelected ? 'relative' : 'static' }}
                                             >
                                                 {isPaid ? (
                                                     <div className="flex flex-col items-center">
