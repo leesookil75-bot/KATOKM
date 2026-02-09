@@ -9,6 +9,7 @@ type Student = {
     parentPhone: string;
     passcode: string; // New field for 4-digit code
     memo: string;
+    className?: string; // New field
 };
 
 export default function StudentManager() {
@@ -112,6 +113,7 @@ export default function StudentManager() {
                 <table className="table">
                     <thead>
                         <tr>
+                            <th style={{ minWidth: "100px" }}>수업</th>
                             <th style={{ minWidth: "80px" }}>이름</th>
                             <th style={{ minWidth: "120px" }}>연락처</th>
                             <th style={{ minWidth: "80px" }}>비밀번호</th>
@@ -132,6 +134,11 @@ export default function StudentManager() {
                         ) : (
                             students.map(student => (
                                 <tr key={student.id}>
+                                    <td>
+                                        <span className="text-xs text-sub" style={{ padding: "2px 6px", backgroundColor: "#f3f4f6", borderRadius: "4px" }}>
+                                            {student.className || "-"}
+                                        </span>
+                                    </td>
                                     <td>
                                         <span style={{ fontWeight: 600, color: "var(--text-main)" }}>{student.name}</span>
                                     </td>
@@ -196,6 +203,16 @@ export default function StudentManager() {
                             {formData.id ? "학생 수정" : "학생 등록"}
                         </h2>
                         <form onSubmit={handleSubmit} className="flex-col gap-md">
+                            <div>
+                                <label className="text-sm text-sub" style={{ display: "block", marginBottom: "0.25rem" }}>수업 (Class)</label>
+                                <input
+                                    type="text"
+                                    className="input"
+                                    value={formData.className || ""}
+                                    onChange={e => setFormData({ ...formData, className: e.target.value })}
+                                    placeholder="예: 월수금반, 초등A반"
+                                />
+                            </div>
                             <div>
                                 <label className="text-sm text-sub" style={{ display: "block", marginBottom: "0.25rem" }}>이름</label>
                                 <input

@@ -22,8 +22,8 @@ export default function Home() {
 
         <Link href="/attendance" className={styles.card}>
           <CheckCircle size={32} color="var(--secondary)" style={{ marginBottom: "1rem" }} />
-          <h2>출석 체크</h2>
-          <p>오늘의 등/하원 기록</p>
+          <h2>출석부</h2>
+          <p>주간/월간 출석 관리</p>
         </Link>
 
         <Link href="/stats" className={styles.card}>
