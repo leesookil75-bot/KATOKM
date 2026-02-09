@@ -205,10 +205,10 @@ export default function TuitionPage() {
                                                 key={m}
                                                 className={`text-center cursor-pointer transition-all duration-200 
                                                     ${isPaid ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-500'}
-                                                    ${isSelected ? 'ring-2 ring-indigo-600 z-10 font-bold scale-105 shadow-md' : 'hover:opacity-80'}
+                                                    ${isSelected ? 'ring-2 ring-red-600 font-bold shadow-md' : 'hover:opacity-80'}
                                                 `}
                                                 onClick={() => handleCellClick(student.id, m)}
-                                                style={{ position: isSelected ? 'relative' : 'static' }}
+                                                style={{ position: isSelected ? 'relative' : 'static', zIndex: isSelected ? 5 : 'auto' }}
                                             >
                                                 {isPaid ? (
                                                     <div className="flex flex-col items-center">
@@ -234,7 +234,7 @@ export default function TuitionPage() {
 
             {/* Modal */}
             {modalOpen && selectedCell && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/50 z-[150] flex items-center justify-center p-4">
                     <div className="card w-full max-w-sm flex flex-col gap-4 shadow-xl animate-in fade-in zoom-in duration-200">
                         <h3 className="heading-md text-center">
                             {students.find(s => s.id === selectedCell.studentId)?.name} 학생<br />
