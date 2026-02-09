@@ -133,7 +133,7 @@ export default function AttendancePage() {
             {/* Header */}
             <div className="card p-4 flex-col gap-sm">
                 <div className="flex-center justify-between">
-                    <h1 className="heading-md">출석부 <span className="text-xs text-gray-400 font-normal">v1.3.6</span></h1>
+                    <h1 className="heading-md">출석부 <span className="text-xs text-gray-400 font-normal">v1.3.7</span></h1>
                     <div className="flex-center gap-xs bg-gray-100 p-1 rounded-md">
                         <button className={`btn text-xs ${view === 'week' ? 'btn-primary' : ''}`}
                             onClick={() => setView('week')} style={{ padding: "0.25rem 0.5rem" }}>주간</button>
@@ -244,13 +244,28 @@ export default function AttendancePage() {
 
                         <div>
                             <label className="text-sm font-bold text-gray-700 mb-1 block">메모</label>
-                            <textarea
-                                className="input w-full text-sm"
-                                rows={3}
-                                placeholder="특이사항을 입력하세요..."
-                                value={tempMemo}
-                                onChange={(e) => setTempMemo(e.target.value)}
-                            />
+                            <div style={{ position: 'relative' }}>
+                                {!tempMemo && (
+                                    <div style={{
+                                        position: 'absolute', top: '12px', left: '12px', right: '12px', bottom: '12px',
+                                        pointerEvents: 'none', color: '#9ca3af', fontSize: '0.875rem', lineHeight: '1.5',
+                                        display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px'
+                                    }}>
+                                        <span>메모 작성 후 위</span>
+                                        <Circle size={14} strokeWidth={3} />
+                                        <Triangle size={14} strokeWidth={3} />
+                                        <X size={14} strokeWidth={3} />
+                                        <span>터치하시면 자동저장</span>
+                                    </div>
+                                )}
+                                <textarea
+                                    className="input w-full text-sm"
+                                    rows={3}
+                                    value={tempMemo}
+                                    onChange={(e) => setTempMemo(e.target.value)}
+                                // Remove standard placeholder to avoid conflict
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
