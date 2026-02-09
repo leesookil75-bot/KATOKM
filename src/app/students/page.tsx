@@ -100,6 +100,48 @@ export default function StudentManager() {
         setFormData({ id: "", name: "", parentPhone: "", memo: "", passcode: "", className: "" });
     };
 
+    const [editingCell, setEditingCell] = useState<{ id: string, field: keyof Student } | null>(null);
+    const [tempValue, setTempValue] = useState("");
+
+    const startEditing = (student: Student, field: keyof Student) => {
+        setEditingCell({ id: student.id, field });
+        setTempValue(student[field] || "");
+    };
+
+    const saveEdit = async () => {
+        if (!editingCell) return;
+
+        const { id, field } = editingCell;
+        const student = students.find(s => s.id === id);
+        if (!student) return;
+
+        const updatedStudent = { ...student, [field]: tempValue };
+
+        try {
+            const res = await fetch(`/api/students/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedStudent)
+            });
+
+            if (res.ok) {
+                setStudents(prev => prev.map(s => s.id === id ? updatedStudent : s));
+            } else {
+                alert("수정 실패");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("오류 발생");
+        }
+
+        setEditingCell(null);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') saveEdit();
+        if (e.key === 'Escape') setEditingCell(null);
+    };
+
     return (
         <div className="main">
             <header className="flex-center justify-between" style={{ marginBottom: "1.5rem" }}>
@@ -117,12 +159,12 @@ export default function StudentManager() {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th style={{ minWidth: "100px", position: 'sticky', left: 0, zIndex: 20, backgroundColor: "#f3f4f6" }}>수업</th>
-                            <th style={{ minWidth: "80px", position: 'sticky', left: "100px", zIndex: 20, backgroundColor: "#f3f4f6" }}>이름</th>
+                            <th style={{ minWidth: "120px", position: 'sticky', left: 0, zIndex: 20, backgroundColor: "#f3f4f6" }}>수업</th>
+                            <th style={{ minWidth: "100px", position: 'sticky', left: "120px", zIndex: 20, backgroundColor: "#f3f4f6" }}>이름</th>
                             <th style={{ minWidth: "120px" }}>연락처</th>
-                            <th style={{ minWidth: "80px" }}>비밀번호</th>
+                            <th style={{ minWidth: "100px" }}>비밀번호</th>
                             <th style={{ width: "40%" }}>메모</th>
-                            <th style={{ width: "100px", textAlign: "center" }}>관리</th>
+                            <th style={{ width: "80px", textAlign: "center" }}>관리</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -138,22 +180,66 @@ export default function StudentManager() {
                         ) : (
                             students.map(student => (
                                 <tr key={student.id}>
-                                    <td style={{ position: 'sticky', left: 0, zIndex: 10, backgroundColor: "white" }}>
-                                        <span className="text-xs text-sub" style={{ padding: "2px 6px", backgroundColor: "#f3f4f6", borderRadius: "4px" }}>
-                                            {student.className || "-"}
-                                        </span>
+                                    <td style={{ position: 'sticky', left: 0, zIndex: 10, backgroundColor: "white" }} onClick={() => startEditing(student, 'className')}>
+                                        {editingCell?.id === student.id && editingCell.field === 'className' ? (
+                                            <select
+                                                className="input text-sm p-1 w-full"
+                                                value={tempValue}
+                                                onChange={e => setTempValue(e.target.value)}
+                                                onBlur={saveEdit}
+                                                onKeyDown={handleKeyDown}
+                                                autoFocus
+                                            >
+                                                <option value="">선택</option>
+                                                {classList.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                            </select>
+                                        ) : (
+                                            <span className="text-xs text-sub cursor-pointer hover:bg-gray-100 p-1 rounded block" >
+                                                {student.className || <span className="text-gray-300">클릭하여 선택</span>}
+                                            </span>
+                                        )}
                                     </td>
-                                    <td style={{ position: 'sticky', left: "100px", zIndex: 10, backgroundColor: "white" }}>
+                                    <td style={{ position: 'sticky', left: "120px", zIndex: 10, backgroundColor: "white" }}>
                                         <span style={{ fontWeight: 600 }}>{student.name}</span>
                                     </td>
                                     <td><a href={`tel:${student.parentPhone}`}>{student.parentPhone}</a></td>
-                                    <td><span className="text-primary" style={{ fontFamily: "monospace", fontWeight: 600 }}>{student.passcode}</span></td>
-                                    <td><span className="text-muted text-sm">{student.memo}</span></td>
+                                    <td onClick={() => startEditing(student, 'passcode')}>
+                                        {editingCell?.id === student.id && editingCell.field === 'passcode' ? (
+                                            <input
+                                                type="text"
+                                                className="input text-sm p-1 w-full text-center"
+                                                value={tempValue}
+                                                onChange={e => setTempValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                                                onBlur={saveEdit}
+                                                onKeyDown={handleKeyDown}
+                                                autoFocus
+                                                maxLength={4}
+                                            />
+                                        ) : (
+                                            <span className="text-primary cursor-pointer hover:bg-gray-100 p-1 rounded block text-center" style={{ fontFamily: "monospace", fontWeight: 600 }}>
+                                                {student.passcode || <span className="text-gray-300">-</span>}
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td onClick={() => startEditing(student, 'memo')}>
+                                        {editingCell?.id === student.id && editingCell.field === 'memo' ? (
+                                            <input
+                                                type="text"
+                                                className="input text-sm p-1 w-full"
+                                                value={tempValue}
+                                                onChange={e => setTempValue(e.target.value)}
+                                                onBlur={saveEdit}
+                                                onKeyDown={handleKeyDown}
+                                                autoFocus
+                                            />
+                                        ) : (
+                                            <span className="text-muted text-sm cursor-pointer hover:bg-gray-100 p-1 rounded block" style={{ minHeight: '24px' }}>
+                                                {student.memo || <span className="text-gray-300">클릭하여 입력</span>}
+                                            </span>
+                                        )}
+                                    </td>
                                     <td>
                                         <div className="flex-center gap-xs" style={{ justifyContent: "center" }}>
-                                            <button className="btn btn-secondary" style={{ padding: "0.4rem" }} onClick={() => openEdit(student)}>
-                                                <Edit size={16} />
-                                            </button>
                                             <button className="btn" style={{ padding: "0.4rem", color: "#ef4444", backgroundColor: "#fef2f2" }} onClick={() => handleDelete(student.id)}>
                                                 <Trash2 size={16} />
                                             </button>
