@@ -152,10 +152,10 @@ export default function MessagePage() {
             </header>
 
             {/* Content Container: Column on Mobile, Row on Desktop */}
-            <div className="flex-1 flex flex-col md:flex-row gap-md p-4 overflow-hidden">
+            <div className="split-layout p-4">
 
                 {/* Left: Student List & Filters */}
-                <div className="card flex flex-col gap-sm md:w-[45%] h-[50vh] md:h-auto overflow-hidden">
+                <div className="card split-panel-left gap-sm">
 
                     {/* Filters */}
                     <div className="flex-center gap-2 mb-2 shrink-0">
@@ -217,7 +217,7 @@ export default function MessagePage() {
                                         </td>
                                         <td>
                                             <span className={`text-xs px-2 py-1 rounded-full ${attendance[student.id] === '출석' ? 'bg-green-100 text-green-700' :
-                                                    attendance[student.id] === '결석' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'
+                                                attendance[student.id] === '결석' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'
                                                 }`}>
                                                 {attendance[student.id] || "미처리"}
                                             </span>
@@ -230,7 +230,7 @@ export default function MessagePage() {
                 </div>
 
                 {/* Right: Message Input */}
-                <div className="card flex flex-col gap-md flex-1 overflow-hidden h-full">
+                <div className="card split-panel-right gap-md">
                     <div className="flex-center justify-between shrink-0">
                         <h3 className="heading-sm">메시지 작성</h3>
                         <button className="btn btn-secondary text-xs flex-center gap-1" onClick={() => setIsTemplateModalOpen(true)}>
