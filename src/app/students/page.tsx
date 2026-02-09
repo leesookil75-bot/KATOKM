@@ -66,17 +66,45 @@ export default function StudentManager() {
         setFormData({ id: "", name: "", parentPhone: "", memo: "", passcode: "" });
     };
 
+    const generateDummyData = () => {
+        const lastNames = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임"];
+        const firstNames = ["민수", "지원", "서연", "도윤", "하은", "준호", "지우", "예준", "서현", "민재", "수진", "현우", "지민", "가은"];
+
+        const dummies: Student[] = [];
+        for (let i = 0; i < 20; i++) {
+            const randomName = lastNames[Math.floor(Math.random() * lastNames.length)] + firstNames[Math.floor(Math.random() * firstNames.length)];
+            dummies.push({
+                id: Date.now().toString() + i,
+                name: randomName,
+                parentPhone: `010-${Math.floor(Math.random() * 9000) + 1000}-${Math.floor(Math.random() * 9000) + 1000}`,
+                passcode: Math.floor(Math.random() * 9000 + 1000).toString(),
+                memo: Math.random() > 0.7 ? "테스트 특이사항 메모입니다." : "",
+            });
+        }
+        setStudents(prev => [...prev, ...dummies]);
+        alert("임의의 학생 20명이 추가되었습니다.");
+    };
+
     return (
         <div className="main">
             <header className="flex-center justify-between" style={{ marginBottom: "1.5rem" }}>
                 <h1 className="heading-lg">학생 관리</h1>
-                <button
-                    className="btn btn-primary"
-                    onClick={() => setIsFormOpen(true)}
-                >
-                    <Plus size={20} />
-                    <span>학생 추가</span>
-                </button>
+                <div className="flex-center gap-sm">
+                    <button
+                        className="btn btn-secondary"
+                        onClick={generateDummyData}
+                        style={{ fontSize: "0.8rem", padding: "0.5rem 0.75rem" }}
+                    >
+                        + 20명 자동생성
+                    </button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => setIsFormOpen(true)}
+                    >
+                        <Plus size={20} />
+                        <span>학생 추가</span>
+                    </button>
+                </div>
             </header>
 
             {/* Student List */}
