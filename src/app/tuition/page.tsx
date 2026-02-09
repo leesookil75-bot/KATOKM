@@ -150,7 +150,7 @@ export default function TuitionPage() {
                 <Link href="/" className="btn text-sm">← 홈</Link>
                 <div className="flex-center gap-4">
                     <button onClick={() => setYear(y => y - 1)}><ChevronLeft /></button>
-                    <h1 className="heading-md">{year}년 수강료 관리</h1>
+                    <h1 className="heading-md">{year}년 수강료 관리 (v1.2)</h1>
                     <button onClick={() => setYear(y => y + 1)}><ChevronRight /></button>
                 </div>
                 <div style={{ width: "40px" }}></div>
