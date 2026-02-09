@@ -81,9 +81,21 @@ export default function StudentManager() {
         setFormData({ id: "", name: "", parentPhone: "", memo: "", passcode: "" });
     };
 
-    // Legacy dummy generation commented out or removed for production
     const generateDummyData = async () => {
-        alert("서버 연동 중에는 대량 데이터 생성을 지원하지 않습니다. (구현 필요 시 요청해주세요)");
+        if (!confirm("연습용 학생 20명을 추가하시겠습니까?")) return;
+
+        try {
+            const res = await fetch('/api/seed?mode=dummy');
+            if (res.ok) {
+                alert("연습용 데이터가 생성되었습니다.");
+                fetchStudents();
+            } else {
+                alert("데이터 생성 실패");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("오류가 발생했습니다.");
+        }
     };
 
     return (
