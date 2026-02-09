@@ -216,21 +216,21 @@ export default function AttendancePage() {
                             <button onClick={() => setSelectedCell(null)}><X size={20} /></button>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2 mb-4">
+                        <div className="flex justify-around items-center mb-6 px-2">
                             <button onClick={() => updateStatus('출석')}
-                                className="btn flex-col gap-1 p-3" style={{ backgroundColor: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>
-                                <span className="text-xl font-bold">O</span>
-                                <span className="text-xs">출석</span>
+                                className="flex flex-col items-center gap-2 p-2 transition-transform active:scale-95">
+                                <span className="text-4xl font-bold text-blue-600">O</span>
+                                <span className="text-xs text-gray-500 font-medium">출석</span>
                             </button>
                             <button onClick={() => updateStatus('특이사항')}
-                                className="btn flex-col gap-1 p-3" style={{ backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
-                                <span className="text-xl font-bold">△</span>
-                                <span className="text-xs">특이사항</span>
+                                className="flex flex-col items-center gap-2 p-2 transition-transform active:scale-95">
+                                <span className="text-4xl font-bold text-green-600">△</span>
+                                <span className="text-xs text-gray-500 font-medium">특이사항</span>
                             </button>
                             <button onClick={() => updateStatus('결석')}
-                                className="btn flex-col gap-1 p-3" style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
-                                <span className="text-xl font-bold">X</span>
-                                <span className="text-xs">결석</span>
+                                className="flex flex-col items-center gap-2 p-2 transition-transform active:scale-95">
+                                <span className="text-4xl font-bold text-red-600">X</span>
+                                <span className="text-xs text-gray-500 font-medium">결석</span>
                             </button>
                         </div>
 
