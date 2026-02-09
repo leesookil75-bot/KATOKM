@@ -107,40 +107,74 @@ export default function StudentManager() {
                 </div>
             </header>
 
-            {/* Student List */}
-            <div className="flex-col gap-md">
-                {students.length === 0 ? (
-                    <div className="card flex-center" style={{ padding: "3rem", color: "var(--text-muted)" }}>
-                        <p>등록된 학생이 없습니다.</p>
-                    </div>
-                ) : (
-                    students.map(student => (
-                        <div key={student.id} className="card" style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", textAlign: "left" }}>
-                            <div>
-                                <h3 className="heading-md">{student.name}</h3>
-                                <p className="text-sub text-sm">{student.parentPhone}</p>
-                                <p className="text-xs text-primary">비밀번호: {student.passcode || "미설정"}</p>
-                                {student.memo && <p className="text-muted text-xs">{student.memo}</p>}
-                            </div>
-                            <div className="flex-center gap-sm">
-                                <button
-                                    className="btn btn-secondary"
-                                    style={{ padding: "0.5rem" }}
-                                    onClick={() => openEdit(student)}
-                                >
-                                    <Edit size={18} />
-                                </button>
-                                <button
-                                    className="btn"
-                                    style={{ padding: "0.5rem", color: "#ef4444" }}
-                                    onClick={() => handleDelete(student.id)}
-                                >
-                                    <Trash2 size={18} />
-                                </button>
-                            </div>
-                        </div>
-                    ))
-                )}
+            {/* Student List (Table View) */}
+            <div className="table-container">
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th style={{ minWidth: "80px" }}>이름</th>
+                            <th style={{ minWidth: "120px" }}>연락처</th>
+                            <th style={{ minWidth: "80px" }}>비밀번호</th>
+                            <th style={{ width: "40%" }}>메모</th>
+                            <th style={{ width: "100px", textAlign: "center" }}>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {students.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} style={{ textAlign: "center", padding: "4rem 2rem", color: "var(--text-muted)" }}>
+                                    <div className="flex-col flex-center gap-sm">
+                                        <p>등록된 학생이 없습니다.</p>
+                                        <p className="text-sm">상단의 '학생 추가' 버튼을 눌러주세요.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : (
+                            students.map(student => (
+                                <tr key={student.id}>
+                                    <td>
+                                        <span style={{ fontWeight: 600, color: "var(--text-main)" }}>{student.name}</span>
+                                    </td>
+                                    <td>
+                                        <a href={`tel:${student.parentPhone}`} style={{ color: "var(--text-sub)" }}>
+                                            {student.parentPhone}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span className="text-primary" style={{ fontFamily: "monospace", fontWeight: 600, letterSpacing: "0.1em" }}>
+                                            {student.passcode || "-"}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className="text-muted text-sm" style={{ display: "block", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", maxWidth: "200px" }}>
+                                            {student.memo}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div className="flex-center gap-xs" style={{ justifyContent: "center" }}>
+                                            <button
+                                                className="btn btn-secondary"
+                                                style={{ padding: "0.4rem", height: "32px", width: "32px" }}
+                                                onClick={() => openEdit(student)}
+                                                title="수정"
+                                            >
+                                                <Edit size={16} />
+                                            </button>
+                                            <button
+                                                className="btn"
+                                                style={{ padding: "0.4rem", color: "#ef4444", height: "32px", width: "32px", border: "1px solid #fee2e2", backgroundColor: "#fef2f2" }}
+                                                onClick={() => handleDelete(student.id)}
+                                                title="삭제"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
 
             {/* Add/Edit Modal */}
