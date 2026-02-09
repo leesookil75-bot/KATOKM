@@ -33,6 +33,15 @@ export async function GET(request: Request) {
       );
     `;
 
+    // 3. Classes Table
+    await client.sql`
+      CREATE TABLE IF NOT EXISTS classes (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) UNIQUE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
     // 3. Insert Dummy Data (Optional)
     const { searchParams } = new URL(request.url);
     if (searchParams.get('mode') === 'dummy') {
