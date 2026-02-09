@@ -216,21 +216,27 @@ export default function AttendancePage() {
                             <button onClick={() => setSelectedCell(null)}><X size={20} /></button>
                         </div>
 
-                        <div className="flex justify-around items-center mb-6 px-2">
+                        <div className="flex justify-evenly items-center mb-8 mt-2">
                             <button onClick={() => updateStatus('출석')}
-                                className="flex flex-col items-center gap-2 p-2 transition-transform active:scale-95">
-                                <span className="text-4xl font-bold text-blue-600">O</span>
-                                <span className="text-xs text-gray-500 font-medium">출석</span>
+                                className="flex flex-col items-center gap-3 p-2 transition-transform active:scale-95 group">
+                                <div className="p-4 rounded-full bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                                    <span className="text-blue-600 font-extrabold text-5xl" style={{ lineHeight: '1' }}>O</span>
+                                </div>
+                                <span className="text-sm text-gray-600 font-semibold">출석</span>
                             </button>
                             <button onClick={() => updateStatus('특이사항')}
-                                className="flex flex-col items-center gap-2 p-2 transition-transform active:scale-95">
-                                <span className="text-4xl font-bold text-green-600">△</span>
-                                <span className="text-xs text-gray-500 font-medium">특이사항</span>
+                                className="flex flex-col items-center gap-3 p-2 transition-transform active:scale-95 group">
+                                <div className="p-4 rounded-full bg-green-50 group-hover:bg-green-100 transition-colors">
+                                    <span className="text-green-600 font-extrabold text-5xl" style={{ lineHeight: '1' }}>△</span>
+                                </div>
+                                <span className="text-sm text-gray-600 font-semibold">특이사항</span>
                             </button>
                             <button onClick={() => updateStatus('결석')}
-                                className="flex flex-col items-center gap-2 p-2 transition-transform active:scale-95">
-                                <span className="text-4xl font-bold text-red-600">X</span>
-                                <span className="text-xs text-gray-500 font-medium">결석</span>
+                                className="flex flex-col items-center gap-3 p-2 transition-transform active:scale-95 group">
+                                <div className="p-4 rounded-full bg-red-50 group-hover:bg-red-100 transition-colors">
+                                    <span className="text-red-600 font-extrabold text-5xl" style={{ lineHeight: '1' }}>X</span>
+                                </div>
+                                <span className="text-sm text-gray-600 font-semibold">결석</span>
                             </button>
                         </div>
 
