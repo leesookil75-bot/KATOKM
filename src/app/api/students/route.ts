@@ -4,7 +4,15 @@ import { NextResponse } from 'next/server';
 export async function GET() {
     try {
         const { rows } = await sql`SELECT * FROM students ORDER BY class_name ASC, name ASC`;
-        return NextResponse.json(rows);
+        const students = rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            parentPhone: row.parent_phone,
+            passcode: row.passcode,
+            memo: row.memo,
+            className: row.class_name
+        }));
+        return NextResponse.json(students);
     } catch (error) {
         return NextResponse.json({ error }, { status: 500 });
     }
