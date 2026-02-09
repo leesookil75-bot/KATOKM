@@ -21,5 +21,8 @@ export async function POST(request: Request) {
       RETURNING *;
     `;
 
+        return NextResponse.json(rows[0]);
+    } catch (error) {
+        return NextResponse.json({ error }, { status: 500 });
     }
 }
