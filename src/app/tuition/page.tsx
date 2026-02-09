@@ -208,7 +208,13 @@ export default function TuitionPage() {
                                                     ${isSelected ? 'ring-2 ring-red-600 font-bold shadow-md' : 'hover:opacity-80'}
                                                 `}
                                                 onClick={() => handleCellClick(student.id, m)}
-                                                style={{ position: isSelected ? 'relative' : 'static', zIndex: isSelected ? 5 : 'auto' }}
+                                                style={{
+                                                    position: isSelected ? 'relative' : 'static',
+                                                    zIndex: isSelected ? 5 : 'auto',
+                                                    border: isSelected ? '2px solid red' : undefined,
+                                                    boxShadow: isSelected ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06)' : undefined,
+                                                    transform: isSelected ? 'scale(1.02)' : 'none'
+                                                }}
                                             >
                                                 {isPaid ? (
                                                     <div className="flex flex-col items-center">
@@ -234,8 +240,22 @@ export default function TuitionPage() {
 
             {/* Modal */}
             {modalOpen && selectedCell && (
-                <div className="fixed inset-0 bg-black/50 z-[150] flex items-center justify-center p-4">
-                    <div className="card w-full max-w-sm flex flex-col gap-4 shadow-xl animate-in fade-in zoom-in duration-200">
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        zIndex: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '1rem'
+                    }}
+                >
+                    <div className="card w-full max-w-sm flex flex-col gap-4 shadow-xl animate-in fade-in zoom-in duration-200" style={{ margin: 'auto' }}>
                         <h3 className="heading-md text-center">
                             {students.find(s => s.id === selectedCell.studentId)?.name} 학생<br />
                             <span className="text-base font-normal text-gray-600">
