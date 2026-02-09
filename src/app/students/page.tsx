@@ -22,37 +22,51 @@ export default function StudentManager() {
         memo: "",
     });
 
-    // Load students from localStorage on mount
-    useEffect(() => {
-        const saved = localStorage.getItem("students");
-        if (saved) {
-            setStudents(JSON.parse(saved));
+    // Fetch students from API
+    const fetchStudents = async () => {
+        try {
+            const res = await fetch('/api/students');
+            if (res.ok) {
+                const data = await res.json();
+                setStudents(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch students", error);
         }
+    };
+
+    useEffect(() => {
+        fetchStudents();
     }, []);
 
-    // Save students to localStorage whenever list changes
-    useEffect(() => {
-        localStorage.setItem("students", JSON.stringify(students));
-    }, [students]);
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (formData.id) {
-            // Edit existing
-            setStudents(students.map(s => s.id === formData.id ? formData : s));
+            // Edit existing (PUT)
+            const res = await fetch(`/api/students/${formData.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+            if (res.ok) fetchStudents();
         } else {
-            // Add new
-            const newStudent = { ...formData, id: Date.now().toString() };
-            setStudents([...students, newStudent]);
+            // Add new (POST)
+            const res = await fetch('/api/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+            if (res.ok) fetchStudents();
         }
 
         closeForm();
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm("정말 삭제하시겠습니까?")) {
-            setStudents(students.filter(s => s.id !== id));
+            await fetch(`/api/students/${id}`, { method: 'DELETE' });
+            fetchStudents();
         }
     };
 
@@ -66,23 +80,9 @@ export default function StudentManager() {
         setFormData({ id: "", name: "", parentPhone: "", memo: "", passcode: "" });
     };
 
-    const generateDummyData = () => {
-        const lastNames = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임"];
-        const firstNames = ["민수", "지원", "서연", "도윤", "하은", "준호", "지우", "예준", "서현", "민재", "수진", "현우", "지민", "가은"];
-
-        const dummies: Student[] = [];
-        for (let i = 0; i < 20; i++) {
-            const randomName = lastNames[Math.floor(Math.random() * lastNames.length)] + firstNames[Math.floor(Math.random() * firstNames.length)];
-            dummies.push({
-                id: Date.now().toString() + i,
-                name: randomName,
-                parentPhone: `010-${Math.floor(Math.random() * 9000) + 1000}-${Math.floor(Math.random() * 9000) + 1000}`,
-                passcode: Math.floor(Math.random() * 9000 + 1000).toString(),
-                memo: Math.random() > 0.7 ? "테스트 특이사항 메모입니다." : "",
-            });
-        }
-        setStudents(prev => [...prev, ...dummies]);
-        alert("임의의 학생 20명이 추가되었습니다.");
+    // Legacy dummy generation commented out or removed for production
+    const generateDummyData = async () => {
+        alert("서버 연동 중에는 대량 데이터 생성을 지원하지 않습니다. (구현 필요 시 요청해주세요)");
     };
 
     return (
