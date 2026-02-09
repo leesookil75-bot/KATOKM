@@ -100,23 +100,11 @@ export default function StudentManager() {
         setFormData({ id: "", name: "", parentPhone: "", memo: "", passcode: "", className: "" });
     };
 
-    const generateDummyData = async () => {
-        if (!confirm("연습용 학생 20명을 추가하시겠습니까?")) return;
-        try {
-            await fetch('/api/seed?mode=dummy');
-            alert("연습용 데이터가 생성되었습니다.");
-            fetchStudents();
-        } catch (e) { console.error(e); }
-    };
-
     return (
         <div className="main">
             <header className="flex-center justify-between" style={{ marginBottom: "1.5rem" }}>
                 <h1 className="heading-lg">학생 관리</h1>
                 <div className="flex-center gap-sm">
-                    <button className="btn btn-secondary" onClick={generateDummyData} style={{ fontSize: "0.8rem", padding: "0.5rem 0.75rem" }}>
-                        + 20명 자동생성
-                    </button>
                     <button className="btn btn-primary" onClick={() => setIsFormOpen(true)}>
                         <Plus size={20} />
                         <span>학생 추가</span>
