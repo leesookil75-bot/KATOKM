@@ -67,7 +67,7 @@ export default function TuitionPage() {
             const validStudents = Array.isArray(studentsData) ? studentsData.map((s: any) => ({
                 id: s.id,
                 name: s.name,
-                className: s.class_name || "반 없음"
+                className: s.className || "반 없음"
             })) : [];
 
             // Transform classes
