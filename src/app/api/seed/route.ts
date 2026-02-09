@@ -28,10 +28,13 @@ export async function GET(request: Request) {
         student_id UUID REFERENCES students(id) ON DELETE CASCADE,
         date DATE NOT NULL,
         status VARCHAR(20) NOT NULL,
+        memo TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(student_id, date)
       );
     `;
+
+    await client.sql`ALTER TABLE attendance ADD COLUMN IF NOT EXISTS memo TEXT;`;
 
     // 3. Classes Table
     await client.sql`
