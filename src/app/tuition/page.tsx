@@ -58,14 +58,20 @@ export default function TuitionPage() {
                 className: s.class_name || "반 없음"
             })) : [];
 
+            // Transform classes
+            // API returns array directly
+            const validClasses = Array.isArray(classesData) ? classesData : [];
+
             // Transform tuition records to map: "studentId-month" -> Record
             const recordMap: Record<string, TuitionRecord> = {};
-            tuitionData.records.forEach((r: any) => {
-                recordMap[`${r.student_id}-${r.month}`] = r;
-            });
+            if (tuitionData && Array.isArray(tuitionData.records)) {
+                tuitionData.records.forEach((r: any) => {
+                    recordMap[`${r.student_id}-${r.month}`] = r;
+                });
+            }
 
             setStudents(validStudents);
-            setClasses(classesData.classes);
+            setClasses(validClasses);
             setTuitionRecords(recordMap);
         } catch (error) {
             console.error("Failed to fetch data", error);
