@@ -295,7 +295,7 @@ export default function TuitionPage() {
                                 납부 완료
                             </button>
                         </div>
-                        <button className="text-sm text-sub underline mt-2 text-center p-2" onClick={() => setModalOpen(false)}>
+                        <button className="text-sm text-sub underline text-center p-2" onClick={() => setModalOpen(false)} style={{ marginTop: '2rem' }}>
                             닫기
                         </button>
                     </div>
