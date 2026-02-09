@@ -8,7 +8,7 @@ export default function Home() {
     <main className={styles.main}>
       <header className={styles.hero}>
         <h1 className="heading-xl" style={{ marginBottom: "0.5rem", color: "var(--primary)" }}>
-          출결 매니저 v1.3 (최신)
+          출결 매니저 v2.0 (Stable)
         </h1>
         <p className="text-sub">간편한 학생 관리와 카톡 알림</p>
       </header>
@@ -19,8 +19,6 @@ export default function Home() {
           <h2>학생 관리</h2>
           <p>학생 등록 및 수정</p>
         </Link>
-
-        {/* ... other links same ... */}
 
         <Link href="/attendance" className={styles.card}>
           <CheckCircle size={32} color="var(--secondary)" style={{ marginBottom: "1rem" }} />
