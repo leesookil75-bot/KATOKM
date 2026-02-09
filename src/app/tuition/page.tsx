@@ -51,11 +51,12 @@ export default function TuitionPage() {
             const tuitionData = await tuitionRes.json();
 
             // Transform students to match interface
-            const validStudents = studentsData.students.map((s: any) => ({
+            // API returns array directly
+            const validStudents = Array.isArray(studentsData) ? studentsData.map((s: any) => ({
                 id: s.id,
                 name: s.name,
                 className: s.class_name || "반 없음"
-            }));
+            })) : [];
 
             // Transform tuition records to map: "studentId-month" -> Record
             const recordMap: Record<string, TuitionRecord> = {};
