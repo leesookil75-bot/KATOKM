@@ -211,7 +211,8 @@ export default function TuitionPage() {
                                                 style={{
                                                     position: isSelected ? 'relative' : 'static',
                                                     zIndex: isSelected ? 5 : 'auto',
-                                                    border: isSelected ? '2px solid red' : undefined,
+                                                    border: isSelected ? '3px solid red' : undefined,
+                                                    borderRadius: isSelected ? '8px' : undefined,
                                                     boxShadow: isSelected ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06)' : undefined,
                                                     transform: isSelected ? 'scale(1.02)' : 'none'
                                                 }}
