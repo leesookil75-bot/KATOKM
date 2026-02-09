@@ -281,7 +281,7 @@ export default function TuitionPage() {
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 mt-2">
+                        <div className="grid grid-cols-2 gap-3 mt-6">
                             <button
                                 className="btn bg-gray-100 hover:bg-gray-200 text-gray-700 py-3"
                                 onClick={() => handleUpdateStatus('unpaid')}
