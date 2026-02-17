@@ -1,14 +1,21 @@
 import { db } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth';
 
 export async function POST(request: Request) {
     try {
+        const session = await getSession();
+        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const academyId = session.user.id;
+
         const { passcode } = await request.json();
         const client = await db.connect();
 
-        // 1. Find Student by Passcode
+        // 1. Find Student by Passcode AND Academy ID
         const { rows } = await client.sql`
-      SELECT * FROM students WHERE passcode = ${passcode} LIMIT 1;
+      SELECT * FROM students 
+      WHERE passcode = ${passcode} AND academy_id = ${academyId} 
+      LIMIT 1;
     `;
 
         if (rows.length === 0) {
@@ -18,8 +25,7 @@ export async function POST(request: Request) {
         const student = rows[0];
         const today = new Date().toISOString().split('T')[0];
 
-        // 2. Mark Attendance (Upsert: If exists, do nothing or update?)
-        // Requirement says: "Automatically marked as 'O' (Present)"
+        // 2. Mark Attendance
         const status = '출석';
 
         await client.sql`
@@ -29,7 +35,7 @@ export async function POST(request: Request) {
       DO UPDATE SET status = ${status}, created_at = CURRENT_TIMESTAMP;
     `;
 
-        // 3. Mock SMS Sending (Log to console/server)
+        // 3. Mock SMS Sending
         console.log(`[SMS-MOCK] Sending to ${student.parent_phone}: ${student.name} 학생이 등원하였습니다.`);
 
         return NextResponse.json({

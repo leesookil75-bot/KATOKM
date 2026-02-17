@@ -1,9 +1,15 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth';
 
 export async function GET() {
     try {
-        const { rows } = await sql`SELECT * FROM students ORDER BY class_name ASC, name ASC`;
+        const session = await getSession();
+        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        const academyId = session.user.id;
+        const { rows } = await sql`SELECT * FROM students WHERE academy_id = ${academyId} ORDER BY class_name ASC, name ASC`;
+
         const students = rows.map(row => ({
             id: row.id,
             name: row.name,
@@ -20,12 +26,16 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
+        const session = await getSession();
+        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        const academyId = session.user.id;
         const body = await request.json();
         const { name, parentPhone, passcode, memo, className } = body;
 
         const { rows } = await sql`
-      INSERT INTO students (name, parent_phone, passcode, memo, class_name)
-      VALUES (${name}, ${parentPhone}, ${passcode}, ${memo}, ${className || ''})
+      INSERT INTO students (name, parent_phone, passcode, memo, class_name, academy_id)
+      VALUES (${name}, ${parentPhone}, ${passcode}, ${memo}, ${className || ''}, ${academyId})
       RETURNING *;
     `;
 

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import InstallPrompt from "@/components/InstallPrompt";
-import NavBar from "@/components/NavBar";
+import LayoutWrapper from "@/components/LayoutWrapper";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -56,10 +56,9 @@ export default function RootLayout({
       </head>
       <body className={notoSansKr.className}>
         <InstallPrompt />
-        <NavBar />
-        <div className="container">
+        <LayoutWrapper>
           {children}
-        </div>
+        </LayoutWrapper>
       </body>
     </html>
   );
