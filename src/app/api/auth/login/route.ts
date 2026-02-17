@@ -1,5 +1,7 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 import { login } from '@/lib/auth';
 
 export async function POST(request: Request) {

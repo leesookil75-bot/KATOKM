@@ -10,6 +10,10 @@ const notoSansKr = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
 });
 
+import { getSession } from "@/lib/auth";
+
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
   title: "카톡 출결 매니저",
