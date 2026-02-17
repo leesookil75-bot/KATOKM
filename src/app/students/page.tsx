@@ -1,6 +1,5 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2, Edit } from "lucide-react";
 
 type Student = {
@@ -26,24 +25,24 @@ export default function StudentManager() {
     });
 
     // Fetch students & classes
-    const fetchStudents = async () => {
+    const fetchStudents = useCallback(async () => {
         try {
             const res = await fetch('/api/students');
             if (res.ok) setStudents(await res.json());
         } catch (error) { console.error("Failed to fetch students", error); }
-    };
+    }, []);
 
-    const fetchClasses = async () => {
+    const fetchClasses = useCallback(async () => {
         try {
             const res = await fetch('/api/classes');
             if (res.ok) setClassList(await res.json());
         } catch (e) { console.error(e); }
-    };
+    }, []);
 
     useEffect(() => {
         fetchStudents();
         fetchClasses();
-    }, []);
+    }, [fetchStudents, fetchClasses]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

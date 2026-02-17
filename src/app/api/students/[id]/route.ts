@@ -2,13 +2,12 @@ import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 
-export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
     try {
         const session = await getSession();
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         const academyId = session.user.id;
 
-        const params = await props.params;
         const id = params.id;
         const body = await request.json();
         const { name, parentPhone, passcode, memo, className } = body;

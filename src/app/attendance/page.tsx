@@ -2,7 +2,7 @@
 // Force Rebuild
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, X, MessageCircle, Check, Circle, Triangle } from "lucide-react";
 
 type Student = {
@@ -33,19 +33,14 @@ export default function AttendancePage() {
     const classes = Array.from(new Set(students.map(s => s.className).filter(Boolean))) as string[];
     const filteredStudents = students.filter(s => selectedClass === "all" ? true : s.className === selectedClass);
 
-    useEffect(() => {
-        fetchStudents();
-        fetchAttendance();
-    }, [date, view]);
-
-    const fetchStudents = async () => {
+    const fetchStudents = useCallback(async () => {
         try {
             const res = await fetch('/api/students');
             if (res.ok) setStudents(await res.json());
         } catch (e) { console.error(e); }
-    };
+    }, []);
 
-    const fetchAttendance = async () => {
+    const fetchAttendance = useCallback(async () => {
         try {
             const res = await fetch('/api/attendance');
             if (res.ok) {
@@ -57,7 +52,12 @@ export default function AttendancePage() {
                 setAttendance(map);
             }
         } catch (e) { console.error(e); }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchStudents();
+        fetchAttendance();
+    }, [date, view, fetchStudents, fetchAttendance]);
 
     const handleCellClick = (studentId: string, date: string) => {
         const key = `${studentId}-${date}`;
