@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -35,11 +35,7 @@ export default function TuitionPage() {
 
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchData();
-    }, [year]);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -58,10 +54,6 @@ export default function TuitionPage() {
             const studentsData = await studentsRes.json();
             const classesData = await classesRes.json();
             const tuitionData = await tuitionRes.json();
-
-            console.log("Students Data:", studentsData);
-            console.log("Classes Data:", classesData);
-            console.log("Tuition Data:", tuitionData);
 
             // Transform students
             const validStudents = Array.isArray(studentsData) ? studentsData.map((s: any) => ({
@@ -90,7 +82,11 @@ export default function TuitionPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [year]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const filteredStudents = selectedClass === "all"
         ? students

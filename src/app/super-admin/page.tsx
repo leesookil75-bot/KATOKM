@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, CheckCircle, XCircle, Clock, School, User, Phone, MapPin } from "lucide-react";
 
@@ -21,7 +21,7 @@ export default function SuperAdminPage() {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
-    const fetchAcademies = async () => {
+    const fetchAcademies = useCallback(async () => {
         try {
             const res = await fetch('/api/admin/academies');
             if (res.ok) {
@@ -35,11 +35,11 @@ export default function SuperAdminPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [router]);
 
     useEffect(() => {
         fetchAcademies();
-    }, []);
+    }, [fetchAcademies]);
 
     const handleAction = async (id: string, status: 'APPROVED' | 'REJECTED') => {
         if (!confirm(`${status === 'APPROVED' ? '승인' : '거절/삭제'}하시겠습니까?`)) return;

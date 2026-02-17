@@ -178,7 +178,7 @@ export default function StudentManager() {
                                 <td colSpan={6} style={{ textAlign: "center", padding: "4rem 2rem", color: "var(--text-muted)" }}>
                                     <div className="flex-col flex-center gap-sm">
                                         <p>등록된 학생이 없습니다.</p>
-                                        <p className="text-sm">상단의 '학생 추가' 버튼을 눌러주세요.</p>
+                                        <p className="text-sm">상단의 &apos;학생 추가&apos; 버튼을 눌러주세요.</p>
                                     </div>
                                 </td>
                             </tr>

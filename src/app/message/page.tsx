@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Send, Copy, Plus, Trash2, Users, Filter, ChevronDown } from "lucide-react";
 import Link from 'next/link';
 
@@ -39,11 +39,7 @@ export default function MessagePage() {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
 
-    useEffect(() => {
-        fetchInitialData();
-    }, []);
-
-    const fetchInitialData = async () => {
+    const fetchInitialData = useCallback(async () => {
         try {
             const [resStudents, resClasses, resTemplates, resAttendance, resTuition] = await Promise.all([
                 fetch('/api/students'),
@@ -72,21 +68,12 @@ export default function MessagePage() {
 
             if (resTuition.ok) {
                 const data = await resTuition.json();
-                // Find students who have PAID for current month
                 const paidStudentIds = new Set(
                     data.records
                         .filter((r: any) => r.month === currentMonth && r.status === 'paid')
                         .map((r: any) => r.student_id)
                 );
 
-                // Identify students who have NOT paid
-                // We need the full student list to determine who is missing from paid list
-                // If studentsData is available here use it, otherwise rely on state update flow?
-                // Actually easier to just store paid IDs and invert logic in filter
-
-                // BUT wait, we need to know who is unpaid. Unpaid = All Students - Paid Students.
-                // So let's just store the Paid IDs for the current month.
-                // Actually, let's store the UNPAID IDs directly for easier filtering.
                 if (studentsData.length > 0) {
                     const unpaid = new Set(
                         studentsData
@@ -97,7 +84,11 @@ export default function MessagePage() {
                 }
             }
         } catch (e) { console.error(e); }
-    };
+    }, [today, currentYear, currentMonth]);
+
+    useEffect(() => {
+        fetchInitialData();
+    }, [fetchInitialData]);
 
     // Filter Logic
     const filteredStudents = students.filter(s => {
