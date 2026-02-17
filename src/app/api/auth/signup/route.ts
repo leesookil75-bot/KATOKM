@@ -48,8 +48,11 @@ export async function POST(request: Request) {
         `;
 
         return NextResponse.json({ success: true, message: '회원가입이 완료되었습니다. 관리자 승인을 기다려주세요.' });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Signup error:', error);
-        return NextResponse.json({ error: '회원가입 중 오류가 발생했습니다.' }, { status: 500 });
+        return NextResponse.json({
+            error: '회원가입 중 오류가 발생했습니다.',
+            details: error.message || String(error)
+        }, { status: 500 });
     }
 }

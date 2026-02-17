@@ -7,6 +7,9 @@ export async function GET(request: Request) {
   try {
     const client = await db.connect();
 
+    // Ensure UUID extension is available
+    await client.sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`;
+
     // 0. Admins Table
     await client.sql`
       CREATE TABLE IF NOT EXISTS admins (
