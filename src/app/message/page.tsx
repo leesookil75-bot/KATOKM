@@ -185,6 +185,10 @@ export default function MessagePage() {
                 const dbSucceeded = data.results?.every((r: any) => r.dbSaved) ?? false;
 
                 let feedback = `푸시 전송 시도 완료 (${data.results?.length}명)`;
+                if (data.results?.length === 1) {
+                    feedback += `\n(학생 ID: ${targets[0]})`;
+                }
+
                 if (totalSubs === 0) {
                     feedback += "\n⚠️ 현재 등록된 기기(구독)가 있는 학생이 없습니다. 학부모 앱에서 알림 승인이 필요합니다.";
                 } else {

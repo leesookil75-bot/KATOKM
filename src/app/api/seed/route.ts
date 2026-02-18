@@ -150,6 +150,18 @@ export async function GET(request: Request) {
       results.links = "Updated missing links to SuperAdmin";
     }
 
+    // 12. Diagnostic counts
+    try {
+      const { rows: subCount } = await client.sql`SELECT count(*) FROM push_subscriptions`;
+      results.subscriptionCount = subCount[0].count;
+      const { rows: notifCount } = await client.sql`SELECT count(*) FROM notifications`;
+      results.notificationCount = notifCount[0].count;
+      const { rows: recentSubs } = await client.sql`SELECT student_id, created_at FROM push_subscriptions ORDER BY created_at DESC LIMIT 5`;
+      results.recentSubscriptions = recentSubs;
+    } catch (diagErr) {
+      results.diagnostics = "Failed to fetch counts: " + (diagErr as any).message;
+    }
+
     return NextResponse.json({
       message: 'Database schema setup completed',
       details: results
