@@ -160,10 +160,14 @@ export default function AttendancePage() {
             <div className="table-container" style={{ maxHeight: "70vh", overflow: "auto" }}>
                 <table className="table text-xs">
                     <thead>
-                        <tr>
-                            <th style={{ position: 'sticky', left: 0, zIndex: 20, background: '#f3f4f6', minWidth: '80px' }}>이름</th>
+                        <tr className="compact-row">
+                            <th style={{ position: 'sticky', left: 0, zIndex: 20, background: '#f3f4f6', minWidth: '70px', padding: '8px 4px' }}>이름</th>
                             {displayDays.map(d => (
-                                <th key={d} className="text-center" style={{ minWidth: view === 'month' ? '30px' : 'auto' }}>
+                                <th key={d} className="text-center" style={{
+                                    minWidth: view === 'month' ? '28px' : '60px',
+                                    padding: '8px 2px',
+                                    fontSize: view === 'month' ? '10px' : '11px'
+                                }}>
                                     {view === 'week' ? d.slice(5) : d.slice(8)}
                                 </th>
                             ))}
@@ -180,18 +184,19 @@ export default function AttendancePage() {
                                     const status = record?.status;
 
                                     return (
-                                        <td key={d} className="text-center p-0">
+                                        <td key={d} className="text-center p-0" style={{ borderRight: '1px solid #f1f5f9' }}>
                                             <button
                                                 onClick={() => handleCellClick(student.id, d)}
                                                 style={{
-                                                    width: "100%", height: "40px",
+                                                    width: "100%", height: "34px",
                                                     display: "flex", alignItems: "center", justifyContent: "center",
                                                     fontWeight: 'bold',
-                                                    color: status === '출석' ? '#2563eb' : status === '특이사항' ? '#16a34a' : status === '결석' ? '#dc2626' : '#e5e7eb'
+                                                    fontSize: view === 'month' ? '12px' : '14px',
+                                                    color: status === '출석' ? '#2563eb' : status === '특이사항' ? '#16a34a' : status === '결석' ? '#dc2626' : '#f1f5f9'
                                                 }}
                                             >
-                                                {status === '출석' ? 'O' : status === '특이사항' ? '△' : status === '결석' ? 'X' : '-'}
-                                                {record?.memo && <span style={{ position: 'absolute', bottom: '2px', right: '2px', width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#6b7280' }}></span>}
+                                                {status === '출석' ? 'O' : status === '특이사항' ? '△' : status === '결석' ? 'X' : '·'}
+                                                {record?.memo && <span style={{ position: 'absolute', bottom: '2px', right: '2px', width: '3px', height: '3px', borderRadius: '50%', backgroundColor: '#6b7280' }}></span>}
                                             </button>
                                         </td>
                                     );
@@ -201,6 +206,15 @@ export default function AttendancePage() {
                     </tbody>
                 </table>
             </div>
+
+            <style jsx>{`
+                .table th, .table td {
+                    padding: 0 !important;
+                }
+                .compact-row th {
+                    padding: 8px 2px !important;
+                }
+            `}</style>
 
             {/* Action Sheet / Modal */}
             {selectedCell && (
