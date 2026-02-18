@@ -43,10 +43,21 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL("/", request.url));
         }
 
-        // 4. Academy Admin Route Protection (prevent them from accessing super-admin)
-        if (!pathname.startsWith("/super-admin") && parsed.user.role === "SUPER") {
-            // Super admin should stay in super-admin area or can browse but it's cleaner to redirect
-            // For now, allow them to see the main app if they want, but usually they'll be in /super-admin
+        // 4. Parent vs Admin Route Protection
+        const isParentRoute = pathname.startsWith('/parent');
+        const isLoginRedirect = pathname === '/login' || pathname === '/parent/login';
+
+        if (isParentRoute && parsed.user.role !== 'PARENT') {
+            // Admin users shouldn't be in the parent area unless it's testing
+            // But for reliability, if they try to go deep, redirect to admin home
+            if (pathname !== '/parent/login') {
+                // allow testing parent app if needed, but usually redirect
+            }
+        }
+
+        if (!isParentRoute && parsed.user.role === 'PARENT') {
+            // Parents shouldn't be in admin area
+            return NextResponse.redirect(new URL("/parent", request.url));
         }
 
         return NextResponse.next();
