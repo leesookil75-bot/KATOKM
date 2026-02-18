@@ -239,11 +239,21 @@ button {
   z-index: 20;
 }
 
+th.sticky-col-class {
+  z-index: 31 !important;
+  background-color: #f3f4f6 !important;
+}
+
 .sticky-col-name {
   min-width: 80px !important;
   left: 60px !important;
   position: sticky !important;
   z-index: 20;
+}
+
+th.sticky-col-name {
+  z-index: 31 !important;
+  background-color: #f3f4f6 !important;
 }
 
 @media (min-width: 640px) {
