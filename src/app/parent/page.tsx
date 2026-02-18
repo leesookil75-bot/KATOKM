@@ -18,6 +18,23 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+const VAPID_PUBLIC_KEY = 'BH749OlOysQPYPpdxUa45W1XShrSsqreU6ohU3vhdvPNFyAL1Y_SGPj6vKv84VtII_Jl8R3Q5RxuvkR9Zywds2c';
+
+function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
 interface Session {
     user: {
         id: string;
@@ -72,6 +89,32 @@ export default function ParentDashboard() {
                     const tuitionData = await tuitionRes.json();
                     setTuitionSummary(tuitionData);
                 }
+
+                // Register Push Subscription
+                try {
+                    if ('serviceWorker' in navigator && 'PushManager' in window) {
+                        const registration = await navigator.serviceWorker.ready;
+
+                        // Check if already subscribed
+                        let subscription = await registration.pushManager.getSubscription();
+
+                        if (!subscription) {
+                            subscription = await registration.pushManager.subscribe({
+                                userVisibleOnly: true,
+                                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                            });
+
+                            // Save to server
+                            await fetch('/api/push/subscribe', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ subscription })
+                            });
+                        }
+                    }
+                } catch (pushErr) {
+                    console.error('[Push-Registration] Failed:', pushErr);
+                }
             } catch (err) {
                 console.error('[ParentApp Fetch Error]:', err);
             } finally {
@@ -123,7 +166,7 @@ export default function ParentDashboard() {
                         {todayAttendance ? (
                             <div className="status-badge-wrapper">
                                 <div className={`status-badge ${todayAttendance.status === '출석' ? 'present' :
-                                        todayAttendance.status === '특이사항' ? 'special' : 'absent'
+                                    todayAttendance.status === '특이사항' ? 'special' : 'absent'
                                     }`}>
                                     {todayAttendance.status === '출석' ? <Circle size={48} strokeWidth={3} /> :
                                         todayAttendance.status === '특이사항' ? <Triangle size={48} strokeWidth={3} /> :

@@ -44,6 +44,17 @@ export async function POST(request: Request) {
         // 3. Mock SMS Sending
         console.log(`[SMS-MOCK] Sending to ${student.parent_phone}: ${student.name} 학생이 등원하였습니다.`);
 
+        // 4. Push Notification
+        try {
+            const { sendPushNotification } = await import('@/lib/push');
+            await sendPushNotification(student.id, {
+                title: '출결 알림',
+                body: `${student.name} 학생이 출석했습니다.`
+            });
+        } catch (pushErr) {
+            console.error('[Push-Kiosk] Failed:', pushErr);
+        }
+
         return NextResponse.json({
             success: true,
             student: { name: student.name, parentPhone: student.parent_phone }

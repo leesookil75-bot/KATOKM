@@ -68,13 +68,35 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '접근 권한이 없는 학생입니다.' }, { status: 403 });
         }
 
-        await sql`
+        const { rows } = await sql`
       INSERT INTO attendance (student_id, date, status, memo)
       VALUES (${studentId}, ${date}, ${status}, ${memo || ''})
       ON CONFLICT (student_id, date) 
-      DO UPDATE SET status = ${status}, memo = ${memo || ''}, created_at = CURRENT_TIMESTAMP;
+      DO UPDATE SET status = ${status}, memo = ${memo || ''}, created_at = CURRENT_TIMESTAMP
+      RETURNING *;
     `;
-        return NextResponse.json({ success: true });
+        // Send Push Notification if status changed
+        if (status === '출석' || status === '결석') {
+            try {
+                const { rows: studentRows } = await sql`SELECT name FROM students WHERE id = ${studentId} `;
+                if (studentRows.length > 0) {
+                    const studentName = studentRows[0].name;
+                    const { sendPushNotification } = await import('@/lib/push');
+                    const body = status === '출석'
+                        ? `${studentName} 학생이 출석했습니다.`
+                        : `${studentName} 학생이 현재 결석 중입니다.`;
+
+                    await sendPushNotification(studentId, {
+                        title: '출결 알림',
+                        body: body
+                    });
+                }
+            } catch (pushErr) {
+                console.error('[Push-Admin] Failed:', pushErr);
+            }
+        }
+
+        return NextResponse.json({ success: true, attendance: rows[0] });
     } catch (error) {
         return NextResponse.json({ error }, { status: 500 });
     }
