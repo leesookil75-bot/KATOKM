@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Send, Copy, Plus, Trash2, Users, Filter, ChevronDown } from "lucide-react";
+import { Send, Copy, Plus, Trash2, Users, Filter, ChevronDown, MessageCircle } from "lucide-react";
 import Link from 'next/link';
 
 type Student = {
@@ -155,19 +155,39 @@ export default function MessagePage() {
         const targets = students.filter(s => selectedStudentIds.has(s.id));
         if (targets.length === 0) return alert("받는 사람을 선택해주세요.");
 
-        const phones = targets.map(s => s.parentPhone).join(';'); // Android/iOS delimiter check? usually ; or ,
-
-        // Mobile only mostly
+        const phoneStr = targets.map(s => s.parentPhone).join(',');
         const ua = navigator.userAgent;
         const sep = ua.match(/iPhone|iPad|iPod/i) ? '&' : '?';
-
-        // Note: Bulk SMS via sms: protocol is limited. 
-        // iOS: sms:open?addresses=1,2,3...
-        // Android: sms:1,2,3?body=...
-        // Let's try standard comma separated.
-
-        const phoneStr = targets.map(s => s.parentPhone).join(',');
         window.location.href = `sms:${phoneStr}${sep}body=${encodeURIComponent(message)}`;
+    };
+
+    const handlePushSend = async () => {
+        const targets = Array.from(selectedStudentIds);
+        if (targets.length === 0) return alert("받는 사람을 선택해주세요.");
+        if (!message.trim()) return alert("메시지 내용을 입력하세요.");
+
+        if (!confirm(`${targets.length}명에게 푸시 알림을 전송하시겠습니까?`)) return;
+
+        try {
+            const res = await fetch('/api/push/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    studentIds: targets,
+                    title: '학원 알림',
+                    message: message
+                })
+            });
+
+            if (res.ok) {
+                alert("푸시 알람 전송이 완료되었습니다.");
+            } else {
+                alert("전송 중 오류가 발생했습니다.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("서버 오류가 발생했습니다.");
+        }
     };
 
     return (
@@ -274,15 +294,18 @@ export default function MessagePage() {
                         onChange={e => setMessage(e.target.value)}
                     />
 
-                    <div className="action-buttons">
+                    <div className="action-buttons" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
                         <button className="btn btn-secondary py-3 flex-center gap-2" onClick={() => {
                             navigator.clipboard.writeText(message);
                             alert("복사되었습니다.");
                         }}>
-                            <Copy size={18} /> 내용 복사
+                            <Copy size={18} /> 복사
                         </button>
-                        <button className="btn btn-primary py-3 flex-center gap-2" onClick={handleSend}>
-                            <Send size={18} /> 문자 전송
+                        <button className="btn btn-secondary py-3 flex-center gap-2" style={{ backgroundColor: '#f0f9ff', color: '#0369a1', borderColor: '#bae6fd' }} onClick={handleSend}>
+                            <Send size={18} /> 문자
+                        </button>
+                        <button className="btn btn-primary py-3 flex-center gap-2" onClick={handlePushSend}>
+                            <MessageCircle size={18} /> 푸시전송
                         </button>
                     </div>
                 </div>

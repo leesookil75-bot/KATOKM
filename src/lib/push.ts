@@ -49,4 +49,15 @@ export async function sendPushNotification(studentId: string, payload: { title: 
     }
 }
 
+export async function broadcastPushNotification(studentIds: string[], payload: { title: string, body: string }) {
+    try {
+        const results = await Promise.allSettled(
+            studentIds.map(id => sendPushNotification(id, payload))
+        );
+        return results;
+    } catch (error) {
+        console.error('[Push-Broadcast] Error:', error);
+    }
+}
+
 export { PUBLIC_KEY };
