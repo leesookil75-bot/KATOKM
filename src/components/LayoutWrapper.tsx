@@ -36,9 +36,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         return <div className="auth-layout">{children}</div>;
     }
 
-    // Explicitly hide only for PARENT role
-    // For admins (ACADEMY, SUPER) or non-logged in users (null), show the navigation
-    const showNav = role !== 'PARENT';
+    // Explicitly hide for PARENT role or KIOSK page
+    const isKioskPage = pathname === '/kiosk';
+    const showNav = role !== 'PARENT' && !isKioskPage;
 
     return (
         <div className="app-layout">

@@ -59,12 +59,10 @@ export default function KioskPage() {
     };
 
     return (
-        <div className="main flex-col" style={{ height: "100vh", backgroundColor: "#111827", color: "white" }}>
+        <div className="main flex-col" style={{ height: "100vh", backgroundColor: "black", color: "white" }}>
             {/* Header */}
-            <header className="flex-center justify-between p-4">
-                <Link href="/" className="text-gray-400"><MoveLeft /></Link>
-                <span className="text-gray-400 text-sm">키오스크 모드</span>
-                <div style={{ width: "24px" }}></div>
+            <header className="flex-center justify-start p-4">
+                <Link href="/" className="text-gray-400"><MoveLeft size={32} /></Link>
             </header>
 
             {/* Content */}
@@ -80,9 +78,6 @@ export default function KioskPage() {
                     </div>
                 ) : (
                     <>
-                        <h1 className="heading-xl mb-8 text-center text-gray-200">
-                            출석번호를 입력해주세요
-                        </h1>
 
                         {/* Dots */}
                         <div className="flex-center gap-4 mb-12">
@@ -102,7 +97,7 @@ export default function KioskPage() {
                                     className="flex-center"
                                     style={{
                                         aspectRatio: "1", borderRadius: "50%", backgroundColor: "#1f2937",
-                                        fontSize: "1.8rem", fontWeight: "bold", color: "white"
+                                        fontSize: "2.5rem", fontWeight: "bold", color: "white"
                                     }}>
                                     {num}
                                 </button>
@@ -112,7 +107,7 @@ export default function KioskPage() {
                                 className="flex-center"
                                 style={{
                                     aspectRatio: "1", borderRadius: "50%", backgroundColor: "#1f2937",
-                                    fontSize: "1.8rem", fontWeight: "bold", color: "white"
+                                    fontSize: "2.5rem", fontWeight: "bold", color: "white"
                                 }}>
                                 0
                             </button>
