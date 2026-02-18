@@ -133,7 +133,7 @@ export default function ParentDashboard() {
                 await fetchNotifications();
 
                 if ('serviceWorker' in navigator && 'PushManager' in window) {
-                    console.log('[Push] Attempting registration...');
+                    console.log('[Push] Initializing registration...');
                     const registration = await navigator.serviceWorker.ready;
                     let subscription = await registration.pushManager.getSubscription();
 
@@ -143,20 +143,26 @@ export default function ParentDashboard() {
                                 userVisibleOnly: true,
                                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                             });
+                            console.log('[Push] New subscription created');
+                        } catch (pushErr) {
+                            console.error('[Push-Registration] Failed or Denied:', pushErr);
+                        }
+                    }
 
+                    if (subscription) {
+                        // Always sync with server to ensure DB is up to date (especially after table recreations)
+                        try {
                             const subRes = await fetch('/api/push/subscribe', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ subscription })
                             });
 
-                            if (subRes.ok) console.log('[Push] Registration Success');
-                            else console.error('[Push] Registration Server Error:', await subRes.text());
-                        } catch (pushErr) {
-                            console.error('[Push-Registration] Failed or Denied:', pushErr);
+                            if (subRes.ok) console.log('[Push] Server Sync Successful for Student ID:', session?.user.student_id);
+                            else console.error('[Push] Server Sync ERROR:', await subRes.text());
+                        } catch (syncErr) {
+                            console.error('[Push-Sync] Server connection failed:', syncErr);
                         }
-                    } else {
-                        console.log('[Push] Already subscribed');
                     }
                 }
             } catch (err) {
