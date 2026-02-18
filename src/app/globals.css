@@ -87,6 +87,16 @@ button {
   box-shadow: var(--shadow-xl);
 }
 
+.kiosk-container {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: black !important;
+  box-shadow: none !important;
+  min-height: 100vh !important;
+}
+
 @media (min-width: 640px) {
   .container {
     max-width: 1200px;

@@ -49,7 +49,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
                 </main>
             </div>
             <div className="mobile-view">
-                <div className="container" style={{ paddingBottom: showNav ? '80px' : '0' }}>
+                <div className={`container ${isKioskPage ? 'kiosk-container' : ''}`} style={{ paddingBottom: showNav ? '80px' : '0' }}>
                     {children}
                 </div>
                 {showNav && <NavBar />}

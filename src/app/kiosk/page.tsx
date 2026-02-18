@@ -15,6 +15,21 @@ export default function KioskPage() {
     const [academyName, setAcademyName] = useState("");
 
     useEffect(() => {
+        // Set body background to black
+        const originalBg = document.body.style.backgroundColor;
+        document.body.style.backgroundColor = 'black';
+
+        // Update theme-color meta tag
+        let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        const originalThemeColor = metaThemeColor ? metaThemeColor.getAttribute('content') : '#4f46e5';
+
+        if (!metaThemeColor) {
+            metaThemeColor = document.createElement('meta');
+            metaThemeColor.setAttribute('name', 'theme-color');
+            document.head.appendChild(metaThemeColor);
+        }
+        metaThemeColor.setAttribute('content', '#000000');
+
         async function fetchSession() {
             try {
                 const res = await fetch('/api/auth/session');
@@ -27,6 +42,14 @@ export default function KioskPage() {
             }
         }
         fetchSession();
+
+        return () => {
+            // Restore original styles on unmount
+            document.body.style.backgroundColor = originalBg;
+            if (metaThemeColor) {
+                metaThemeColor.setAttribute('content', originalThemeColor || '#4f46e5');
+            }
+        };
     }, []);
 
     const handleNumberClick = (num: number) => {
