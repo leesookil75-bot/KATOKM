@@ -31,9 +31,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         }
 
         return NextResponse.json(rows[0]);
-    } catch (error) {
-        console.error(`[PUT] Error:`, error);
-        return NextResponse.json({ error }, { status: 500 });
+    } catch (error: any) {
+        console.error(`[PUT ${params.id}] Error:`, error);
+        return NextResponse.json({ error: error.message || '학생 정보를 수정하는데 실패했습니다.' }, { status: 500 });
     }
 }
 
@@ -51,7 +51,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         }
 
         return NextResponse.json({ message: 'Deleted successfully' });
-    } catch (error) {
-        return NextResponse.json({ error }, { status: 500 });
+    } catch (error: any) {
+        console.error(`[DELETE ${params.id}] Error:`, error);
+        return NextResponse.json({ error: error.message || '학생을 삭제하는데 실패했습니다.' }, { status: 500 });
     }
 }

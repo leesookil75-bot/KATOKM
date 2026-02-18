@@ -22,8 +22,9 @@ export async function GET() {
             tuition_due_day: row.tuition_due_day
         }));
         return NextResponse.json(students);
-    } catch (error) {
-        return NextResponse.json({ error }, { status: 500 });
+    } catch (error: any) {
+        console.error('[Students GET] Error:', error);
+        return NextResponse.json({ error: error.message || '목록을 불러오는데 실패했습니다.' }, { status: 500 });
     }
 }
 
@@ -46,7 +47,8 @@ export async function POST(request: Request) {
     `;
 
         return NextResponse.json(rows[0]);
-    } catch (error) {
-        return NextResponse.json({ error }, { status: 500 });
+    } catch (error: any) {
+        console.error('[Students POST] Error:', error);
+        return NextResponse.json({ error: error.message || '저장 중 오류가 발생했습니다.' }, { status: 500 });
     }
 }
