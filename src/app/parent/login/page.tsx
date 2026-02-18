@@ -95,7 +95,7 @@ export default function ParentLoginPage() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+                    background: #f1f5f9;
                     padding: 1.5rem;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 }
@@ -105,7 +105,7 @@ export default function ParentLoginPage() {
                     background: white;
                     border-radius: 2rem;
                     padding: 2.5rem 2rem;
-                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
                 }
                 .login-header {
                     text-align: center;
@@ -114,7 +114,7 @@ export default function ParentLoginPage() {
                 .logo-icon {
                     width: 64px;
                     height: 64px;
-                    background: var(--primary, #4f46e5);
+                    background: #4f46e5;
                     border-radius: 1.25rem;
                     display: flex;
                     align-items: center;
@@ -125,12 +125,12 @@ export default function ParentLoginPage() {
                 .login-header h1 {
                     font-size: 1.75rem;
                     font-weight: 800;
-                    color: #1a1a1a;
+                    color: #1e293b;
                     margin-bottom: 0.5rem;
                     letter-spacing: -0.025em;
                 }
                 .login-header p {
-                    color: #6b7280;
+                    color: #64748b;
                     font-size: 0.95rem;
                 }
                 .login-form {
@@ -146,7 +146,7 @@ export default function ParentLoginPage() {
                 .input-group label {
                     font-size: 0.875rem;
                     font-weight: 600;
-                    color: #374151;
+                    color: #475569;
                     margin-left: 0.25rem;
                 }
                 .input-wrapper {
@@ -157,16 +157,17 @@ export default function ParentLoginPage() {
                 .input-wrapper .icon {
                     position: absolute;
                     left: 1rem;
-                    color: #9ca3af;
+                    color: #94a3b8;
                 }
                 .input-wrapper input {
                     width: 100%;
                     padding: 0.875rem 1rem 0.875rem 3rem;
-                    border: 1.5px solid #e5e7eb;
+                    border: 1.5px solid #e2e8f0;
                     border-radius: 1rem;
                     font-size: 1rem;
                     transition: all 0.2s;
-                    background: #f9fafb;
+                    background: #f8fafc;
+                    color: #1e293b;
                 }
                 .input-wrapper input:focus {
                     outline: none;
@@ -188,6 +189,8 @@ export default function ParentLoginPage() {
                     gap: 0.5rem;
                     transition: all 0.2s;
                     box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+                    border: none;
+                    cursor: pointer;
                 }
                 .login-button:hover:not(:disabled) {
                     background: #4338ca;
@@ -205,7 +208,7 @@ export default function ParentLoginPage() {
                     color: #ef4444;
                     font-size: 0.875rem;
                     text-align: center;
-                    font-weight: 500;
+                    font-weight: 600;
                 }
                 .login-footer {
                     margin-top: 2rem;
@@ -213,12 +216,12 @@ export default function ParentLoginPage() {
                 }
                 .login-footer p {
                     font-size: 0.875rem;
-                    color: #6b7280;
+                    color: #64748b;
                     line-height: 1.5;
                 }
                 .login-footer span {
                     font-size: 0.8rem;
-                    color: #9ca3af;
+                    color: #94a3b8;
                 }
             `}</style>
         </div>

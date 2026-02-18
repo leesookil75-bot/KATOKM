@@ -12,12 +12,11 @@ export async function POST(request: Request) {
         // Clean phone number for comparison
         const cleanPhone = phone.replace(/[^0-9]/g, '');
 
-        // Find student with matching phone and password
-        // Since we are using phone number as ID, and password as the 4 digits or custom pw
+        // Find student with matching phone and password using robust regex comparison
         const { rows } = await sql`
             SELECT id, name, parent_phone, academy_id 
             FROM students 
-            WHERE REPLACE(REPLACE(REPLACE(parent_phone, '-', ''), ' ', ''), '.', '') = ${cleanPhone}
+            WHERE REGEXP_REPLACE(parent_phone, '[^0-9]', '', 'g') = ${cleanPhone}
             AND parent_password = ${password}
             LIMIT 1;
         `;

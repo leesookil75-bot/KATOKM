@@ -10,7 +10,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     const [isAuthPage, setIsAuthPage] = useState(false);
 
     useEffect(() => {
-        const authPages = ['/login', '/signup', '/super-admin'];
+        const authPages = ['/login', '/signup', '/super-admin', '/parent/login'];
         setIsAuthPage(authPages.includes(pathname));
     }, [pathname]);
 
