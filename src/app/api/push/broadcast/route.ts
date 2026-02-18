@@ -18,14 +18,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Targets missing' }, { status: 400 });
         }
 
-        await broadcastPushNotification(studentIds, {
-            title: title || '공지 알림',
+        const results = await broadcastPushNotification(studentIds, {
+            title: title || '학원 알림',
             body: message
         });
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, results });
     } catch (error) {
         console.error('[Push-Broadcast-API] Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: String(error) }, { status: 500 });
     }
 }

@@ -11,6 +11,10 @@ webpush.setVapidDetails(
 );
 
 export async function sendPushNotification(studentId: string, payload: { title: string, body: string }) {
+    console.log(`[Push] Sending to student: ${studentId}`, payload);
+    let dbSaved = false;
+    let pushResults: any[] = [];
+
     try {
         const { rows: subscriptions } = await sql`
             SELECT subscription FROM push_subscriptions WHERE student_id = ${studentId}
@@ -19,29 +23,25 @@ export async function sendPushNotification(studentId: string, payload: { title: 
         const notificationPayload = JSON.stringify({
             ...payload,
             vibrate: [100, 50, 100],
-            data: {
-                dateOfArrival: Date.now(),
-                primaryKey: 1
-            },
-            // Custom sound logic is handled in the service worker
+            data: { dateOfArrival: Date.now(), primaryKey: 1 },
         });
 
-        const results = await Promise.allSettled(
-            subscriptions.map(s =>
-                webpush.sendNotification(s.subscription, notificationPayload)
-            )
-        );
+        if (subscriptions.length > 0) {
+            const results = await Promise.allSettled(
+                subscriptions.map(s => webpush.sendNotification(s.subscription, notificationPayload))
+            );
+            pushResults = results;
 
-        // Cleanup failed subscriptions
-        results.forEach((result, index) => {
-            if (result.status === 'rejected') {
-                const sub = subscriptions[index].subscription;
-                // If 404 or 410, subscription is no longer valid
-                if (result.reason.statusCode === 404 || result.reason.statusCode === 410) {
-                    sql`DELETE FROM push_subscriptions WHERE subscription = ${JSON.stringify(sub)}`.catch(console.error);
+            // Cleanup failed subscriptions
+            results.forEach((result, index) => {
+                if (result.status === 'rejected') {
+                    const sub = subscriptions[index].subscription;
+                    if (result.reason.statusCode === 404 || result.reason.statusCode === 410) {
+                        sql`DELETE FROM push_subscriptions WHERE subscription = ${JSON.stringify(sub)}`.catch(e => console.error('[Push-Cleanup-Error]', e));
+                    }
                 }
-            }
-        });
+            });
+        }
 
         // Save to notifications table for history
         try {
@@ -49,26 +49,29 @@ export async function sendPushNotification(studentId: string, payload: { title: 
                 INSERT INTO notifications (student_id, title, body)
                 VALUES (${studentId}, ${payload.title}, ${payload.body})
             `;
-            // Periodic cleanup: delete older than 30 days
+            dbSaved = true;
             await cleanOldNotifications();
         } catch (dbErr) {
-            console.error('[Push-DB] Save failed:', dbErr);
+            console.error('[Push-DB-Save-Error]', dbErr);
         }
 
-        return results;
+        return { success: true, dbSaved, subCount: subscriptions.length, pushResults };
     } catch (error) {
-        console.error('[Push-Notification] Error sending:', error);
+        console.error('[Push-Fatal-Error]', error);
+        return { success: false, error: String(error) };
     }
 }
 
 export async function broadcastPushNotification(studentIds: string[], payload: { title: string, body: string }) {
+    console.log(`[Push] Broadcasting to ${studentIds.length} students`);
     try {
-        const results = await Promise.allSettled(
+        const results = await Promise.all(
             studentIds.map(id => sendPushNotification(id, payload))
         );
         return results;
     } catch (error) {
-        console.error('[Push-Broadcast] Error:', error);
+        console.error('[Push-Broadcast-Fatal-Error]', error);
+        throw error;
     }
 }
 

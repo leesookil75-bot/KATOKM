@@ -180,9 +180,25 @@ export default function MessagePage() {
             });
 
             if (res.ok) {
-                alert("푸시 알람 전송이 완료되었습니다.");
+                const data = await res.json();
+                const totalSubs = data.results?.reduce((acc: number, r: any) => acc + (r.subCount || 0), 0) || 0;
+                const dbSucceeded = data.results?.every((r: any) => r.dbSaved) ?? false;
+
+                let feedback = `푸시 전송 시도 완료 (${data.results?.length}명)`;
+                if (totalSubs === 0) {
+                    feedback += "\n⚠️ 현재 등록된 기기(구독)가 있는 학생이 없습니다. 학부모 앱에서 알림 승인이 필요합니다.";
+                } else {
+                    feedback += `\n✅ ${totalSubs}개의 기기로 발송되었습니다.`;
+                }
+
+                if (!dbSucceeded) {
+                    feedback += "\n❌ 알림 내역 저장에 실패했습니다.";
+                }
+
+                alert(feedback);
             } else {
-                alert("전송 중 오류가 발생했습니다.");
+                const errorData = await res.json();
+                alert(`전송 실패: ${errorData.error || '알 수 없는 오류'}`);
             }
         } catch (e) {
             console.error(e);
