@@ -38,7 +38,7 @@ export default function parentAttendancePage() {
         fetchData();
     }, [router]);
 
-    if (loading) return <div className="loading">이력을 불러오는 중...</div>;
+    // Non-blocking loading
 
     return (
         <div className="history-container">
@@ -64,7 +64,17 @@ export default function parentAttendancePage() {
                 </div>
 
                 <div className="history-list">
-                    {attendance.length > 0 ? (
+                    {loading ? (
+                        [1, 2, 3, 4, 5].map((i) => (
+                            <div key={i} className="history-item skeleton-item shimmer">
+                                <div className="skeleton-date"></div>
+                                <div className="skeleton-info">
+                                    <div className="skeleton-line"></div>
+                                    <div className="skeleton-line short"></div>
+                                </div>
+                            </div>
+                        ))
+                    ) : attendance.length > 0 ? (
                         attendance.map((item, idx) => (
                             <div key={idx} className="history-item">
                                 <div className="date-box">
@@ -74,7 +84,7 @@ export default function parentAttendancePage() {
                                 <div className="info-box">
                                     <div className="status-row">
                                         <span className={`status-badge ${item.status === '출석' ? 'present' :
-                                                item.status === '특이사항' ? 'special' : 'absent'
+                                            item.status === '특이사항' ? 'special' : 'absent'
                                             }`}>
                                             {item.status === '출석' ? '출석' :
                                                 item.status === '특이사항' ? '특이사항' : '결석'}
@@ -204,6 +214,19 @@ export default function parentAttendancePage() {
                 .memo-row { display: flex; align-items: flex-start; gap: 0.25rem; border-top: 1px dashed #f1f5f9; padding-top: 0.4rem; }
                 .memo-row p { font-size: 0.8rem; color: #64748b; margin: 0; }
                 
+                .shimmer {
+                    background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+                    background-size: 200% 100%;
+                    animation: shimmer 1.5s infinite;
+                }
+                @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+                
+                .skeleton-item { border: none; box-shadow: none; background: transparent !important; }
+                .skeleton-date { width: 56px; height: 56px; background: #f1f5f9; border-radius: 0.75rem; }
+                .skeleton-info { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+                .skeleton-line { height: 1rem; background: #f1f5f9; border-radius: 0.25rem; width: 100%; }
+                .skeleton-line.short { width: 40%; }
+
                 .empty-state { text-align: center; padding: 4rem 1rem; color: #94a3b8; }
                 .empty-state p { margin-top: 1rem; }
             `}</style>

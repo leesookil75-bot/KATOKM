@@ -179,7 +179,8 @@ export default function ParentDashboard() {
         router.push("/parent/login");
     };
 
-    if (loading) return <div className="loading">데이터를 불러오는 중...</div>;
+    // If loading and no session yet, show a shell with skeletons
+    // This removes the "데이터를 불러오는 중..." blocking message
 
     const currentMonth = new Date().getMonth() + 1;
     const currentMonthTuition = tuitionSummary?.records?.find((r: any) => r.month === currentMonth);
@@ -219,7 +220,12 @@ export default function ParentDashboard() {
                         </Link>
                     </div>
                     <div className="card-body">
-                        {todayAttendance ? (
+                        {loading ? (
+                            <div className="skeleton-badge-wrapper shimmer">
+                                <div className="skeleton-circle"></div>
+                                <div className="skeleton-text short"></div>
+                            </div>
+                        ) : todayAttendance ? (
                             <div className="status-badge-wrapper">
                                 <div className={`status-badge ${todayAttendance.status === '출석' ? 'present' :
                                     todayAttendance.status === '특이사항' ? 'special' : 'absent'
@@ -273,7 +279,12 @@ export default function ParentDashboard() {
                                 <span className="label">납부 약정일</span>
                                 <span className="value">매월 {tuitionSummary?.tuition_due_day || '-'}일</span>
                             </div>
-                            {isPaid && currentMonthTuition.payment_date && (
+                            {loading ? (
+                                <div className="skeleton-tuition shimmer">
+                                    <div className="skeleton-row"></div>
+                                    <div className="skeleton-row short"></div>
+                                </div>
+                            ) : currentMonthTuition?.payment_date && (
                                 <div className="payment-date">
                                     <span className="label">납부 일자</span>
                                     <span className="value">{new Date(currentMonthTuition.payment_date).toLocaleDateString()}</span>
@@ -581,6 +592,54 @@ export default function ParentDashboard() {
                 .popup-icon { font-size: 1.5rem; }
                 .popup-content strong { display: block; font-size: 0.9rem; color: #1e293b; margin-bottom: 0.2rem; }
                 .popup-content p { font-size: 0.85rem; color: #475569; margin: 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+                .shimmer {
+                    background: linear-gradient(
+                        90deg,
+                        #f0f0f0 25%,
+                        #f8f8f8 50%,
+                        #f0f0f0 75%
+                    );
+                    background-size: 200% 100%;
+                    animation: shimmer 1.5s infinite;
+                }
+                @keyframes shimmer {
+                    0% { background-position: 200% 0; }
+                    100% { background-position: -200% 0; }
+                }
+                .skeleton-badge-wrapper {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 1rem;
+                    padding: 1rem 0;
+                }
+                .skeleton-circle {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    background: #f1f5f9;
+                }
+                .skeleton-text {
+                    height: 1.25rem;
+                    background: #f1f5f9;
+                    border-radius: 0.25rem;
+                    width: 80%;
+                }
+                .skeleton-text.short { width: 40%; }
+                .skeleton-tuition {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                    padding: 0.5rem 0;
+                }
+                .skeleton-row {
+                    height: 1rem;
+                    background: #f1f5f9;
+                    border-radius: 0.25rem;
+                    width: 100%;
+                }
+                .skeleton-row.short { width: 60%; }
 
                 @media (min-width: 640px) {
                     .modal-overlay { align-items: center; justify-content: center; padding: 1rem; }

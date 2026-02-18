@@ -35,7 +35,7 @@ export default function parentTuitionPage() {
         fetchData();
     }, [router]);
 
-    if (loading) return <div className="loading">이력을 불러오는 중...</div>;
+    // Non-blocking loading
 
     const currentMonth = new Date().getMonth() + 1;
     const unpaidCount = tuitionData?.records?.filter((r: any) => r.status === 'unpaid').length || 0;
@@ -66,7 +66,17 @@ export default function parentTuitionPage() {
                 </div>
 
                 <div className="history-list">
-                    {tuitionData?.records && tuitionData.records.length > 0 ? (
+                    {loading ? (
+                        [1, 2, 3].map((i) => (
+                            <div key={i} className="history-item skeleton-item shimmer">
+                                <div className="skeleton-icon"></div>
+                                <div className="skeleton-info">
+                                    <div className="skeleton-line"></div>
+                                    <div className="skeleton-line short"></div>
+                                </div>
+                            </div>
+                        ))
+                    ) : tuitionData?.records && tuitionData.records.length > 0 ? (
                         tuitionData.records.map((item: any, idx: number) => (
                             <div key={idx} className="history-item">
                                 <div className={`icon-status ${item.status}`}>
@@ -200,6 +210,19 @@ export default function parentTuitionPage() {
                     text-align: center;
                 }
                 .help-box p { font-size: 0.85rem; color: #64748b; margin: 0; }
+
+                .shimmer {
+                    background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+                    background-size: 200% 100%;
+                    animation: shimmer 1.5s infinite;
+                }
+                @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+                
+                .skeleton-item { border: none; box-shadow: none; background: transparent !important; }
+                .skeleton-icon { width: 44px; height: 44px; background: #f1f5f9; border-radius: 50%; }
+                .skeleton-info { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+                .skeleton-line { height: 1.1rem; background: #f1f5f9; border-radius: 0.25rem; width: 80%; }
+                .skeleton-line.short { width: 50%; }
 
                 .empty-state { text-align: center; padding: 4rem 1rem; color: #94a3b8; }
                 .empty-state p { margin-top: 1rem; }
