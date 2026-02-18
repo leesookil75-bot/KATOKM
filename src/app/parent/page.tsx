@@ -10,7 +10,11 @@ import {
     Clock,
     ChevronRight,
     LogOut,
-    UserCircle
+    UserCircle,
+    AlertCircle,
+    Circle,
+    Triangle,
+    X
 } from "lucide-react";
 import Link from "next/link";
 
@@ -118,9 +122,16 @@ export default function ParentDashboard() {
                     <div className="card-body">
                         {todayAttendance ? (
                             <div className="status-badge-wrapper">
-                                <div className={`status-badge ${todayAttendance.status}`}>
-                                    {todayAttendance.status === 'present' ? <CheckCircle2 size={32} /> : <XCircle size={32} />}
-                                    <span>{todayAttendance.status === 'present' ? '출석 완료' : '결석'}</span>
+                                <div className={`status-badge ${todayAttendance.status === '출석' ? 'present' :
+                                        todayAttendance.status === '특이사항' ? 'special' : 'absent'
+                                    }`}>
+                                    {todayAttendance.status === '출석' ? <Circle size={48} strokeWidth={3} /> :
+                                        todayAttendance.status === '특이사항' ? <Triangle size={48} strokeWidth={3} /> :
+                                            <X size={48} strokeWidth={3} />}
+                                    <span>
+                                        {todayAttendance.status === '출석' ? '출석 완료' :
+                                            todayAttendance.status === '특이사항' ? '특이사항' : '결석'}
+                                    </span>
                                 </div>
                                 <div className="status-details">
                                     <div className="detail-item">
@@ -281,9 +292,10 @@ export default function ParentDashboard() {
                     align-items: center;
                     gap: 0.5rem;
                 }
-                .status-badge.present { color: #10b981; }
-                .status-badge.absent { color: #ef4444; }
-                .status-badge span { font-weight: 800; font-size: 1.25rem; }
+                .status-badge.present { color: #2563eb; }
+                .status-badge.special { color: #16a34a; }
+                .status-badge.absent { color: #dc2626; }
+                .status-badge span { font-weight: 800; font-size: 1.25rem; margin-top: 0.5rem; }
                 
                 .status-details {
                     width: 100%;

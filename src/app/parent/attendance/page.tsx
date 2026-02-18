@@ -8,7 +8,10 @@ import {
     XCircle,
     Clock,
     CalendarDays,
-    Info
+    Info,
+    Circle,
+    Triangle,
+    X
 } from "lucide-react";
 import Link from "next/link";
 
@@ -51,7 +54,7 @@ export default function parentAttendancePage() {
                 <div className="summary-banner">
                     <div className="banner-item">
                         <span className="label">이번 달 출석</span>
-                        <span className="value">{attendance.filter(a => a.status === 'present').length}회</span>
+                        <span className="value">{attendance.filter(a => a.status === '출석').length}회</span>
                     </div>
                     <div className="banner-divider"></div>
                     <div className="banner-item">
@@ -70,12 +73,15 @@ export default function parentAttendancePage() {
                                 </div>
                                 <div className="info-box">
                                     <div className="status-row">
-                                        <span className={`status-badge ${item.status}`}>
-                                            {item.status === 'present' ? '출석' : '결석'}
+                                        <span className={`status-badge ${item.status === '출석' ? 'present' :
+                                                item.status === '특이사항' ? 'special' : 'absent'
+                                            }`}>
+                                            {item.status === '출석' ? '출석' :
+                                                item.status === '특이사항' ? '특이사항' : '결석'}
                                         </span>
                                         <div className="time-info">
                                             <Clock size={14} />
-                                            <span>{new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            <span>{new Date(item.created_at || item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                     </div>
                                     {item.memo && (
@@ -190,8 +196,9 @@ export default function parentAttendancePage() {
                     padding: 0.2rem 0.6rem;
                     border-radius: 0.5rem;
                 }
-                .status-badge.present { background: #dcfce7; color: #166534; }
-                .status-badge.absent { background: #fee2e2; color: #991b1b; }
+                .status-badge.present { background: #eff6ff; color: #2563eb; }
+                .status-badge.special { background: #f0fdf4; color: #16a34a; }
+                .status-badge.absent { background: #fef2f2; color: #dc2626; }
                 
                 .time-info { display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; color: #94a3b8; }
                 .memo-row { display: flex; align-items: flex-start; gap: 0.25rem; border-top: 1px dashed #f1f5f9; padding-top: 0.4rem; }
