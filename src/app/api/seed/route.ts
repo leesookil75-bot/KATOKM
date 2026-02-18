@@ -116,7 +116,31 @@ export async function GET(request: Request) {
     `;
     results.tuitionTable = "OK";
 
-    // 9. Initial Link
+    // 9. Push Subscriptions Table
+    await client.sql`
+      CREATE TABLE IF NOT EXISTS push_subscriptions (
+        id SERIAL PRIMARY KEY,
+        student_id TEXT NOT NULL,
+        subscription JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(student_id, subscription)
+      );
+    `;
+    results.pushSubscriptionsTable = "OK";
+
+    // 10. Notifications History Table
+    await client.sql`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        student_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    results.notificationsTable = "OK";
+
+    // 11. Initial Link
     const superAdminRes = await client.sql`SELECT id FROM admins WHERE username = 'admin95' LIMIT 1;`;
     if (superAdminRes.rows.length > 0) {
       const superAdminId = superAdminRes.rows[0].id;
