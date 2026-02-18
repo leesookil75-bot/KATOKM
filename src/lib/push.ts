@@ -43,6 +43,18 @@ export async function sendPushNotification(studentId: string, payload: { title: 
             }
         });
 
+        // Save to notifications table for history
+        try {
+            await sql`
+                INSERT INTO notifications (student_id, title, body)
+                VALUES (${studentId}, ${payload.title}, ${payload.body})
+            `;
+            // Periodic cleanup: delete older than 30 days
+            await cleanOldNotifications();
+        } catch (dbErr) {
+            console.error('[Push-DB] Save failed:', dbErr);
+        }
+
         return results;
     } catch (error) {
         console.error('[Push-Notification] Error sending:', error);
@@ -57,6 +69,17 @@ export async function broadcastPushNotification(studentIds: string[], payload: {
         return results;
     } catch (error) {
         console.error('[Push-Broadcast] Error:', error);
+    }
+}
+
+async function cleanOldNotifications() {
+    try {
+        await sql`
+            DELETE FROM notifications 
+            WHERE created_at < NOW() - INTERVAL '30 days'
+        `;
+    } catch (e) {
+        console.error('[Push-Cleanup] Error:', e);
     }
 }
 

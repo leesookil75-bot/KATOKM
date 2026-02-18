@@ -14,7 +14,8 @@ import {
     AlertCircle,
     Circle,
     Triangle,
-    X
+    X,
+    Bell
 } from "lucide-react";
 import Link from "next/link";
 
@@ -52,6 +53,48 @@ export default function ParentDashboard() {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [activePopup, setActivePopup] = useState<any>(null);
+
+    useEffect(() => {
+        // Real-time listener for app-in-use popups
+        const channel = new BroadcastChannel('push-notification');
+        channel.onmessage = (event) => {
+            const data = event.data;
+            setActivePopup(data);
+
+            // Play sound - a simple polite beep
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.5);
+
+            // Auto-hide popup after 5 seconds
+            setTimeout(() => setActivePopup(null), 5000);
+
+            // Refresh history
+            fetchNotifications();
+        };
+
+        return () => channel.close();
+    }, []);
+
+    async function fetchNotifications() {
+        try {
+            const res = await fetch('/api/parent/notifications');
+            if (res.ok) setNotifications(await res.json());
+        } catch (e) { console.error(e); }
+    }
+
     useEffect(() => {
         async function fetchData() {
             try {
@@ -65,7 +108,7 @@ export default function ParentDashboard() {
 
                 // Get local date in YYYY-MM-DD format
                 const now = new Date();
-                const today = now.toLocaleDateString('sv'); // 'sv' locale matches YYYY-MM-DD
+                const today = now.toLocaleDateString('sv');
                 const currentYear = now.getFullYear();
 
                 const [attendanceRes, tuitionRes] = await Promise.all([
@@ -75,11 +118,8 @@ export default function ParentDashboard() {
 
                 if (attendanceRes.ok) {
                     const attendanceData = await attendanceRes.json();
-                    // Since it returns history for parent, find today's record
-                    // Robust matching using locale strings
                     const todayRecord = attendanceData.find((r: any) => {
                         const recDate = new Date(r.date);
-                        // Force UTC hours to be 0 or check via locale string
                         return recDate.toLocaleDateString('sv') === today;
                     });
                     setTodayAttendance(todayRecord);
@@ -90,30 +130,29 @@ export default function ParentDashboard() {
                     setTuitionSummary(tuitionData);
                 }
 
+                await fetchNotifications();
+
                 // Register Push Subscription
-                try {
-                    if ('serviceWorker' in navigator && 'PushManager' in window) {
-                        const registration = await navigator.serviceWorker.ready;
+                if ('serviceWorker' in navigator && 'PushManager' in window) {
+                    const registration = await navigator.serviceWorker.ready;
+                    let subscription = await registration.pushManager.getSubscription();
 
-                        // Check if already subscribed
-                        let subscription = await registration.pushManager.getSubscription();
-
-                        if (!subscription) {
+                    if (!subscription) {
+                        try {
                             subscription = await registration.pushManager.subscribe({
                                 userVisibleOnly: true,
                                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                             });
 
-                            // Save to server
                             await fetch('/api/push/subscribe', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ subscription })
                             });
+                        } catch (pushErr) {
+                            console.error('[Push-Registration] Failed:', pushErr);
                         }
                     }
-                } catch (pushErr) {
-                    console.error('[Push-Registration] Failed:', pushErr);
                 }
             } catch (err) {
                 console.error('[ParentApp Fetch Error]:', err);
@@ -145,9 +184,15 @@ export default function ParentDashboard() {
                         <p>오늘도 좋은 하루 되세요!</p>
                     </div>
                 </div>
-                <button onClick={handleLogout} className="logout-btn">
-                    <LogOut size={20} />
-                </button>
+                <div className="header-actions">
+                    <button onClick={() => { setIsHistoryOpen(true); fetchNotifications(); }} className="bell-btn">
+                        <Bell size={24} />
+                        {notifications.length > 0 && <span className="bell-badge" />}
+                    </button>
+                    <button onClick={handleLogout} className="logout-btn">
+                        <LogOut size={20} />
+                    </button>
+                </div>
             </header>
 
             <main className="dashboard-content">
@@ -227,6 +272,47 @@ export default function ParentDashboard() {
                     </div>
                 </section>
             </main>
+
+            {/* Notification History Modal */}
+            {isHistoryOpen && (
+                <div className="modal-overlay" onClick={() => setIsHistoryOpen(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>알림 내역 (최근 10개)</h3>
+                            <button onClick={() => setIsHistoryOpen(false)}><X size={20} /></button>
+                        </div>
+                        <div className="modal-body history-list">
+                            {notifications.length === 0 ? (
+                                <p className="no-history">저장된 알림이 없습니다.</p>
+                            ) : (
+                                notifications.map(n => (
+                                    <div key={n.id} className="history-item">
+                                        <div className="history-meta">
+                                            <span className="history-title">{n.title}</span>
+                                            <span className="history-date">
+                                                {new Date(n.created_at).toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                        <p className="history-body">{n.body}</p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                        <p className="history-info">* 30일이 지난 내역은 자동 삭제됩니다.</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Real-time Popup Toast */}
+            {activePopup && (
+                <div className="popup-toast" onClick={() => setActivePopup(null)}>
+                    <div className="popup-icon">🔔</div>
+                    <div className="popup-content">
+                        <strong>{activePopup.title}</strong>
+                        <p>{activePopup.body}</p>
+                    </div>
+                </div>
+            )}
 
             <style jsx>{`
                 .dashboard-container {
@@ -384,6 +470,112 @@ export default function ParentDashboard() {
                 .status-text.paid { background: #dcfce7; color: #166534; }
                 .status-text.unpaid { background: #fee2e2; color: #991b1b; }
                 .value { font-weight: 600; color: #1e293b; font-size: 0.95rem; }
+                .header-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+                .bell-btn {
+                    position: relative;
+                    padding: 0.5rem;
+                    color: #64748b;
+                    border-radius: 0.5rem;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                }
+                .bell-badge {
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    width: 8px;
+                    height: 8px;
+                    background: #ef4444;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                }
+                .modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0,0,0,0.4);
+                    backdrop-filter: blur(4px);
+                    z-index: 100;
+                    display: flex;
+                    align-items: flex-end;
+                }
+                .modal-content {
+                    background: white;
+                    width: 100%;
+                    border-radius: 2rem 2rem 0 0;
+                    padding: 1.5rem;
+                    max-height: 80vh;
+                    display: flex;
+                    flex-direction: column;
+                    animation: slideUp 0.3s ease-out;
+                }
+                @keyframes slideUp {
+                    from { transform: translateY(100%); }
+                    to { transform: translateY(0); }
+                }
+                .modal-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1.5rem;
+                }
+                .modal-header h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0; }
+                .history-list {
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+                .history-item {
+                    padding: 1rem;
+                    background: #f8fafc;
+                    border-radius: 1rem;
+                }
+                .history-meta {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 0.4rem;
+                }
+                .history-title { font-weight: 700; font-size: 0.9rem; color: #4f46e5; }
+                .history-date { font-size: 0.75rem; color: #94a3b8; }
+                .history-body { font-size: 0.85rem; color: #334155; margin: 0; line-height: 1.4; }
+                .no-history { text-align: center; padding: 3rem 0; color: #94a3b8; font-size: 0.9rem; }
+                .history-info { font-size: 0.7rem; color: #94a3b8; text-align: center; margin-top: 1rem; }
+
+                .popup-toast {
+                    position: fixed;
+                    top: 1rem;
+                    left: 1rem;
+                    right: 1rem;
+                    background: white;
+                    padding: 1rem;
+                    border-radius: 1rem;
+                    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+                    z-index: 200;
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    border-left: 4px solid #4f46e5;
+                    animation: slideInDown 0.3s ease-out;
+                    cursor: pointer;
+                }
+                @keyframes slideInDown {
+                    from { transform: translateY(-100%); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                .popup-icon { font-size: 1.5rem; }
+                .popup-content strong { display: block; font-size: 0.9rem; color: #1e293b; margin-bottom: 0.2rem; }
+                .popup-content p { font-size: 0.85rem; color: #475569; margin: 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+                @media (min-width: 640px) {
+                    .modal-overlay { align-items: center; justify-content: center; padding: 1rem; }
+                    .modal-content { border-radius: 1.5rem; max-width: 480px; }
+                    .popup-toast { left: auto; right: 1rem; width: 360px; }
+                }
             `}</style>
         </div>
     );

@@ -14,6 +14,15 @@ self.addEventListener('push', (event) => {
     if (!event.data) return;
 
     const data = event.data.json();
+
+    // Broadcast for real-time in-app popup
+    try {
+        const channel = new BroadcastChannel('push-notification');
+        channel.postMessage(data);
+    } catch (e) {
+        console.error('Broadcast failed', e);
+    }
+
     const options = {
         body: data.body,
         icon: '/icon.png',
@@ -23,9 +32,6 @@ self.addEventListener('push', (event) => {
         actions: [
             { action: 'open', title: '앱 열기' }
         ],
-        // Sound is browser dependent, usually browser uses default sound if not specified
-        // Some browsers allow 'sound' property but it's not widely supported
-        // We ensure vibration is there for tactile feedback
     };
 
     event.waitUntil(
