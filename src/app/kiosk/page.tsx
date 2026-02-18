@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MoveLeft, Eraser, Check } from "lucide-react";
 import Link from 'next/link';
 
@@ -11,6 +11,23 @@ export default function KioskPage() {
     const [step, setStep] = useState<KioskStep>("input");
     const [studentName, setStudentName] = useState("");
     const [message, setMessage] = useState("");
+
+    const [academyName, setAcademyName] = useState("");
+
+    useEffect(() => {
+        async function fetchSession() {
+            try {
+                const res = await fetch('/api/auth/session');
+                if (res.ok) {
+                    const session = await res.json();
+                    setAcademyName(session.user.academy_name || "학원");
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        fetchSession();
+    }, []);
 
     const handleNumberClick = (num: number) => {
         if (passcode.length < 4) {
@@ -61,8 +78,10 @@ export default function KioskPage() {
     return (
         <div className="main flex-col" style={{ height: "100vh", backgroundColor: "black", color: "white" }}>
             {/* Header */}
-            <header className="flex-center justify-start p-4">
+            <header className="flex-center justify-between p-4">
                 <Link href="/" className="text-gray-400"><MoveLeft size={32} /></Link>
+                <h2 className="text-xl font-bold">{academyName}</h2>
+                <div style={{ width: "32px" }}></div>
             </header>
 
             {/* Content */}
@@ -79,14 +98,12 @@ export default function KioskPage() {
                 ) : (
                     <>
 
-                        {/* Dots */}
-                        <div className="flex-center gap-4 mb-12">
+                        {/* Asterisk Display */}
+                        <div className="flex-center gap-6 mb-12 h-12">
                             {[0, 1, 2, 3].map(i => (
-                                <div key={i} style={{
-                                    width: "20px", height: "20px", borderRadius: "50%",
-                                    backgroundColor: i < passcode.length ? "#6366f1" : "#374151",
-                                    transition: "all 0.2s"
-                                }} />
+                                <span key={i} className="text-5xl font-mono text-white opacity-80" style={{ width: '1ch', textAlign: 'center' }}>
+                                    {i < passcode.length ? "*" : "_"}
+                                </span>
                             ))}
                         </div>
 
