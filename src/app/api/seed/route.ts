@@ -36,9 +36,9 @@ export async function GET(request: Request) {
 
     // 3. Super Admin
     await client.sql`
-      INSERT INTO admins (username, password, role, admin_name, status)
-      VALUES ('admin95', '12345', 'SUPER', '슈퍼관리자', 'APPROVED')
-      ON CONFLICT (username) DO NOTHING;
+      INSERT INTO admins (username, password, role, academy_name, admin_name, status)
+      VALUES ('admin95', '12345', 'SUPER', 'KATOKM 출결 매니저', '슈퍼관리자', 'APPROVED')
+      ON CONFLICT (username) DO UPDATE SET academy_name = 'KATOKM 출결 매니저';
     `;
     results.superAdmin = "OK";
 
@@ -154,7 +154,12 @@ export async function GET(request: Request) {
         await client.sql`UPDATE students SET academy_id = ${superAdminId} WHERE academy_id IS NULL;`;
         await client.sql`UPDATE classes SET academy_id = ${superAdminId} WHERE academy_id IS NULL;`;
         await client.sql`UPDATE message_templates SET academy_id = ${superAdminId} WHERE academy_id IS NULL;`;
-        results.links = "Updated missing links to SuperAdmin";
+
+        // Ensure ALL admins (especially test accounts) have an academy name
+        await client.sql`UPDATE admins SET academy_name = 'KATOKM 출결 매니저' WHERE (academy_name IS NULL OR academy_name = '') AND role = 'SUPER';`;
+        await client.sql`UPDATE admins SET academy_name = '우리 학원' WHERE (academy_name IS NULL OR academy_name = '') AND role != 'SUPER';`;
+
+        results.links = "Updated missing links and academy names";
       }
     } catch (linkErr: any) { results.links = "Error: " + linkErr.message; }
 

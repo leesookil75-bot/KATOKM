@@ -188,7 +188,7 @@ export default function ParentDashboard() {
     const isPaid = currentMonthTuition?.status === 'paid';
 
     return (
-        <div className="dashboard-container">
+        <div className={`dashboard-container ${session?.user.academy_name ? 'has-banner' : ''}`}>
             {session?.user.academy_name && (
                 <div className="academy-banner">
                     {session.user.academy_name}
@@ -358,6 +358,12 @@ export default function ParentDashboard() {
                     font-weight: 700;
                     letter-spacing: 0.05em;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    position: sticky;
+                    top: 0;
+                    z-index: 20;
+                }
+                .has-banner .dashboard-header {
+                    top: 2.15rem;
                 }
                 .loading {
                     height: 100vh;
