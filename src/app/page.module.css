@@ -50,3 +50,9 @@
   color: var(--text-sub);
   font-size: 0.9rem;
 }
+
+@media (min-width: 641px) {
+  .pcHide {
+    display: none !important;
+  }
+}

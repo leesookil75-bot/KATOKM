@@ -8,12 +8,12 @@ export default function AdminSidebar() {
     const pathname = usePathname();
 
     const menuItems = [
-        { name: "대시보드", path: "/", icon: <LayoutDashboard size={20} /> },
-        { name: "학생 관리", path: "/students", icon: <Users size={20} /> },
-        { name: "출석부", path: "/attendance", icon: <CalendarCheck size={20} /> },
-        { name: "수강료 관리", path: "/tuition", icon: <CreditCard size={20} /> },
-        { name: "알림 전송", path: "/message", icon: <MessageCircle size={20} /> },
-        { name: "키오스크 모드", path: "/kiosk", icon: <Monitor size={20} /> },
+        { name: "홈", path: "/", icon: <LayoutDashboard size={20} color="var(--primary)" /> },
+        { name: "학생 관리", path: "/students", icon: <Users size={20} color="var(--primary)" /> },
+        { name: "출석부", path: "/attendance", icon: <CalendarCheck size={20} color="var(--primary)" /> },
+        { name: "수강료 관리", path: "/tuition", icon: <CreditCard size={20} color="var(--primary)" /> },
+        { name: "알림 전송", path: "/message", icon: <MessageCircle size={20} color="var(--primary)" /> },
+        { name: "키오스크 모드", path: "/kiosk", icon: <Monitor size={20} color="var(--primary)" /> },
     ];
 
     const handleLogout = async () => {
@@ -80,6 +80,7 @@ export default function AdminSidebar() {
                     align-items: center;
                     gap: 0.75rem;
                     padding: 0.75rem 1rem;
+                    line-height: normal;
                     border-radius: 0.75rem;
                     color: #64748b;
                     text-decoration: none;

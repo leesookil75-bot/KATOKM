@@ -44,17 +44,10 @@ export default async function Home() {
           <p>미납 내역 및 청구서 발송</p>
         </Link>
 
-        <Link href="/kiosk" className={styles.card} style={{ borderColor: "var(--primary)", backgroundColor: "#f5f3ff" }}>
+        <Link href="/kiosk" className={`${styles.card} ${styles.pcHide}`} style={{ borderColor: "var(--primary)", backgroundColor: "#f5f3ff" }}>
           <Smartphone size={32} color="var(--primary)" style={{ marginBottom: "1rem" }} />
           <h2 style={{ color: "var(--primary)" }}>키오스크 모드</h2>
           <p>학생 전용 셀프 출석 단말기</p>
-        </Link>
-      </div>
-
-      <div style={{ marginTop: "2rem", textAlign: "center" }}>
-        <Link href="/attendance" className="btn btn-primary">
-          <Plus size={18} style={{ marginRight: "8px" }} />
-          <span>오늘의 출석 체크하러 가기</span>
         </Link>
       </div>
     </main>
