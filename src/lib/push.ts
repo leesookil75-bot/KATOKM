@@ -16,12 +16,26 @@ export async function sendPushNotification(studentId: string, payload: { title: 
     let pushResults: any[] = [];
 
     try {
-        const { rows: subscriptions } = await sql`
-            SELECT subscription FROM push_subscriptions WHERE student_id = ${studentId}
+        // Fetch subscriptions and academy name
+        const { rows: studentData } = await sql`
+            SELECT ps.subscription, a.academy_name
+            FROM students s
+            JOIN admins a ON s.academy_id = a.id
+            LEFT JOIN push_subscriptions ps ON s.id = ps.student_id
+            WHERE s.id = ${studentId}
         `;
 
+        if (studentData.length === 0) return { success: false, error: 'Student not found' };
+
+        const academyName = studentData[0].academy_name || '우리 학원';
+        const subscriptions = studentData.filter(r => r.subscription).map(r => r.subscription);
+
+        // Append academy name to the body
+        const finalBody = `${payload.body}\n\n[${academyName}]`;
+
         const notificationPayload = JSON.stringify({
-            ...payload,
+            title: payload.title,
+            body: finalBody,
             vibrate: [100, 50, 100],
             data: { dateOfArrival: Date.now(), primaryKey: 1 },
         });
@@ -47,7 +61,7 @@ export async function sendPushNotification(studentId: string, payload: { title: 
         try {
             await sql`
                 INSERT INTO notifications (student_id, title, body)
-                VALUES (${studentId}, ${payload.title}, ${payload.body})
+                VALUES (${studentId}, ${payload.title}, ${finalBody})
             `;
             dbSaved = true;
             await cleanOldNotifications();
