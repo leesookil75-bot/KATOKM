@@ -52,6 +52,7 @@ export async function GET(request: Request) {
         UNIQUE(academy_id, name)
       );
     `;
+    await client.sql`ALTER TABLE classes ADD COLUMN IF NOT EXISTS academy_id UUID REFERENCES admins(id) ON DELETE CASCADE;`;
     results.classesTable = "OK";
 
     // 5. Students Table
@@ -67,6 +68,8 @@ export async function GET(request: Request) {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
+    await client.sql`ALTER TABLE students ADD COLUMN IF NOT EXISTS academy_id UUID REFERENCES admins(id) ON DELETE CASCADE;`;
+    await client.sql`ALTER TABLE students ADD COLUMN IF NOT EXISTS class_name VARCHAR(100);`;
     results.studentsTable = "OK";
 
     // 6. Attendance Table
@@ -81,6 +84,7 @@ export async function GET(request: Request) {
         UNIQUE(student_id, date)
       );
     `;
+    await client.sql`ALTER TABLE attendance ADD COLUMN IF NOT EXISTS memo TEXT;`;
     results.attendanceTable = "OK";
 
     // 7. Message Templates
@@ -92,6 +96,7 @@ export async function GET(request: Request) {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
+    await client.sql`ALTER TABLE message_templates ADD COLUMN IF NOT EXISTS academy_id UUID REFERENCES admins(id) ON DELETE CASCADE;`;
     results.messageTemplatesTable = "OK";
 
     // 8. Tuition Table
