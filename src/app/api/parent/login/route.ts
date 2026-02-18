@@ -12,12 +12,13 @@ export async function POST(request: Request) {
         // Clean phone number for comparison
         const cleanPhone = phone.replace(/[^0-9]/g, '');
 
-        // Find student with matching phone and password using robust regex comparison
+        // Find student and academy name
         const { rows } = await sql`
-            SELECT id, name, parent_phone, academy_id 
-            FROM students 
-            WHERE REGEXP_REPLACE(parent_phone, '[^0-9]', '', 'g') = ${cleanPhone}
-            AND parent_password = ${password}
+            SELECT s.id, s.name, s.parent_phone, s.academy_id, a.academy_name
+            FROM students s
+            JOIN admins a ON s.academy_id = a.id
+            WHERE REGEXP_REPLACE(s.parent_phone, '[^0-9]', '', 'g') = ${cleanPhone}
+            AND s.parent_password = ${password}
             LIMIT 1;
         `;
 
@@ -29,11 +30,12 @@ export async function POST(request: Request) {
 
         // Create parent session
         await login({
-            id: student.academy_id, // We use academy_id to know which academy context they belong to
+            id: student.academy_id,
             username: student.parent_phone,
             role: 'PARENT',
             student_id: student.id,
-            student_name: student.name
+            student_name: student.name,
+            academy_name: student.academy_name
         });
 
         return NextResponse.json({ success: true });

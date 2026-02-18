@@ -43,6 +43,7 @@ interface Session {
         role: string;
         student_id: string;
         student_name: string;
+        academy_name?: string;
     };
 }
 
@@ -188,6 +189,11 @@ export default function ParentDashboard() {
 
     return (
         <div className="dashboard-container">
+            {session?.user.academy_name && (
+                <div className="academy-banner">
+                    {session.user.academy_name}
+                </div>
+            )}
             <header className="dashboard-header">
                 <div className="user-info">
                     <UserCircle size={40} color="#4f46e5" />
@@ -342,6 +348,16 @@ export default function ParentDashboard() {
                     background: #f8fafc;
                     padding-bottom: 2rem;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .academy-banner {
+                    background: linear-gradient(90deg, #4f46e5, #6366f1);
+                    color: white;
+                    text-align: center;
+                    padding: 0.5rem;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    letter-spacing: 0.05em;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 }
                 .loading {
                     height: 100vh;

@@ -17,6 +17,7 @@ import Link from "next/link";
 
 export default function parentAttendancePage() {
     const [attendance, setAttendance] = useState<any[]>([]);
+    const [session, setSession] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -28,6 +29,12 @@ export default function parentAttendancePage() {
                     setAttendance(await res.json());
                 } else if (res.status === 401) {
                     router.push("/parent/login");
+                }
+
+                // Fetch session for academy name
+                const sessionRes = await fetch("/api/auth/session");
+                if (sessionRes.ok) {
+                    setSession(await sessionRes.json());
                 }
             } catch (err) {
                 console.error(err);
@@ -42,6 +49,11 @@ export default function parentAttendancePage() {
 
     return (
         <div className="history-container">
+            {session?.user?.academy_name && (
+                <div className="academy-banner">
+                    {session.user.academy_name}
+                </div>
+            )}
             <header className="history-header">
                 <Link href="/parent" className="back-btn">
                     <ChevronLeft size={24} />
@@ -117,6 +129,16 @@ export default function parentAttendancePage() {
                     min-height: 100vh;
                     background: #f8fafc;
                     padding-bottom: 2rem;
+                }
+                .academy-banner {
+                    background: linear-gradient(90deg, #4f46e5, #6366f1);
+                    color: white;
+                    text-align: center;
+                    padding: 0.5rem;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    letter-spacing: 0.05em;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 }
                 .loading {
                     height: 100vh;
