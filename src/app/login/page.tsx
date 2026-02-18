@@ -142,7 +142,7 @@ export default function LoginPage() {
         }
         .auth-form {
           display: flex;
-          flex-col;
+          flex-direction: column;
           gap: 1.25rem;
         }
         .form-group {
@@ -205,9 +205,13 @@ export default function LoginPage() {
           text-decoration: underline;
         }
         .parent-link-box {
-          margin-top: 1.5rem;
+          margin-top: 2rem;
           padding-top: 1.5rem;
           border-top: 1px dashed #e2e8f0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
         }
         .parent-login-link {
           color: #10b981;
@@ -215,15 +219,23 @@ export default function LoginPage() {
           text-decoration: none;
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           background: #f0fdf4;
-          padding: 0.5rem 1rem;
-          border-radius: 2rem;
-          font-size: 0.9rem;
+          padding: 0.75rem 1.5rem;
+          border-radius: 99px;
+          font-size: 0.95rem;
           transition: all 0.2s;
+          border: 1.5px solid #10b981;
+          cursor: pointer;
         }
         .parent-login-link:hover {
-          background: #dcfce7;
-          transform: translateY(-1px);
+          background: #10b981;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+        }
+        .parent-login-link:active {
+          transform: translateY(0);
         }
 
         @media (max-width: 640px) {
