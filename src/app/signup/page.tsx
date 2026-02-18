@@ -40,7 +40,16 @@ export default function SignupPage() {
             if (res.ok) {
                 setIsSuccess(true);
             } else {
-                setError(data.details ? `${data.error}\n(${data.details})` : (data.error || "회원가입에 실패했습니다."));
+                const isMissingTable = data.details?.includes("relation") || data.details?.includes("does not exist");
+                setError(
+                    isMissingTable
+                        ? "데이터베이스 초기화가 필요합니다. 먼저 아래 링크를 클릭하여 초기화한 후 다시 시도해주세요."
+                        : (data.details ? `${data.error}\n(${data.details})` : (data.error || "회원가입에 실패했습니다."))
+                );
+                if (isMissingTable) {
+                    // Provide a way for user to click and seed
+                    setError(prev => prev + " [데이터베이스 초기화하기](/api/seed)");
+                }
             }
         } catch (err) {
             setError("서버와의 통신에 오류가 발생했습니다.");
@@ -150,7 +159,21 @@ export default function SignupPage() {
                         </div>
                     </div>
 
-                    {error && <div className="error-message">{error}</div>}
+                    {error && (
+                        <div className="error-message">
+                            {error}
+                            {(error.includes("데이터베이스 초기화") || error.includes("relation")) && (
+                                <div style={{ marginTop: "0.5rem" }}>
+                                    <Link href="/api/seed" target="_blank" className="btn btn-secondary" style={{ fontSize: "0.8rem", padding: "0.4rem 0.8rem" }}>
+                                        데이터베이스 초기화 실행하기
+                                    </Link>
+                                    <p className="text-xs" style={{ marginTop: "0.4rem", opacity: 0.8 }}>
+                                        *클릭 후 'Database schema updated' 메시지가 나오면 다시 가입을 시도해주세요.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     <button type="submit" className="btn btn-primary auth-btn" disabled={isLoading}>
                         {isLoading ? "가입 신청 중..." : "회원가입 신청"}
