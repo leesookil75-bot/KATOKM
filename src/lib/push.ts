@@ -51,8 +51,8 @@ export async function sendPushNotification(studentId: string, payload: { title: 
             `;
             dbSaved = true;
             await cleanOldNotifications();
-        } catch (dbErr) {
-            console.error('[Push-DB-Save-Error]', dbErr);
+        } catch (dbErr: any) {
+            console.error('[Push-DB-Save-Error]', dbErr.message || dbErr);
         }
 
         return { success: true, dbSaved, subCount: subscriptions.length, pushResults };

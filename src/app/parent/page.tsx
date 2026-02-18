@@ -132,8 +132,8 @@ export default function ParentDashboard() {
 
                 await fetchNotifications();
 
-                // Register Push Subscription
                 if ('serviceWorker' in navigator && 'PushManager' in window) {
+                    console.log('[Push] Attempting registration...');
                     const registration = await navigator.serviceWorker.ready;
                     let subscription = await registration.pushManager.getSubscription();
 
@@ -144,14 +144,19 @@ export default function ParentDashboard() {
                                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                             });
 
-                            await fetch('/api/push/subscribe', {
+                            const subRes = await fetch('/api/push/subscribe', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ subscription })
                             });
+
+                            if (subRes.ok) console.log('[Push] Registration Success');
+                            else console.error('[Push] Registration Server Error:', await subRes.text());
                         } catch (pushErr) {
-                            console.error('[Push-Registration] Failed:', pushErr);
+                            console.error('[Push-Registration] Failed or Denied:', pushErr);
                         }
+                    } else {
+                        console.log('[Push] Already subscribed');
                     }
                 }
             } catch (err) {
