@@ -178,8 +178,8 @@ export default function TuitionPage() {
                     <table className="table text-sm w-full" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
                         <thead className="sticky top-0 z-20 bg-gray-50 shadow-sm">
                             <tr>
-                                <th className="sticky left-0 z-30 bg-gray-50 border-r" style={{ minWidth: '80px' }}>이름</th>
-                                <th className="sticky z-30 bg-gray-50 border-r" style={{ left: '80px', minWidth: '100px' }}>반</th>
+                                <th className="sticky-col-class" style={{ backgroundColor: "#f9fafb" }}>반</th>
+                                <th className="sticky-col-name" style={{ backgroundColor: "#f9fafb" }}>이름</th>
                                 {months.map(m => (
                                     <th key={m} className="text-center min-w-[60px]">{m}월</th>
                                 ))}
@@ -188,8 +188,8 @@ export default function TuitionPage() {
                         <tbody>
                             {filteredStudents.map(student => (
                                 <tr key={student.id} className="hover:bg-gray-50">
-                                    <td className="sticky left-0 z-10 bg-white border-r font-bold">{student.name}</td>
-                                    <td className="sticky z-10 bg-white border-r text-xs text-sub" style={{ left: '80px' }}>{student.className}</td>
+                                    <td className="sticky-col-class text-xs text-sub" style={{ backgroundColor: "white" }}>{student.className}</td>
+                                    <td className="sticky-col-name" style={{ backgroundColor: "white", fontWeight: 600 }}>{student.name}</td>
                                     {months.map(m => {
                                         const key = `${student.id}-${m}`;
                                         const record = tuitionRecords[key];
