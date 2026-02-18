@@ -181,26 +181,30 @@ export default function MessagePage() {
 
             if (res.ok) {
                 const data = await res.json();
-                const totalSubs = data.results?.reduce((acc: number, r: any) => acc + (r.subCount || 0), 0) || 0;
-                const dbSucceeded = data.results?.every((r: any) => r.dbSaved) ?? false;
+                const results = data.results || [];
+                const totalSubs = results.reduce((acc: number, r: any) => acc + (r.subCount || 0), 0) || 0;
+                const dbSucceeded = results.every((r: any) => r.dbSaved === true);
+                const errors = results.filter((r: any) => !r.success || r.error).map((r: any) => r.error);
 
-                let feedback = `푸시 전송 시도 완료 (${data.results?.length}명)`;
-                if (data.results?.length === 1) {
-                    feedback += `\n(학생 ID: ${targets[0]})`;
-                }
+                let feedback = `푸시 전송 시도 완료 (${results.length}명)`;
 
-                if (totalSubs === 0) {
-                    feedback += "\n⚠️ 현재 등록된 기기(구독)가 있는 학생이 없습니다. 학부모 앱에서 알림 승인이 필요합니다.";
-                } else {
+                if (totalSubs === 0 && errors.length === 0) {
+                    feedback += "\n⚠️ 등록된 기기가 있는 학생이 없습니다. 학부모 앱에서 알림 승인이 필요합니다.";
+                } else if (totalSubs > 0) {
                     feedback += `\n✅ ${totalSubs}개의 기기로 발송되었습니다.`;
                 }
 
-                if (!dbSucceeded) {
+                if (errors.length > 0) {
+                    feedback += `\n❌ 오류 발생: ${errors[0]}${errors.length > 1 ? ` 외 ${errors.length - 1}건` : ''}`;
+                }
+
+                if (!dbSucceeded && errors.length === 0) {
                     feedback += "\n❌ 알림 내역 저장에 실패했습니다.";
                 }
 
                 alert(feedback);
-            } else {
+            }
+            else {
                 const errorData = await res.json();
                 alert(`전송 실패: ${errorData.error || '알 수 없는 오류'}`);
             }

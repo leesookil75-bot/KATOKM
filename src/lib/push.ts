@@ -16,24 +16,30 @@ export async function sendPushNotification(studentId: string, payload: { title: 
     let pushResults: any[] = [];
 
     try {
-        // Fetch subscriptions and academy name (using LEFT JOIN to be robust)
-        const { rows: studentData } = await sql`
-            SELECT ps.subscription, a.academy_name
+        // 1. Fetch Student & Academy Info (Essential - use cast for robustness)
+        const { rows: studentInfo } = await sql`
+            SELECT s.id, s.name, a.academy_name
             FROM students s
             LEFT JOIN admins a ON s.academy_id = a.id
-            LEFT JOIN push_subscriptions ps ON s.id = ps.student_id
-            WHERE s.id = ${studentId}
+            WHERE s.id = ${studentId}::uuid
         `;
 
-        if (studentData.length === 0) {
-            console.error(`[Push] Student not found in DB: ${studentId}`);
-            return { success: false, error: 'Student not found' };
+        if (studentInfo.length === 0) {
+            console.error(`[Push] Student not found: ${studentId}`);
+            return { success: false, error: `학생 정보를 찾을 수 없음 (ID: ${studentId})`, dbSaved: false };
         }
 
-        const academyName = studentData[0].academy_name || '우리 학원';
-        const subscriptions = studentData.filter(r => r.subscription).map(r => r.subscription);
+        const academyName = studentInfo[0].academy_name || '우리 학원';
+        const studentName = studentInfo[0].name;
 
-        // Append academy name to the body if possible, default to empty string if body missing
+        // 2. Fetch Subscriptions (Explicitly cast studentId to text)
+        const { rows: subs } = await sql`
+            SELECT subscription FROM push_subscriptions 
+            WHERE student_id = ${studentId}::text
+        `;
+        const subscriptions = subs.filter(r => r.subscription).map(r => r.subscription);
+
+        // 3. Prepare Payload
         const originalBody = payload.body || '';
         const finalBody = originalBody ? `${originalBody}\n\n[${academyName}]` : `[${academyName}]`;
 
@@ -44,16 +50,17 @@ export async function sendPushNotification(studentId: string, payload: { title: 
             data: { dateOfArrival: Date.now(), primaryKey: 1 },
         });
 
+        // 4. Send Push
         if (subscriptions.length > 0) {
             const results = await Promise.allSettled(
-                subscriptions.map(s => webpush.sendNotification(s.subscription, notificationPayload))
+                subscriptions.map(s => webpush.sendNotification(s, notificationPayload))
             );
             pushResults = results;
 
             // Cleanup failed subscriptions
             results.forEach((result, index) => {
                 if (result.status === 'rejected') {
-                    const sub = subscriptions[index].subscription;
+                    const sub = subscriptions[index]; // subscriptions already contains the subscription object
                     if (result.reason.statusCode === 404 || result.reason.statusCode === 410) {
                         sql`DELETE FROM push_subscriptions WHERE subscription = ${JSON.stringify(sub)}`.catch(e => console.error('[Push-Cleanup-Error]', e));
                     }
@@ -61,7 +68,8 @@ export async function sendPushNotification(studentId: string, payload: { title: 
             });
         }
 
-        // Save to notifications table for history
+        // 5. Save to notifications table for history
+        let dbError = null;
         try {
             await sql`
                 INSERT INTO notifications (student_id, title, body)
@@ -70,10 +78,18 @@ export async function sendPushNotification(studentId: string, payload: { title: 
             dbSaved = true;
             await cleanOldNotifications();
         } catch (dbErr: any) {
-            console.error('[Push-DB-Save-Error]', dbErr.message || dbErr);
+            dbError = dbErr.message || String(dbErr);
+            console.error('[Push-DB-Save-Error]', dbError);
         }
 
-        return { success: true, dbSaved, subCount: subscriptions.length, pushResults };
+        return {
+            success: true,
+            studentName,
+            dbSaved,
+            dbError,
+            subCount: subscriptions.length,
+            pushResults
+        };
     } catch (error) {
         console.error('[Push-Fatal-Error]', error);
         return { success: false, error: String(error) };
