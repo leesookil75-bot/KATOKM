@@ -22,6 +22,8 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith("/api/seed") ||
         pathname === "/login" ||
         pathname === "/signup" ||
+        pathname === "/parent/login" ||
+        pathname.startsWith("/api/parent/login") ||
         pathname === "/manifest.json" ||
         pathname === "/icon.png"
     ) {
