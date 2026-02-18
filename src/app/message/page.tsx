@@ -35,7 +35,7 @@ export default function MessagePage() {
     const [newTemplateContent, setNewTemplateContent] = useState("");
 
     // Date for context (default today)
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toLocaleDateString('sv');
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
 

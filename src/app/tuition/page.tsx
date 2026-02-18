@@ -31,7 +31,7 @@ export default function TuitionPage() {
     // Modal State
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedCell, setSelectedCell] = useState<{ studentId: string; month: number } | null>(null);
-    const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+    const [paymentDate, setPaymentDate] = useState(new Date().toLocaleDateString('sv'));
 
     const [error, setError] = useState<string | null>(null);
 
@@ -100,8 +100,8 @@ export default function TuitionPage() {
 
         // Default payment date to existing record's date or today
         const defaultDate = record?.payment_date
-            ? new Date(record.payment_date).toISOString().split('T')[0]
-            : new Date().toISOString().split('T')[0];
+            ? new Date(record.payment_date).toLocaleDateString('sv')
+            : new Date().toLocaleDateString('sv');
 
         setSelectedCell({ studentId, month });
         setPaymentDate(defaultDate);

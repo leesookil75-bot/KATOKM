@@ -25,7 +25,11 @@ export async function POST(request: Request) {
         }
 
         const student = rows[0];
-        const today = new Date().toISOString().split('T')[0];
+        // Generate KST date (UTC+9)
+        const now = new Date();
+        const kstOffset = 9 * 60 * 60 * 1000;
+        const kstDate = new Date(now.getTime() + kstOffset);
+        const today = kstDate.toISOString().split('T')[0];
 
         // 2. Mark Attendance
         const status = '출석';

@@ -29,7 +29,7 @@ export default function AttendancePage() {
     const [tempMemo, setTempMemo] = useState("");
 
     // Helpers
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = date.toLocaleDateString('sv');
     const classes = Array.from(new Set(students.map(s => s.className).filter(Boolean))) as string[];
     const filteredStudents = students.filter(s => selectedClass === "all" ? true : s.className === selectedClass);
 
@@ -47,7 +47,9 @@ export default function AttendancePage() {
                 const data = await res.json();
                 const map: any = {};
                 data.forEach((r: any) => {
-                    map[`${r.student_id}-${r.date.split('T')[0]}`] = { status: r.status, memo: r.memo };
+                    // Normalize record date to YYYY-MM-DD for matching
+                    const rDate = new Date(r.date).toLocaleDateString('sv');
+                    map[`${r.student_id}-${rDate}`] = { status: r.status, memo: r.memo };
                 });
                 setAttendance(map);
             }
@@ -102,7 +104,7 @@ export default function AttendancePage() {
         for (let i = 0; i < 5; i++) {
             const d = new Date(monday);
             d.setDate(monday.getDate() + i);
-            days.push(d.toISOString().split('T')[0]);
+            days.push(d.toLocaleDateString('sv'));
         }
         return days;
     };

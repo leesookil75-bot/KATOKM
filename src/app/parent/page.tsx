@@ -55,19 +55,21 @@ export default function ParentDashboard() {
                 if (attendanceRes.ok) {
                     const attendanceData = await attendanceRes.json();
                     // Since it returns history for parent, find today's record
-                    // Handle potential variations in date string format
+                    // Robust matching using locale strings
                     const todayRecord = attendanceData.find((r: any) => {
-                        const recordDate = new Date(r.date).toLocaleDateString('sv');
-                        return recordDate === today;
+                        const recDate = new Date(r.date);
+                        // Force UTC hours to be 0 or check via locale string
+                        return recDate.toLocaleDateString('sv') === today;
                     });
                     setTodayAttendance(todayRecord);
                 }
 
                 if (tuitionRes.ok) {
-                    setTuitionSummary(await tuitionRes.json());
+                    const tuitionData = await tuitionRes.json();
+                    setTuitionSummary(tuitionData);
                 }
             } catch (err) {
-                console.error(err);
+                console.error('[ParentApp Fetch Error]:', err);
             } finally {
                 setLoading(false);
             }
