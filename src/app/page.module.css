@@ -2,9 +2,12 @@
 .main {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  min-height: 100vh;
-  padding: 1rem;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 40px);
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .hero {
@@ -14,24 +17,35 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-  width: 100%;
+  grid-template-columns: repeat(2, 280px);
+  /* 2 columns on PC */
+  gap: 2rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    width: 100%;
+  }
 }
 
 .card {
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  transition: var(--transition);
+  padding: 2.5rem 1.5rem;
+  min-height: 220px;
+  border-radius: 1.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 .card:hover {

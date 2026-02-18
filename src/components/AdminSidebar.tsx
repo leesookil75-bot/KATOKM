@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, CalendarCheck, CreditCard, MessageCircle, Monitor, Settings, LogOut, LayoutDashboard } from "lucide-react";
+import { Users, CalendarCheck, CreditCard, MessageCircle, Monitor, Settings, LogOut, LayoutDashboard, Home } from "lucide-react";
 
 export default function AdminSidebar() {
     const pathname = usePathname();
 
     const menuItems = [
-        { name: "홈", path: "/", icon: <LayoutDashboard size={20} color="var(--primary)" /> },
-        { name: "학생 관리", path: "/students", icon: <Users size={20} color="var(--primary)" /> },
-        { name: "출석부", path: "/attendance", icon: <CalendarCheck size={20} color="var(--primary)" /> },
-        { name: "수강료 관리", path: "/tuition", icon: <CreditCard size={20} color="var(--primary)" /> },
-        { name: "알림 전송", path: "/message", icon: <MessageCircle size={20} color="var(--primary)" /> },
-        { name: "키오스크 모드", path: "/kiosk", icon: <Monitor size={20} color="var(--primary)" /> },
+        { name: "홈", path: "/", icon: <Home size={22} color="#4f46e5" /> },
+        { name: "학생 관리", path: "/students", icon: <Users size={22} color="#ec4899" /> },
+        { name: "출석부", path: "/attendance", icon: <CalendarCheck size={22} color="#f59e0b" /> },
+        { name: "수강료 관리", path: "/tuition", icon: <CreditCard size={22} color="#06b6d4" /> },
+        { name: "알림 전송", path: "/message", icon: <MessageCircle size={22} color="#10b981" /> },
+        { name: "키오스크 모드", path: "/kiosk", icon: <Monitor size={22} color="#8b5cf6" /> },
     ];
 
     const handleLogout = async () => {
@@ -78,13 +78,15 @@ export default function AdminSidebar() {
                 .sidebar-item {
                     display: flex;
                     align-items: center;
-                    gap: 0.75rem;
-                    padding: 0.75rem 1rem;
+                    gap: 1rem;
+                    padding: 1rem 1.25rem;
                     line-height: normal;
                     border-radius: 0.75rem;
-                    color: #64748b;
+                    color: #475569;
                     text-decoration: none;
+                    font-size: 1.05rem;
                     font-weight: 500;
+                    margin-bottom: 0.25rem;
                     transition: all 0.2s;
                 }
                 .sidebar-item:hover {
