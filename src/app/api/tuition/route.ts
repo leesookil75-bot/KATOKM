@@ -12,6 +12,31 @@ export async function GET(request: Request) {
 
         const { searchParams } = new URL(request.url);
         const year = searchParams.get('year') || new Date().getFullYear().toString();
+        const role = session.user.role;
+        const studentIdParam = searchParams.get('studentId') || session.user.student_id;
+
+        if (role === 'PARENT') {
+            if (!studentIdParam) return NextResponse.json({ error: 'Student ID missing' }, { status: 400 });
+
+            // Parent view: specific student history + tuition due day info
+            const { rows: records } = await sql`
+                SELECT tr.* 
+                FROM tuition_records tr
+                WHERE tr.student_id = ${studentIdParam} AND tr.year = ${year}
+                ORDER BY tr.month DESC
+            `;
+
+            const { rows: studentInfo } = await sql`
+                SELECT tuition_due_day 
+                FROM students 
+                WHERE id = ${studentIdParam}
+            `;
+
+            return NextResponse.json({
+                records,
+                tuition_due_day: studentInfo[0]?.tuition_due_day
+            });
+        }
 
         // Fetch all tuition records for students of this academy in the given year
         const result = await sql`

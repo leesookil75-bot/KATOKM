@@ -10,9 +10,25 @@ export async function GET(request: Request) {
     const session = await getSession();
 
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const role = session.user.role;
     const academyId = session.user.id;
+    const studentIdParam = searchParams.get('studentId') || session.user.student_id;
 
     try {
+        if (role === 'PARENT') {
+            if (!studentIdParam) return NextResponse.json({ error: 'Student ID missing' }, { status: 400 });
+
+            // Parent view: specific student history
+            const { rows } = await sql`
+                SELECT a.date, a.status, a.memo
+                FROM attendance a
+                WHERE a.student_id = ${studentIdParam}
+                ORDER BY a.date DESC
+            `;
+            return NextResponse.json(rows);
+        }
+
         if (date) {
             // Daily Attendance for this academy
             const { rows } = await sql`

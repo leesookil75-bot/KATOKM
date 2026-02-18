@@ -70,6 +70,8 @@ export async function GET(request: Request) {
     `;
     await client.sql`ALTER TABLE students ADD COLUMN IF NOT EXISTS academy_id UUID REFERENCES admins(id) ON DELETE CASCADE;`;
     await client.sql`ALTER TABLE students ADD COLUMN IF NOT EXISTS class_name VARCHAR(100);`;
+    await client.sql`ALTER TABLE students ADD COLUMN IF NOT EXISTS tuition_due_day INTEGER;`;
+    await client.sql`ALTER TABLE students ADD COLUMN IF NOT EXISTS parent_password VARCHAR(255);`;
     results.studentsTable = "OK";
 
     // 6. Attendance Table

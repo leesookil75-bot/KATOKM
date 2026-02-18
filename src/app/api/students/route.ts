@@ -18,7 +18,8 @@ export async function GET() {
             parentPhone: row.parent_phone,
             passcode: row.passcode,
             memo: row.memo,
-            className: row.class_name
+            className: row.class_name,
+            tuition_due_day: row.tuition_due_day
         }));
         return NextResponse.json(students);
     } catch (error) {
@@ -33,11 +34,14 @@ export async function POST(request: Request) {
 
         const academyId = session.user.id;
         const body = await request.json();
-        const { name, parentPhone, passcode, memo, className } = body;
+        const { name, parentPhone, passcode, memo, className, tuition_due_day } = body;
+
+        // Initial password is last 4 digits of phone
+        const initialPassword = parentPhone.replace(/[^0-9]/g, '').slice(-4);
 
         const { rows } = await sql`
-      INSERT INTO students (name, parent_phone, passcode, memo, class_name, academy_id)
-      VALUES (${name}, ${parentPhone}, ${passcode}, ${memo}, ${className || ''}, ${academyId})
+      INSERT INTO students (name, parent_phone, passcode, memo, class_name, academy_id, tuition_due_day, parent_password)
+      VALUES (${name}, ${parentPhone}, ${passcode}, ${memo}, ${className || ''}, ${academyId}, ${tuition_due_day || null}, ${initialPassword})
       RETURNING *;
     `;
 

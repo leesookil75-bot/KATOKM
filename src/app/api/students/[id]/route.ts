@@ -9,14 +9,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         const session = await getSession();
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         const academyId = session.user.id;
-
         const id = params.id;
+
         const body = await request.json();
-        const { name, parentPhone, passcode, memo, className } = body;
+        const { name, parentPhone, passcode, memo, className, tuition_due_day } = body;
 
         const { rows } = await sql`
       UPDATE students
-      SET name = ${name}, parent_phone = ${parentPhone}, passcode = ${passcode}, memo = ${memo}, class_name = ${className || ''}
+      SET name = ${name}, 
+          parent_phone = ${parentPhone}, 
+          passcode = ${passcode}, 
+          memo = ${memo}, 
+          class_name = ${className || ''},
+          tuition_due_day = ${tuition_due_day || null}
       WHERE id = ${id} AND academy_id = ${academyId}
       RETURNING *;
     `;

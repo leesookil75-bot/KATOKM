@@ -6,9 +6,10 @@ type Student = {
     id: string;
     name: string;
     parentPhone: string;
-    passcode: string; // New field for 4-digit code
+    passcode: string;
     memo: string;
-    className?: string; // New field
+    className?: string;
+    tuition_due_day?: number; // New field
 };
 
 export default function StudentManager() {
@@ -21,7 +22,8 @@ export default function StudentManager() {
         parentPhone: "",
         passcode: "",
         memo: "",
-        className: ""
+        className: "",
+        tuition_due_day: 0
     });
 
     // Fetch students & classes
@@ -96,15 +98,29 @@ export default function StudentManager() {
 
     const closeForm = () => {
         setIsFormOpen(false);
-        setFormData({ id: "", name: "", parentPhone: "", memo: "", passcode: "", className: "" });
+        setFormData({ id: "", name: "", parentPhone: "", memo: "", passcode: "", className: "", tuition_due_day: 0 });
+    };
+
+    const handleResetPassword = async (student: Student) => {
+        if (!confirm(`${student.name} 학생 학부모님의 비밀번호를 전화번호 뒷자리 4자리로 초기화하시겠습니까?`)) return;
+
+        try {
+            const res = await fetch(`/api/students/${student.id}/reset-password`, { method: 'POST' });
+            if (res.ok) alert("비밀번호가 초기화되었습니다.");
+            else alert("초기화 실패");
+        } catch (e) {
+            console.error(e);
+            alert("오류 발생");
+        }
     };
 
     const [editingCell, setEditingCell] = useState<{ id: string, field: keyof Student } | null>(null);
-    const [tempValue, setTempValue] = useState("");
+    const [tempValue, setTempValue] = useState<string>("");
 
     const startEditing = (student: Student, field: keyof Student) => {
         setEditingCell({ id: student.id, field });
-        setTempValue(student[field] || "");
+        const val = student[field];
+        setTempValue(val !== undefined && val !== null ? String(val) : "");
     };
 
     const saveEdit = async () => {
@@ -117,10 +133,16 @@ export default function StudentManager() {
         const student = students.find(s => s.id === id);
         if (!student) return;
 
-        // Skip if value hasn't changed
-        if (student[field] === value) return;
+        // Convert value back to number if field is tuition_due_day
+        let finalValue: string | number = value;
+        if (field === 'tuition_due_day') {
+            finalValue = parseInt(value) || 0;
+        }
 
-        const updatedStudent = { ...student, [field]: value };
+        // Skip if value hasn't changed
+        if (student[field] === finalValue) return;
+
+        const updatedStudent = { ...student, [field]: finalValue };
 
         try {
             const res = await fetch(`/api/students/${id}`, {
@@ -164,11 +186,12 @@ export default function StudentManager() {
                     <thead>
                         <tr>
                             <th style={{ minWidth: "120px", position: 'sticky', left: 0, zIndex: 20, backgroundColor: "#f3f4f6" }}>수업</th>
-                            <th style={{ minWidth: "100px", position: 'sticky', left: "120px", zIndex: 20, backgroundColor: "#f3f4f6" }}>이름</th>
+                            <th style={{ minWidth: "120px", position: 'sticky', left: "120px", zIndex: 20, backgroundColor: "#f3f4f6" }}>이름</th>
                             <th style={{ minWidth: "120px" }}>연락처</th>
-                            <th style={{ minWidth: "100px" }}>비밀번호</th>
-                            <th style={{ width: "40%" }}>메모</th>
-                            <th style={{ width: "80px", textAlign: "center" }}>관리</th>
+                            <th style={{ minWidth: "80px" }}>약정일</th>
+                            <th style={{ minWidth: "100px" }}>출석코드</th>
+                            <th style={{ width: "30%" }}>메모</th>
+                            <th style={{ width: "120px", textAlign: "center" }}>관리</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -212,6 +235,24 @@ export default function StudentManager() {
                                         <span style={{ fontWeight: 600 }}>{student.name}</span>
                                     </td>
                                     <td><a href={`tel:${student.parentPhone}`}>{student.parentPhone}</a></td>
+                                    <td onClick={() => startEditing(student, 'tuition_due_day')}>
+                                        {editingCell?.id === student.id && editingCell.field === 'tuition_due_day' ? (
+                                            <input
+                                                type="number"
+                                                className="input text-sm p-1 w-full text-center"
+                                                value={tempValue}
+                                                onChange={e => setTempValue(e.target.value)}
+                                                onBlur={saveEdit}
+                                                onKeyDown={handleKeyDown}
+                                                autoFocus
+                                                min={1} max={31}
+                                            />
+                                        ) : (
+                                            <span className="text-sub cursor-pointer hover:bg-gray-100 p-1 rounded block text-center" >
+                                                {student.tuition_due_day ? `${student.tuition_due_day}일` : <span className="text-gray-300">-</span>}
+                                            </span>
+                                        )}
+                                    </td>
                                     <td onClick={() => startEditing(student, 'passcode')}>
                                         {editingCell?.id === student.id && editingCell.field === 'passcode' ? (
                                             <input
@@ -249,6 +290,9 @@ export default function StudentManager() {
                                     </td>
                                     <td>
                                         <div className="flex-center gap-xs" style={{ justifyContent: "center" }}>
+                                            <button className="btn" style={{ padding: "0.4rem", color: "var(--primary)", backgroundColor: "#eef2ff" }} onClick={() => handleResetPassword(student)} title="학부모 비밀번호 초기화">
+                                                리셋
+                                            </button>
                                             <button className="btn" style={{ padding: "0.4rem", color: "#ef4444", backgroundColor: "#fef2f2" }} onClick={() => handleDelete(student.id)}>
                                                 <Trash2 size={16} />
                                             </button>
@@ -311,6 +355,17 @@ export default function StudentManager() {
                                 <label className="text-sm text-sub block mb-1">메모</label>
                                 <textarea className="input" style={{ resize: "none" }} rows={3} value={formData.memo}
                                     onChange={e => setFormData({ ...formData, memo: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label className="text-sm text-sub block mb-1">학원비 납부 약정일 (매월)</label>
+                                <div className="flex items-center gap-2">
+                                    <input type="number" min={1} max={31} className="input w-24 text-center"
+                                        value={formData.tuition_due_day || ""}
+                                        onChange={e => setFormData({ ...formData, tuition_due_day: parseInt(e.target.value) || 0 })}
+                                        placeholder="15" />
+                                    <span className="text-sm text-sub">일</span>
+                                </div>
                             </div>
 
                             <div className="flex gap-2 mt-4">
