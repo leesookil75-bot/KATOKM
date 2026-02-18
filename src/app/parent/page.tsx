@@ -42,16 +42,24 @@ export default function ParentDashboard() {
                 const sessionData = await sessionRes.json();
                 setSession(sessionData);
 
-                const today = new Date().toISOString().split('T')[0];
+                // Get local date in YYYY-MM-DD format
+                const now = new Date();
+                const today = now.toLocaleDateString('sv'); // 'sv' locale matches YYYY-MM-DD
+                const currentYear = now.getFullYear();
+
                 const [attendanceRes, tuitionRes] = await Promise.all([
-                    fetch(`/api/attendance?date=${today}`),
-                    fetch(`/api/tuition?year=${new Date().getFullYear()}`)
+                    fetch(`/api/attendance`),
+                    fetch(`/api/tuition?year=${currentYear}`)
                 ]);
 
                 if (attendanceRes.ok) {
                     const attendanceData = await attendanceRes.json();
                     // Since it returns history for parent, find today's record
-                    const todayRecord = attendanceData.find((r: any) => r.date.split('T')[0] === today);
+                    // Handle potential variations in date string format
+                    const todayRecord = attendanceData.find((r: any) => {
+                        const recordDate = new Date(r.date).toLocaleDateString('sv');
+                        return recordDate === today;
+                    });
                     setTodayAttendance(todayRecord);
                 }
 
@@ -115,7 +123,7 @@ export default function ParentDashboard() {
                                 <div className="status-details">
                                     <div className="detail-item">
                                         <Clock size={16} />
-                                        <span>체크 시간: {new Date(todayAttendance.created_at || Date.now()).toLocaleTimeString([], { hour: '2p-digit', minute: '2-digit' })}</span>
+                                        <span>체크 시간: {new Date(todayAttendance.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
                                     {todayAttendance.memo && (
                                         <p className="status-memo">{todayAttendance.memo}</p>

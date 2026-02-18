@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
             // Parent view: specific student history
             const { rows } = await sql`
-                SELECT a.date, a.status, a.memo
+                SELECT a.date, a.status, a.memo, a.created_at
                 FROM attendance a
                 WHERE a.student_id = ${studentIdParam}
                 ORDER BY a.date DESC
