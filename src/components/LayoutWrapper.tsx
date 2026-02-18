@@ -11,7 +11,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     const [role, setRole] = useState<string | null>(null);
 
     useEffect(() => {
-        const authPages = ['/login', '/signup', '/super-admin', '/parent/login'];
+        const authPages = ['/login', '/signup', '/parent/login'];
         setIsAuthPage(authPages.includes(pathname));
 
         // Fetch session to determine role
@@ -21,8 +21,13 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
                 if (res.ok) {
                     const session = await res.json();
                     setRole(session.user.role);
+                } else {
+                    setRole(null);
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+                setRole(null);
+            }
         }
         checkSession();
     }, [pathname]);
@@ -31,6 +36,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         return <div className="auth-layout">{children}</div>;
     }
 
+    // Explicitly hide only for PARENT role
+    // For admins (ACADEMY, SUPER) or non-logged in users (null), show the navigation
     const showNav = role !== 'PARENT';
 
     return (
