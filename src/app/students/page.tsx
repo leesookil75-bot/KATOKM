@@ -190,9 +190,9 @@ export default function StudentManager() {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th style={{ minWidth: "120px", position: 'sticky', left: 0, zIndex: 20, backgroundColor: "#f3f4f6" }}>수업</th>
-                            <th style={{ minWidth: "120px", position: 'sticky', left: "120px", zIndex: 20, backgroundColor: "#f3f4f6" }}>이름</th>
-                            <th style={{ minWidth: "120px" }}>연락처</th>
+                            <th className="sticky-col-class" style={{ backgroundColor: "#f3f4f6" }}>수업</th>
+                            <th className="sticky-col-name" style={{ backgroundColor: "#f3f4f6" }}>이름</th>
+                            <th style={{ minWidth: "100px" }}>연락처</th>
                             <th style={{ minWidth: "80px" }}>약정일</th>
                             <th style={{ minWidth: "100px" }}>출석코드</th>
                             <th style={{ width: "30%" }}>메모</th>
@@ -212,7 +212,7 @@ export default function StudentManager() {
                         ) : (
                             students.map(student => (
                                 <tr key={student.id}>
-                                    <td style={{ position: 'sticky', left: 0, zIndex: 10, backgroundColor: "white" }} onClick={() => startEditing(student, 'className')}>
+                                    <td className="sticky-col-class" style={{ backgroundColor: "white" }} onClick={() => startEditing(student, 'className')}>
                                         {editingCell?.id === student.id && editingCell.field === 'className' ? (
                                             <select
                                                 className="input text-sm p-1 w-full"
@@ -236,7 +236,7 @@ export default function StudentManager() {
                                             </span>
                                         )}
                                     </td>
-                                    <td style={{ position: 'sticky', left: "120px", zIndex: 10, backgroundColor: "white" }}>
+                                    <td className="sticky-col-name" style={{ backgroundColor: "white" }}>
                                         <span style={{ fontWeight: 600 }}>{student.name}</span>
                                     </td>
                                     <td><a href={`tel:${student.parentPhone}`}>{student.parentPhone}</a></td>
