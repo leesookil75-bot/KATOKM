@@ -4,8 +4,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 40px);
-  padding: 2rem;
+  min-height: calc(100vh - 4rem);
+  /* Balanced height after LayoutWrapper padding */
+  padding: 0 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }

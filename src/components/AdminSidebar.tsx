@@ -33,7 +33,7 @@ export default function AdminSidebar() {
                     const isActive = pathname === item.path;
                     return (
                         <Link key={item.path} href={item.path} className={`sidebar-item ${isActive ? 'active' : ''}`}>
-                            {item.icon}
+                            <div className="icon-wrapper">{item.icon}</div>
                             <span>{item.name}</span>
                         </Link>
                     );
@@ -78,16 +78,23 @@ export default function AdminSidebar() {
                 .sidebar-item {
                     display: flex;
                     align-items: center;
-                    gap: 1rem;
+                    gap: 1.4rem;
                     padding: 1rem 1.25rem;
-                    line-height: normal;
+                    line-height: 1;
                     border-radius: 0.75rem;
                     color: #475569;
                     text-decoration: none;
-                    font-size: 1.05rem;
+                    font-size: 1.15rem;
                     font-weight: 500;
-                    margin-bottom: 0.25rem;
+                    margin-bottom: 0.5rem;
                     transition: all 0.2s;
+                }
+                .icon-wrapper {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 24px;
+                    height: 24px;
                 }
                 .sidebar-item:hover {
                     background: #f1f5f9;
