@@ -117,47 +117,53 @@ export async function GET(request: Request) {
     results.tuitionTable = "OK";
 
     // 9. Push Subscriptions Table
-    await client.sql`
-      CREATE TABLE IF NOT EXISTS push_subscriptions (
-        id SERIAL PRIMARY KEY,
-        student_id TEXT NOT NULL,
-        subscription JSONB NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(student_id, subscription)
-      );
-    `;
-    results.pushSubscriptionsTable = "OK";
+    try {
+      await client.sql`DROP TABLE IF EXISTS push_subscriptions;`;
+      await client.sql`
+        CREATE TABLE push_subscriptions (
+          id SERIAL PRIMARY KEY,
+          student_id TEXT NOT NULL,
+          subscription JSONB NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(student_id, subscription)
+        );
+      `;
+      results.pushSubscriptionsTable = "OK (Recreated)";
+    } catch (pushErr: any) { results.pushSubscriptionsTable = "Error: " + pushErr.message; }
 
     // 10. Notifications History Table
-    await client.sql`
-      CREATE TABLE IF NOT EXISTS notifications (
-        id SERIAL PRIMARY KEY,
-        student_id TEXT NOT NULL,
-        title TEXT NOT NULL,
-        body TEXT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
-    results.notificationsTable = "OK";
+    try {
+      await client.sql`DROP TABLE IF EXISTS notifications;`;
+      await client.sql`
+        CREATE TABLE notifications (
+          id SERIAL PRIMARY KEY,
+          student_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          body TEXT NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `;
+      results.notificationsTable = "OK (Recreated)";
+    } catch (notifErr: any) { results.notificationsTable = "Error: " + notifErr.message; }
 
     // 11. Initial Link
-    const superAdminRes = await client.sql`SELECT id FROM admins WHERE username = 'admin95' LIMIT 1;`;
-    if (superAdminRes.rows.length > 0) {
-      const superAdminId = superAdminRes.rows[0].id;
-      await client.sql`UPDATE students SET academy_id = ${superAdminId} WHERE academy_id IS NULL;`;
-      await client.sql`UPDATE classes SET academy_id = ${superAdminId} WHERE academy_id IS NULL;`;
-      await client.sql`UPDATE message_templates SET academy_id = ${superAdminId} WHERE academy_id IS NULL;`;
-      results.links = "Updated missing links to SuperAdmin";
-    }
+    try {
+      const superAdminRes = await client.sql`SELECT id FROM admins WHERE username = 'admin95' LIMIT 1;`;
+      if (superAdminRes.rows.length > 0) {
+        const superAdminId = superAdminRes.rows[0].id;
+        await client.sql`UPDATE students SET academy_id = ${superAdminId} WHERE academy_id IS NULL;`;
+        await client.sql`UPDATE classes SET academy_id = ${superAdminId} WHERE academy_id IS NULL;`;
+        await client.sql`UPDATE message_templates SET academy_id = ${superAdminId} WHERE academy_id IS NULL;`;
+        results.links = "Updated missing links to SuperAdmin";
+      }
+    } catch (linkErr: any) { results.links = "Error: " + linkErr.message; }
 
-    // 12. Diagnostic counts
+    // 12. Final Diagnostics
     try {
       const { rows: subCount } = await client.sql`SELECT count(*) FROM push_subscriptions`;
       results.subscriptionCount = subCount[0].count;
       const { rows: notifCount } = await client.sql`SELECT count(*) FROM notifications`;
       results.notificationCount = notifCount[0].count;
-      const { rows: recentSubs } = await client.sql`SELECT student_id, created_at FROM push_subscriptions ORDER BY created_at DESC LIMIT 5`;
-      results.recentSubscriptions = recentSubs;
     } catch (diagErr) {
       results.diagnostics = "Failed to fetch counts: " + (diagErr as any).message;
     }
