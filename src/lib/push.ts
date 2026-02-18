@@ -16,25 +16,29 @@ export async function sendPushNotification(studentId: string, payload: { title: 
     let pushResults: any[] = [];
 
     try {
-        // Fetch subscriptions and academy name
+        // Fetch subscriptions and academy name (using LEFT JOIN to be robust)
         const { rows: studentData } = await sql`
             SELECT ps.subscription, a.academy_name
             FROM students s
-            JOIN admins a ON s.academy_id = a.id
+            LEFT JOIN admins a ON s.academy_id = a.id
             LEFT JOIN push_subscriptions ps ON s.id = ps.student_id
             WHERE s.id = ${studentId}
         `;
 
-        if (studentData.length === 0) return { success: false, error: 'Student not found' };
+        if (studentData.length === 0) {
+            console.error(`[Push] Student not found in DB: ${studentId}`);
+            return { success: false, error: 'Student not found' };
+        }
 
         const academyName = studentData[0].academy_name || '우리 학원';
         const subscriptions = studentData.filter(r => r.subscription).map(r => r.subscription);
 
-        // Append academy name to the body
-        const finalBody = `${payload.body}\n\n[${academyName}]`;
+        // Append academy name to the body if possible, default to empty string if body missing
+        const originalBody = payload.body || '';
+        const finalBody = originalBody ? `${originalBody}\n\n[${academyName}]` : `[${academyName}]`;
 
         const notificationPayload = JSON.stringify({
-            title: payload.title,
+            title: payload.title || '알림',
             body: finalBody,
             vibrate: [100, 50, 100],
             data: { dateOfArrival: Date.now(), primaryKey: 1 },
@@ -61,7 +65,7 @@ export async function sendPushNotification(studentId: string, payload: { title: 
         try {
             await sql`
                 INSERT INTO notifications (student_id, title, body)
-                VALUES (${studentId}, ${payload.title}, ${finalBody})
+                VALUES (${studentId}, ${payload.title || '알림'}, ${finalBody})
             `;
             dbSaved = true;
             await cleanOldNotifications();

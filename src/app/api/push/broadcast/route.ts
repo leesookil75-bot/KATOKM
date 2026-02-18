@@ -12,15 +12,19 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const { studentIds, title, message } = body;
+        const { studentIds, title, message, payload } = body;
 
         if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
             return NextResponse.json({ error: 'Targets missing' }, { status: 400 });
         }
 
+        // Handle both possible structures (direct vs nested in payload)
+        const finalTitle = title || payload?.title || '학원 알림';
+        const finalBody = message || payload?.body || '';
+
         const results = await broadcastPushNotification(studentIds, {
-            title: title || '학원 알림',
-            body: message
+            title: finalTitle,
+            body: finalBody
         });
 
         return NextResponse.json({ success: true, results });
