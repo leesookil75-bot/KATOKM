@@ -13,7 +13,6 @@ export default function AdminSidebar() {
         { name: "출석부", path: "/attendance", icon: <CalendarCheck size={22} color="#f59e0b" /> },
         { name: "수강료 관리", path: "/tuition", icon: <CreditCard size={22} color="#06b6d4" /> },
         { name: "알림 전송", path: "/message", icon: <MessageCircle size={22} color="#10b981" /> },
-        { name: "키오스크 모드", path: "/kiosk", icon: <Monitor size={22} color="#8b5cf6" /> },
     ];
 
     const handleLogout = async () => {
