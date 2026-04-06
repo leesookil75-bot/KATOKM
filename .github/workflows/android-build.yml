@@ -1,0 +1,51 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch: # 수동으로 언제든 빌드 버튼을 누를 수 있게 함
+  push:
+    branches:
+      - main # 메인 브랜치에 코드가 올라갈때마다 자동 빌드
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Build Next.js (Export)
+        run: |
+          mkdir -p out
+          echo "<html><head><meta http-equiv=\"refresh\" content=\"0;url=https://katokm-he6nx7nyw-leesookils-projects.vercel.app/parent\"></head><body>Loading...</body></html>" > out/index.html
+        
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Capacitor Sync
+        run: |
+          chmod +x android/gradlew
+          npx cap sync android
+
+      - name: Build APK
+        working-directory: ./android
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AIPASS-App-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk

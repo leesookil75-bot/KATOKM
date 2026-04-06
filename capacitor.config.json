@@ -1,0 +1,19 @@
+{
+  "appId": "com.aipass.parents",
+  "appName": "AI-PASS",
+  "webDir": "out",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://katokm-he6nx7nyw-leesookils-projects.vercel.app/parent",
+    "cleartext": true,
+    "allowNavigation": [
+      "katokm-he6nx7nyw-leesookils-projects.vercel.app",
+      "*.vercel.app"
+    ]
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}

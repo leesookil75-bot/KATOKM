@@ -22,16 +22,23 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith("/api/seed") ||
         pathname === "/login" ||
         pathname === "/signup" ||
-        pathname === "/parent/login" ||
         pathname.startsWith("/api/parent/login") ||
         pathname === "/manifest.json" ||
         pathname === "/icon.png"
     ) {
         return NextResponse.next();
     }
+    
+    // Allow pass-through for parent/login if no session, but process session if exists
+    if (!session && pathname === "/parent/login") {
+        return NextResponse.next();
+    }
 
-    // 2. Redirect to login if no session
+    // 2. Redirect to specific login pages if no session
     if (!session) {
+        if (pathname.startsWith('/parent')) {
+            return NextResponse.redirect(new URL("/parent/login", request.url));
+        }
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
@@ -57,6 +64,14 @@ export async function middleware(request: NextRequest) {
 
         if (!isParentRoute && parsed.user.role === 'PARENT') {
             // Parents shouldn't be in admin area
+            return NextResponse.redirect(new URL("/parent", request.url));
+        }
+
+        // 5. If authenticated and visiting login pages, redirect to appropriate home
+        if (pathname === '/login' && parsed.user.role !== 'PARENT') {
+            return NextResponse.redirect(new URL("/", request.url));
+        }
+        if (pathname === '/parent/login' && parsed.user.role === 'PARENT') {
             return NextResponse.redirect(new URL("/parent", request.url));
         }
 
