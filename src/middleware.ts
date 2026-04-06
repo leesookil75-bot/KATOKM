@@ -29,16 +29,14 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
     
-    // Allow pass-through for parent/login if no session, but process session if exists
-    if (!session && pathname === "/parent/login") {
+    // Allow pass-through for parent routes if no session (Capacitor WebView 307 redirect bug fix)
+    // The client-side code in /parent/page.tsx will handle the redirect to /parent/login via API check
+    if (!session && pathname.startsWith("/parent")) {
         return NextResponse.next();
     }
 
-    // 2. Redirect to specific login pages if no session
+    // 2. Redirect to specific login pages if no session for other routes (Admin)
     if (!session) {
-        if (pathname.startsWith('/parent')) {
-            return NextResponse.redirect(new URL("/parent/login", request.url));
-        }
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
