@@ -101,7 +101,7 @@ export default function ParentDashboard() {
             try {
                 const sessionRes = await fetch("/api/auth/session");
                 if (!sessionRes.ok) {
-                    router.push("/parent/login");
+                    router.push("/login");
                     return;
                 }
                 const sessionData = await sessionRes.json();
@@ -177,7 +177,7 @@ export default function ParentDashboard() {
 
     const handleLogout = async () => {
         await fetch("/api/auth/logout", { method: "POST" });
-        router.push("/parent/login");
+        router.push("/login");
     };
 
     // If loading and no session yet, show a shell with skeletons

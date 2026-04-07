@@ -11,7 +11,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     const [role, setRole] = useState<string | null>(null);
 
     useEffect(() => {
-        const authPages = ['/login', '/signup', '/parent/login'];
+        const authPages = ['/login', '/signup', '/admin-login'];
         setIsAuthPage(authPages.includes(pathname));
 
         // Fetch session to determine role

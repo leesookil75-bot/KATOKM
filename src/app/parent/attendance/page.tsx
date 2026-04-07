@@ -28,7 +28,7 @@ export default function parentAttendancePage() {
                 if (res.ok) {
                     setAttendance(await res.json());
                 } else if (res.status === 401) {
-                    router.push("/parent/login");
+                    router.push("/login");
                 }
 
                 // Fetch session for academy name

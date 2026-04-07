@@ -25,7 +25,7 @@ export default function parentTuitionPage() {
                 if (res.ok) {
                     setTuitionData(await res.json());
                 } else if (res.status === 401) {
-                    router.push("/parent/login");
+                    router.push("/login");
                 }
 
                 // Fetch session for academy name

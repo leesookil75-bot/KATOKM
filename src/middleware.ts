@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
     // 2. Redirect to specific login pages if no session for other routes
     if (!session) {
         // If they are trying to access admin routes, redirect to admin-login
-        if (pathname === "/" || pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
+        if (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
             return NextResponse.redirect(new URL("/admin-login", request.url));
         }
         return NextResponse.redirect(new URL("/login", request.url));
@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL("/parent", request.url));
         }
 
-        // 5. If authenticated and visiting login pages, redirect to appropriate home
+                // 5. If authenticated and visiting login pages, redirect to appropriate home
         if ((pathname === '/login' || pathname === '/admin-login') && parsed.user.role !== 'PARENT') {
             if (parsed.user.role === 'SUPER') return NextResponse.redirect(new URL("/super-admin", request.url));
             return NextResponse.redirect(new URL("/", request.url));
@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     } catch (err) {
         // Session expired or invalid
-        if (pathname === "/" || pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
+        if (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
             return NextResponse.redirect(new URL("/admin-login", request.url));
         }
         return NextResponse.redirect(new URL("/login", request.url));
