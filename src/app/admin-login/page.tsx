@@ -47,10 +47,10 @@ export default function LoginPage() {
       <div className="auth-card">
         <div className="auth-header">
           <div className="auth-logo">
-            <ShieldCheck size={40} color="var(--primary)" />
+             <img src="/icon.png" alt="AI-PASS 로고" style={{ width: '60px', height: '60px', borderRadius: '1rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
           </div>
-          <h1>출결 매니저 v2.0</h1>
-          <p>관리자 로그인</p>
+          <h1>AI-PASS</h1>
+          <p>원장님 관리자 로그인</p>
         </div>
 
         <form onSubmit={handleLogin} className="auth-form">
