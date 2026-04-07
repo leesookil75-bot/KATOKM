@@ -16,22 +16,22 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
-  title: "카톡 출결 매니저",
-  description: "학원/공부방 출결 관리 및 알림 전송 서비스",
+  title: "AI-PASS",
+  description: "스마트한 학원 출결 관리 및 수강료 알림 서비스",
   manifest: "/manifest.json",
   icons: {
     icon: "/icon.png",
     apple: "/icon.png",
   },
   openGraph: {
-    title: "카톡 출결 매니저",
-    description: "간편한 학생 출석 체크 및 알림 전송",
+    title: "AI-PASS (아이패스)",
+    description: "스마트한 학원/공부방 출결 및 관리 매니저",
     images: [
       {
-        url: "/icon.png",
-        width: 192,
-        height: 192,
-        alt: "App Icon",
+        url: "/icon.png?v=3",
+        width: 512,
+        height: 512,
+        alt: "AI-PASS App Icon",
       },
     ],
     locale: "ko_KR",
@@ -44,7 +44,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#4f46e5",
+  themeColor: "#ff9800",
 };
 
 export default function RootLayout({

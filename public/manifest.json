@@ -1,13 +1,13 @@
 {
-    "name": "카톡 출결 매니저",
-    "short_name": "출결매니저",
-    "description": "간편한 학생 출석 체크 및 알림 전송",
+    "name": "AI-PASS",
+    "short_name": "AI-PASS",
+    "description": "스마트한 학원/공부방 출결 관리 및 알림 전송 서비스",
     "id": "/",
     "scope": "/",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#ffffff",
+    "theme_color": "#ff9800",
     "orientation": "portrait",
     "icons": [
         {
