@@ -21,6 +21,7 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith("/api/auth") ||
         pathname.startsWith("/api/seed") ||
         pathname === "/login" ||
+        pathname === "/admin-login" ||
         pathname === "/signup" ||
         pathname.startsWith("/api/parent/login") ||
         pathname === "/manifest.json" ||
@@ -30,13 +31,17 @@ export async function middleware(request: NextRequest) {
     }
     
     // Allow pass-through for parent routes if no session (Capacitor WebView 307 redirect bug fix)
-    // The client-side code in /parent/page.tsx will handle the redirect to /parent/login via API check
+    // The client-side code in /parent/page.tsx will handle the redirect to /login via API check
     if (!session && pathname.startsWith("/parent")) {
         return NextResponse.next();
     }
 
-    // 2. Redirect to specific login pages if no session for other routes (Admin)
+    // 2. Redirect to specific login pages if no session for other routes
     if (!session) {
+        // If they are trying to access admin routes, redirect to admin-login
+        if (pathname === "/" || pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
+            return NextResponse.redirect(new URL("/admin-login", request.url));
+        }
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
@@ -50,15 +55,6 @@ export async function middleware(request: NextRequest) {
 
         // 4. Parent vs Admin Route Protection
         const isParentRoute = pathname.startsWith('/parent');
-        const isLoginRedirect = pathname === '/login' || pathname === '/parent/login';
-
-        if (isParentRoute && parsed.user.role !== 'PARENT') {
-            // Admin users shouldn't be in the parent area unless it's testing
-            // But for reliability, if they try to go deep, redirect to admin home
-            if (pathname !== '/parent/login') {
-                // allow testing parent app if needed, but usually redirect
-            }
-        }
 
         if (!isParentRoute && parsed.user.role === 'PARENT') {
             // Parents shouldn't be in admin area
@@ -66,16 +62,20 @@ export async function middleware(request: NextRequest) {
         }
 
         // 5. If authenticated and visiting login pages, redirect to appropriate home
-        if (pathname === '/login' && parsed.user.role !== 'PARENT') {
+        if ((pathname === '/login' || pathname === '/admin-login') && parsed.user.role !== 'PARENT') {
+            if (parsed.user.role === 'SUPER') return NextResponse.redirect(new URL("/super-admin", request.url));
             return NextResponse.redirect(new URL("/", request.url));
         }
-        if (pathname === '/parent/login' && parsed.user.role === 'PARENT') {
+        if ((pathname === '/login' || pathname === '/admin-login') && parsed.user.role === 'PARENT') {
             return NextResponse.redirect(new URL("/parent", request.url));
         }
 
         return NextResponse.next();
     } catch (err) {
         // Session expired or invalid
+        if (pathname === "/" || pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
+            return NextResponse.redirect(new URL("/admin-login", request.url));
+        }
         return NextResponse.redirect(new URL("/login", request.url));
     }
 }

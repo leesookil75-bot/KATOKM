@@ -2,257 +2,235 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { LogIn, UserPlus, ShieldCheck, Users } from "lucide-react";
+import { Phone, Lock, ChevronRight } from "lucide-react";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+    const [phone, setPhone] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+        try {
+            const res = await fetch("/api/parent/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone, password }),
+            });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        if (data.role === "SUPER") {
-          router.push("/super-admin");
-        } else {
-          router.push("/");
+            if (res.ok) {
+                router.push("/parent");
+            } else {
+                const data = await res.json();
+                setError(data.error || "로그인에 실패했습니다.");
+            }
+        } catch (err) {
+            setError("서버와 통신 중 오류가 발생했습니다.");
+        } finally {
+            setLoading(false);
         }
-      } else {
-        setError(data.error || "로그인에 실패했습니다.");
-      }
-    } catch (err) {
-      setError("서버와의 통신에 오류가 발생했습니다.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  return (
-    <main className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <div className="auth-logo">
-            <ShieldCheck size={40} color="var(--primary)" />
-          </div>
-          <h1>출결 매니저 v2.0</h1>
-          <p>관리자 로그인</p>
+    return (
+        <div className="login-container">
+            <div className="login-card">
+                <div className="login-header">
+                    <div className="logo-container">
+                        <img src="/icon.png" alt="AI-PASS 로고" className="app-logo" />
+                    </div>
+                    <h1>AI-PASS</h1>
+                    <p>자녀의 출결 및 현황을 확인하세요</p>
+                </div>
+
+                <form onSubmit={handleLogin} className="login-form">
+                    <div className="input-group">
+                        <label>전화번호</label>
+                        <div className="input-wrapper">
+                            <Phone size={20} className="icon" />
+                            <input
+                                type="tel"
+                                placeholder="010-1234-5678"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="input-group">
+                        <label>비밀번호</label>
+                        <div className="input-wrapper">
+                            <Lock size={20} className="icon" />
+                            <input
+                                type="password"
+                                placeholder="초기 비밀번호: 전화번호 뒷자리 4자리"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    {error && <p className="error-message">{error}</p>}
+
+                    <button type="submit" className="login-button" disabled={loading}>
+                        {loading ? "로그인 중..." : "로그인하기"}
+                        {!loading && <ChevronRight size={20} />}
+                    </button>
+                </form>
+
+                <div className="login-footer">
+                    <p>비밀번호를 분실하셨나요? <br /><span>다니시는 학원 원장님께 문의하여 초기화하실 수 있습니다.</span></p>
+                </div>
+            </div>
+
+            <style jsx>{`
+                .login-container {
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #fdfbf7; /* Logo background matching cream yellow */
+                    padding: 1.5rem;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .login-card {
+                    width: 100%;
+                    max-width: 400px;
+                    background: white;
+                    border-radius: 2rem;
+                    padding: 2.5rem 2rem;
+                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+                    border: 1px solid #f1f5f9;
+                }
+                .login-header {
+                    text-align: center;
+                    margin-bottom: 2.5rem;
+                }
+                .logo-container {
+                    width: 80px;
+                    height: 80px;
+                    margin: 0 auto 1.25rem;
+                    border-radius: 1.5rem;
+                    overflow: hidden;
+                    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+                    background: #fff7e6;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .app-logo {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                .login-header h1 {
+                    font-size: 1.85rem;
+                    font-weight: 800;
+                    color: #1e293b;
+                    margin-bottom: 0.5rem;
+                    letter-spacing: -0.025em;
+                }
+                .login-header p {
+                    color: #64748b;
+                    font-size: 0.95rem;
+                }
+                .login-form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                }
+                .input-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+                .input-group label {
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    color: #475569;
+                    margin-left: 0.25rem;
+                }
+                .input-wrapper {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                }
+                .input-wrapper .icon {
+                    position: absolute;
+                    left: 1rem;
+                    color: #94a3b8;
+                }
+                .input-wrapper input {
+                    width: 100%;
+                    padding: 0.875rem 1rem 0.875rem 3rem;
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 1rem;
+                    font-size: 1rem;
+                    transition: all 0.2s;
+                    background: #f8fafc;
+                    color: #1e293b;
+                }
+                .input-wrapper input:focus {
+                    outline: none;
+                    border-color: #ff9800;
+                    background: white;
+                    box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
+                }
+                .login-button {
+                    margin-top: 1rem;
+                    background: #ff9800;
+                    color: white;
+                    padding: 1rem;
+                    border-radius: 1rem;
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    transition: all 0.2s;
+                    box-shadow: 0 4px 10px -1px rgba(255, 152, 0, 0.3);
+                    border: none;
+                    cursor: pointer;
+                }
+                .login-button:hover:not(:disabled) {
+                    background: #f57c00;
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 15px -3px rgba(255, 152, 0, 0.4);
+                }
+                .login-button:active:not(:disabled) {
+                    transform: translateY(0);
+                }
+                .login-button:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+                .error-message {
+                    color: #ef4444;
+                    font-size: 0.875rem;
+                    text-align: center;
+                    font-weight: 600;
+                }
+                .login-footer {
+                    margin-top: 2rem;
+                    text-align: center;
+                }
+                .login-footer p {
+                    font-size: 0.875rem;
+                    color: #64748b;
+                    line-height: 1.5;
+                }
+                .login-footer span {
+                    font-size: 0.8rem;
+                    color: #94a3b8;
+                }
+            `}</style>
         </div>
-
-        <form onSubmit={handleLogin} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="username">아이디</label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="아이디를 입력하세요"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">비밀번호</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="비밀번호를 입력하세요"
-              required
-            />
-          </div>
-
-          {error && <div className="error-message">{error}</div>}
-
-          <button type="submit" className="btn btn-primary auth-btn" disabled={isLoading}>
-            {isLoading ? "로그인 중..." : "로그인"}
-            {!isLoading && <LogIn size={18} style={{ marginLeft: "8px" }} />}
-          </button>
-        </form>
-
-        <div className="auth-footer">
-          <p>아직 회원이 아니신가요?</p>
-          <Link href="/signup" className="signup-link">
-            <UserPlus size={16} style={{ marginRight: "4px" }} />
-            학원 관리자 회원가입
-          </Link>
-
-          <div className="parent-link-box">
-            <p>자녀의 출결을 확인하고 싶으신가요?</p>
-            <Link href="/parent/login" className="parent-login-link">
-              <Users size={16} style={{ marginRight: "4px" }} />
-              학부모 로그인 바로가기
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <style jsx>{`
-        .auth-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: calc(100vh - 100px);
-          padding: 1rem;
-          background: #f8fafc;
-        }
-        .auth-card {
-          background: white;
-          padding: 2.5rem;
-          border-radius: 1.5rem;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-          width: 100%;
-          max-width: 400px;
-          border: 1px solid #e2e8f0;
-        }
-        .auth-header {
-          text-align: center;
-          margin-bottom: 2rem;
-        }
-        .auth-logo {
-          margin-bottom: 1rem;
-          display: flex;
-          justify-content: center;
-        }
-        .auth-header h1 {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #1e293b;
-          margin-bottom: 0.5rem;
-        }
-        .auth-header p {
-          color: #64748b;
-          font-size: 0.875rem;
-        }
-        .auth-form {
-          display: flex;
-          flex-direction: column;
-          gap: 1.25rem;
-        }
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-        .form-group label {
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: #475569;
-        }
-        .form-group input {
-          padding: 0.75rem 1rem;
-          border: 1px solid #cbd5e1;
-          border-radius: 0.75rem;
-          font-size: 1rem;
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .form-group input:focus {
-          outline: none;
-          border-color: var(--primary);
-          box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-        .error-message {
-          color: #ef4444;
-          font-size: 0.875rem;
-          text-align: center;
-          background: #fef2f2;
-          padding: 0.75rem;
-          border-radius: 0.5rem;
-          border: 1px solid #fee2e2;
-        }
-        .auth-btn {
-          width: 100%;
-          padding: 0.875rem;
-          font-size: 1rem;
-          font-weight: 600;
-          margin-top: 0.5rem;
-        }
-        .auth-footer {
-          margin-top: 2rem;
-          text-align: center;
-          padding-top: 1.5rem;
-          border-top: 1px solid #f1f5f9;
-        }
-        .auth-footer p {
-          color: #64748b;
-          font-size: 0.875rem;
-          margin-bottom: 0.5rem;
-        }
-        .signup-link {
-          color: var(--primary);
-          font-weight: 600;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-        }
-        .signup-link:hover {
-          text-decoration: underline;
-        }
-        .parent-link-box {
-          margin-top: 2rem;
-          padding-top: 1.5rem;
-          border-top: 1px dashed #e2e8f0;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.75rem;
-        }
-        .parent-login-link {
-          color: #10b981;
-          font-weight: 700;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: #f0fdf4;
-          padding: 0.75rem 1.5rem;
-          border-radius: 99px;
-          font-size: 0.95rem;
-          transition: all 0.2s;
-          border: 1.5px solid #10b981;
-          cursor: pointer;
-        }
-        .parent-login-link:hover {
-          background: #10b981;
-          color: white;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
-        }
-        .parent-login-link:active {
-          transform: translateY(0);
-        }
-
-        @media (max-width: 640px) {
-          .auth-card {
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: none;
-            background: transparent;
-            border: none;
-          }
-          .auth-container {
-            background: white;
-            align-items: flex-start;
-            padding-top: 3rem;
-          }
-        }
-      `}</style>
-    </main>
-  );
+    );
 }
