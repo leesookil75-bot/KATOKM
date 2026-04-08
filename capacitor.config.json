@@ -4,10 +4,10 @@
   "webDir": "out",
   "bundledWebRuntime": false,
   "server": {
-    "url": "https://katokm-he6nx7nyw-leesookils-projects.vercel.app/parent",
+    "url": "https://katokm.vercel.app/",
     "cleartext": true,
     "allowNavigation": [
-      "katokm-he6nx7nyw-leesookils-projects.vercel.app",
+      "katokm.vercel.app",
       "*.vercel.app"
     ]
   },
