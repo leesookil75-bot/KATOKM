@@ -5,6 +5,12 @@ import { getAdminAuth } from '@/lib/firebase/adminApp';
 
 export const dynamic = 'force-dynamic';
 
+export async function GET() {
+    return NextResponse.json({
+        envKeys: Object.keys(process.env).filter(k => k.startsWith('FIREBASE'))
+    });
+}
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();
