@@ -180,8 +180,46 @@ export default function ParentDashboard() {
         router.push("/login");
     };
 
-    // If loading and no session yet, show a shell with skeletons
-    // This removes the "데이터를 불러오는 중..." blocking message
+    if (loading || !session) {
+        return (
+            <div className="splash-screen">
+                <div className="logo-container">
+                    <img src="/icon.png" alt="AI-PASS 로고" className="app-logo" />
+                </div>
+                <style jsx>{`
+                    .splash-screen {
+                        min-height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: #fdfbf7;
+                    }
+                    .logo-container {
+                        width: 100px;
+                        height: 100px;
+                        border-radius: 1.5rem;
+                        overflow: hidden;
+                        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+                        background: #fff7e6;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        animation: pulse 2s infinite ease-in-out;
+                    }
+                    .app-logo {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                    @keyframes pulse {
+                        0% { transform: scale(1); opacity: 1; }
+                        50% { transform: scale(1.05); opacity: 0.8; }
+                        100% { transform: scale(1); opacity: 1; }
+                    }
+                `}</style>
+            </div>
+        );
+    }
 
     const currentMonth = new Date().getMonth() + 1;
     const currentMonthTuition = tuitionSummary?.records?.find((r: any) => r.month === currentMonth);

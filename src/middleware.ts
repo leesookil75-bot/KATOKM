@@ -56,6 +56,12 @@ export async function middleware(request: NextRequest) {
         // 4. Parent vs Admin Route Protection
         const isParentRoute = pathname.startsWith('/parent');
 
+        if (isParentRoute && parsed.user.role !== 'PARENT') {
+            // Admins shouldn't be in parent area
+            if (parsed.user.role === 'SUPER') return NextResponse.redirect(new URL("/super-admin", request.url));
+            return NextResponse.redirect(new URL("/", request.url));
+        }
+
         if (!isParentRoute && parsed.user.role === 'PARENT') {
             // Parents shouldn't be in admin area
             return NextResponse.redirect(new URL("/parent", request.url));
