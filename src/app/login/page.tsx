@@ -2,14 +2,28 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Phone, Lock, ChevronRight } from "lucide-react";
+import { Phone, Lock, ChevronRight, ShieldCheck, RefreshCw } from "lucide-react";
+import { auth } from "@/lib/firebase/clientApp";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+
+declare global {
+  interface Window {
+    recaptchaVerifier: any;
+  }
+  const grecaptcha: any;
+}
 
 export default function LoginPage() {
     const [phone, setPhone] = useState("");
-    const [password, setPassword] = useState("");
+    const [verificationCode, setVerificationCode] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [showSplash, setShowSplash] = useState(true);
+    
+    // OTP states
+    const [isOtpSent, setIsOtpSent] = useState(false);
+    const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+
     const router = useRouter();
 
     useEffect(() => {
@@ -20,26 +34,90 @@ export default function LoginPage() {
         return () => clearTimeout(timer);
     }, []);
 
-    const handleLogin = async (e: React.FormEvent) => {
+    // Initialize Recaptcha
+    const setupRecaptcha = () => {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'invisible',
+            });
+        }
+    };
+
+    const formatPhoneNumber = (phoneNumber: string) => {
+        // Remove all non-numeric characters
+        const cleaned = phoneNumber.replace(/[^0-9]/g, '');
+        // For South Korea, assuming number starts with 010
+        if (cleaned.startsWith('0')) {
+            return '+82' + cleaned.substring(1);
+        }
+        return '+' + cleaned;
+    };
+
+    const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!phone) {
+            setError("전화번호를 입력해주세요.");
+            return;
+        }
+
         setLoading(true);
         setError("");
 
         try {
+            setupRecaptcha();
+            const appVerifier = window.recaptchaVerifier;
+            const formattedPhone = formatPhoneNumber(phone);
+            
+            const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
+            setConfirmationResult(result);
+            setIsOtpSent(true);
+        } catch (err: any) {
+            console.error("SMS 전송 오류:", err);
+            setError("인증번호 발송에 실패했습니다. 번호를 확인해주세요.");
+            // Reset recaptcha if error
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.render().then((widgetId: any) => {
+                    grecaptcha.reset(widgetId);
+                });
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!verificationCode || !confirmationResult) return;
+
+        setLoading(true);
+        setError("");
+
+        try {
+            // 1. Verify code with Firebase
+            const result = await confirmationResult.confirm(verificationCode);
+            const user = result.user;
+            
+            // 2. Get ID Token
+            const idToken = await user.getIdToken();
+
+            // 3. Send to our backend to verify and issue session
             const res = await fetch("/api/parent/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone, password }),
+                body: JSON.stringify({ idToken }),
             });
 
             if (res.ok) {
                 router.push("/parent");
             } else {
                 const data = await res.json();
-                setError(data.error || "로그인에 실패했습니다.");
+                setError(data.error || "학원 시스템에 등록되지 않은 번호입니다.");
+                // Sign out of firebase to allow retry
+                await auth.signOut();
             }
-        } catch (err) {
-            setError("서버와 통신 중 오류가 발생했습니다.");
+        } catch (err: any) {
+            console.error("인증 오류:", err);
+            setError("인증번호가 일치하지 않습니다.");
         } finally {
             setLoading(false);
         }
@@ -97,47 +175,84 @@ export default function LoginPage() {
                     <p>자녀의 출결 및 현황을 확인하세요</p>
                 </div>
 
-                <form onSubmit={handleLogin} className="login-form">
-                    <div className="input-group">
-                        <label>전화번호</label>
-                        <div className="input-wrapper">
-                            <Phone size={20} className="icon" />
-                            <input
-                                type="tel"
-                                placeholder="010-1234-5678"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                required
-                            />
+                {!isOtpSent ? (
+                    <form onSubmit={handleSendOtp} className="login-form">
+                        <div className="input-group">
+                            <label>휴대폰 번호 인증</label>
+                            <div className="input-wrapper">
+                                <Phone size={20} className="icon" />
+                                <input
+                                    type="tel"
+                                    placeholder="010-1234-5678"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    required
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="input-group">
-                        <label>비밀번호</label>
-                        <div className="input-wrapper">
-                            <Lock size={20} className="icon" />
-                            <input
-                                type="password"
-                                placeholder="초기 비밀번호: 전화번호 뒷자리 4자리"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
+                        {error && <p className="error-message">{error}</p>}
+
+                        <div id="recaptcha-container"></div>
+
+                        <button type="submit" className="login-button" disabled={loading || !phone}>
+                            {loading ? "전송 중..." : "인증번호 받기"}
+                            {!loading && <ChevronRight size={20} />}
+                        </button>
+                    </form>
+                ) : (
+                    <form onSubmit={handleVerifyOtp} className="login-form otp-form">
+                        <div className="otp-banner">
+                            <ShieldCheck size={40} color="#10b981" />
+                            <h3>인증번호 발송 완료</h3>
+                            <p>{phone} 번호로 전송된<br/>6자리 코드를 입력해주세요.</p>
                         </div>
-                    </div>
 
-                    {error && <p className="error-message">{error}</p>}
+                        <div className="input-group">
+                            <div className="input-wrapper">
+                                <Lock size={20} className="icon" />
+                                <input
+                                    type="number"
+                                    placeholder="인증번호 6자리"
+                                    value={verificationCode}
+                                    onChange={(e) => setVerificationCode(e.target.value)}
+                                    autoFocus
+                                    required
+                                />
+                            </div>
+                        </div>
 
-                    <button type="submit" className="login-button" disabled={loading}>
-                        {loading ? "로그인 중..." : "로그인하기"}
-                        {!loading && <ChevronRight size={20} />}
-                    </button>
-                </form>
+                        {error && <p className="error-message">{error}</p>}
+
+                        <button type="submit" className="login-button verify-button" disabled={loading || verificationCode.length < 6}>
+                            {loading ? "학인 중..." : "인증 확인 및 로그인"}
+                            {!loading && <ChevronRight size={20} />}
+                        </button>
+
+                        <button 
+                            type="button" 
+                            className="text-button"
+                            onClick={() => {
+                                setIsOtpSent(false);
+                                setVerificationCode("");
+                                setError("");
+                            }}
+                            disabled={loading}
+                        >
+                            <RefreshCw size={16} /> 번호 다시 입력하기
+                        </button>
+                    </form>
+                )}
 
                 <div className="login-footer">
-                    <p>비밀번호를 분실하셨나요? <br /><span>다니시는 학원 원장님께 문의하여 초기화하실 수 있습니다.</span></p>
+                    <p>학원 시스템에 등록된 번호만<br/><span>로그인이 가능합니다.</span></p>
                 </div>
             </div>
+
+            {/* Recaptcha Global Type fixes below */}
+            <style jsx global>{`
+                .grecaptcha-badge { visibility: hidden; }
+            `}</style>
 
             <style jsx>{`
                 .login-container {
@@ -145,7 +260,7 @@ export default function LoginPage() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: #fdfbf7; /* Logo background matching cream yellow */
+                    background: #fdfbf7;
                     padding: 1.5rem;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 }
@@ -160,7 +275,7 @@ export default function LoginPage() {
                 }
                 .login-header {
                     text-align: center;
-                    margin-bottom: 2.5rem;
+                    margin-bottom: 2rem;
                 }
                 .logo-container {
                     width: 80px;
@@ -194,6 +309,31 @@ export default function LoginPage() {
                     display: flex;
                     flex-direction: column;
                     gap: 1.5rem;
+                }
+                .otp-form {
+                    animation: slideUp 0.3s ease-out;
+                }
+                .otp-banner {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                    background: #f0fdf4;
+                    padding: 1.5rem;
+                    border-radius: 1.5rem;
+                    margin-bottom: 0.5rem;
+                }
+                .otp-banner h3 {
+                    margin: 0.75rem 0 0.25rem;
+                    color: #166534;
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                }
+                .otp-banner p {
+                    color: #15803d;
+                    font-size: 0.9rem;
+                    line-height: 1.4;
+                    margin: 0;
                 }
                 .input-group {
                     display: flex;
@@ -232,8 +372,16 @@ export default function LoginPage() {
                     background: white;
                     box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
                 }
+                
+                /* Hide number input spinners */
+                .input-wrapper input[type="number"]::-webkit-inner-spin-button,
+                .input-wrapper input[type="number"]::-webkit-outer-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                
                 .login-button {
-                    margin-top: 1rem;
+                    margin-top: 0.5rem;
                     background: #ff9800;
                     color: white;
                     padding: 1rem;
@@ -249,6 +397,14 @@ export default function LoginPage() {
                     border: none;
                     cursor: pointer;
                 }
+                .verify-button {
+                    background: #10b981;
+                    box-shadow: 0 4px 10px -1px rgba(16, 185, 129, 0.3);
+                }
+                .verify-button:hover:not(:disabled) {
+                    background: #059669;
+                    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+                }
                 .login-button:hover:not(:disabled) {
                     background: #f57c00;
                     transform: translateY(-2px);
@@ -261,11 +417,28 @@ export default function LoginPage() {
                     opacity: 0.7;
                     cursor: not-allowed;
                 }
+                .text-button {
+                    background: none;
+                    border: none;
+                    color: #64748b;
+                    font-size: 0.9rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.3rem;
+                    margin-top: 0.5rem;
+                    cursor: pointer;
+                    padding: 0.5rem;
+                }
+                .text-button:hover {
+                    color: #1e293b;
+                }
                 .error-message {
                     color: #ef4444;
                     font-size: 0.875rem;
                     text-align: center;
                     font-weight: 600;
+                    animation: shake 0.4s ease-in-out;
                 }
                 .login-footer {
                     margin-top: 2rem;
@@ -279,6 +452,16 @@ export default function LoginPage() {
                 .login-footer span {
                     font-size: 0.8rem;
                     color: #94a3b8;
+                }
+                
+                @keyframes slideUp {
+                    from { transform: translateY(10px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
                 }
             `}</style>
         </div>
