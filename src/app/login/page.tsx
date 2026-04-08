@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Phone, Lock, ChevronRight } from "lucide-react";
 
@@ -9,7 +9,16 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showSplash, setShowSplash] = useState(true);
     const router = useRouter();
+
+    useEffect(() => {
+        // App launch splash screen
+        const timer = setTimeout(() => {
+            setShowSplash(false);
+        }, 1500); // 1.5 seconds splash
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,6 +44,47 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
+
+    if (showSplash) {
+        return (
+            <div className="splash-screen">
+                <div className="logo-container">
+                    <img src="/icon.png" alt="AI-PASS 로고" className="app-logo" />
+                </div>
+                <style jsx>{`
+                    .splash-screen {
+                        min-height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: #fdfbf7;
+                    }
+                    .logo-container {
+                        width: 100px;
+                        height: 100px;
+                        border-radius: 1.5rem;
+                        overflow: hidden;
+                        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+                        background: #fff7e6;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        animation: pulse 2s infinite ease-in-out;
+                    }
+                    .app-logo {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                    @keyframes pulse {
+                        0% { transform: scale(1); opacity: 1; }
+                        50% { transform: scale(1.05); opacity: 0.8; }
+                        100% { transform: scale(1); opacity: 1; }
+                    }
+                `}</style>
+            </div>
+        );
+    }
 
     return (
         <div className="login-container">
