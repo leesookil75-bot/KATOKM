@@ -7,11 +7,11 @@ export function getAdminAuth() {
             privateKey = privateKey.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
         }
 
-        if (process.env.FIREBASE_PROJECT_ID) {
+        if (privateKey) {
             admin.initializeApp({
                 credential: admin.credential.cert({
-                    projectId: process.env.FIREBASE_PROJECT_ID,
-                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                    projectId: "aipass-auth",
+                    clientEmail: "firebase-adminsdk-fbsvc@aipass-auth.iam.gserviceaccount.com",
                     privateKey: privateKey,
                 }),
             });
