@@ -2,9 +2,10 @@ import * as admin from 'firebase-admin';
 
 export function getAdminAuth() {
     if (!admin.apps.length) {
-        const privateKey = process.env.FIREBASE_PRIVATE_KEY
-            ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-            : undefined;
+        let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+        if (privateKey) {
+            privateKey = privateKey.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
+        }
 
         if (process.env.FIREBASE_PROJECT_ID) {
             admin.initializeApp({

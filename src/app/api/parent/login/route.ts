@@ -70,6 +70,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '인증이 만료되었습니다. 다시 시도해주세요.' }, { status: 401 });
         }
         
-        return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
+        // **Return exact error string to UI to debug what's wrong**
+        return NextResponse.json({ error: '서버에러: ' + (error.message || error.toString()) }, { status: 500 });
     }
 }
