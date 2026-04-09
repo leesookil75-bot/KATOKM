@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Joyride, STATUS } from 'react-joyride';
+// @ts-ignore
+import Joyride, { STATUS } from 'react-joyride';
 
 export default function OnboardingTour() {
   const [run, setRun] = useState(false);
@@ -31,8 +32,7 @@ export default function OnboardingTour() {
           </p>
         </div>
       ),
-      placement: 'bottom',
-      disableBeacon: true,
+      disableBeacon: true, /* 검정 점 제거 */
     },
     {
       target: '#tour-student-management',
@@ -135,10 +135,10 @@ export default function OnboardingTour() {
           close: '닫기',
           last: '시작하기',
           next: '다음',
-          skip: '설명 건너뛰기',
+          skip: '가이드 종료',
         }}
       />
-      {/* 다시 보기 버튼 (우측 하단) */}
+      {/* 설명서(가이드) 버튼 (우측 하단) */}
       <button
         onClick={() => {
             localStorage.removeItem('aipass_tour_completed');
@@ -148,24 +148,32 @@ export default function OnboardingTour() {
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            backgroundColor: 'white',
-            border: '1px solid #e2e8f0',
-            borderRadius: '50%',
-            width: '48px',
-            height: '48px',
+            backgroundColor: '#4f46e5',
+            color: 'white',
+            border: 'none',
+            borderRadius: '99px',
+            padding: '12px 20px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            gap: '8px',
+            boxShadow: '0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.15)',
             cursor: 'pointer',
-            zIndex: 9999,
-            color: '#4f46e5',
-            fontWeight: 'bold',
-            fontSize: '20px'
+            zIndex: 9990,
+            fontWeight: '600',
+            fontSize: '15px',
+            transition: 'transform 0.2s, box-shadow 0.2s',
         }}
-        title="가이드 투어 다시 보기"
+        onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 15px 20px -3px rgba(79, 70, 229, 0.4), 0 4px 6px -2px rgba(79, 70, 229, 0.2)';
+        }}
+        onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.15)';
+        }}
+        title="화면 설명서 다시 보기"
       >
-        ?
+        <span>💡</span> 가이드 투어 보기
       </button>
     </>
   );
