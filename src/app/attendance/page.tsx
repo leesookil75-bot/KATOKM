@@ -136,7 +136,7 @@ export default function AttendancePage() {
             <div className="card p-4 flex-col gap-sm">
                 <div className="flex-center justify-between">
                     <h1 className="heading-md">출석부 <span className="text-xs text-gray-400 font-normal">v1.3.7</span></h1>
-                    <div className="flex-center gap-xs bg-gray-100 p-1 rounded-md">
+                    <div id="tour-attendance-mode" className="flex-center gap-xs bg-gray-100 p-1 rounded-md">
                         <button className={`btn text-xs ${view === 'week' ? 'btn-primary' : ''}`}
                             onClick={() => setView('week')} style={{ padding: "0.25rem 0.5rem" }}>주간</button>
                         <button className={`btn text-xs ${view === 'month' ? 'btn-primary' : ''}`}
@@ -188,6 +188,7 @@ export default function AttendancePage() {
                                     return (
                                         <td key={d} className="text-center p-0" style={{ borderRight: '1px solid #f1f5f9' }}>
                                             <button
+                                                id="tour-attendance-cell"
                                                 onClick={() => handleCellClick(student.id, d)}
                                                 style={{
                                                     width: "100%", height: "34px",

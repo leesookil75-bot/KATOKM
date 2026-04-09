@@ -235,7 +235,7 @@ export default function MessagePage() {
                             <option value="all">전체 반</option>
                             {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                         </select>
-                        <select className="input text-sm p-2 flex-1" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
+                        <select id="tour-msg-filter" className="input text-sm p-2 flex-1" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
                             <option value="all">전체 상태</option>
                             <option value="absent">결석/미처리</option>
                             <option value="present">출석</option>
@@ -306,7 +306,7 @@ export default function MessagePage() {
                 <div className="card split-panel-right gap-md">
                     <div className="flex-center justify-between shrink-0">
                         <h3 className="heading-sm">메시지 작성</h3>
-                        <button className="btn btn-secondary text-xs flex-center gap-1" onClick={() => setIsTemplateModalOpen(true)}>
+                        <button id="tour-msg-template" className="btn btn-secondary text-xs flex-center gap-1" onClick={() => setIsTemplateModalOpen(true)}>
                             <Plus size={14} /> 템플릿
                         </button>
                     </div>
@@ -318,7 +318,7 @@ export default function MessagePage() {
                         onChange={e => setMessage(e.target.value)}
                     />
 
-                    <div className="action-buttons" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                    <div id="tour-msg-send" className="action-buttons" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
                         <button className="btn btn-secondary py-3 flex-center gap-2" onClick={() => {
                             navigator.clipboard.writeText(message);
                             alert("복사되었습니다.");

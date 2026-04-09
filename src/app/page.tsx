@@ -2,7 +2,6 @@ import styles from "./page.module.css";
 import { Users, CheckCircle, MessageCircle, CreditCard, Monitor, Plus } from "lucide-react";
 import Link from 'next/link';
 import { getSession } from "@/lib/auth";
-import OnboardingTour from "@/components/OnboardingTour";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,8 +11,6 @@ export default async function Home() {
 
   return (
     <main className={styles.main}>
-      <OnboardingTour />
-      
       <header className={styles.hero} id="tour-welcome">
         <div className={styles.badge}>v2.0 Stable</div>
         <h1 className="heading-xl" style={{ marginBottom: "0.5rem", color: "var(--primary)" }}>

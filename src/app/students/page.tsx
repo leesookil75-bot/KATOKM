@@ -178,7 +178,7 @@ export default function StudentManager() {
             <header className="flex-center justify-between" style={{ marginBottom: "1.5rem" }}>
                 <h1 className="heading-lg">학생 관리</h1>
                 <div className="flex-center gap-sm">
-                    <button className="btn btn-primary" onClick={() => setIsFormOpen(true)}>
+                    <button id="tour-student-add" className="btn btn-primary" onClick={() => setIsFormOpen(true)}>
                         <Plus size={20} />
                         <span>학생 추가</span>
                     </button>
@@ -186,7 +186,7 @@ export default function StudentManager() {
             </header>
 
             {/* Student List */}
-            <div className="table-container">
+            <div id="tour-student-table" className="table-container">
                 <table className="table">
                     <thead>
                         <tr>
@@ -295,7 +295,7 @@ export default function StudentManager() {
                                     </td>
                                     <td>
                                         <div className="flex-center gap-xs" style={{ justifyContent: "center" }}>
-                                            <button className="btn" style={{ padding: "0.4rem", color: "var(--primary)", backgroundColor: "#eef2ff" }} onClick={() => handleResetPassword(student)} title="학부모 비밀번호 초기화">
+                                            <button id="tour-student-reset" className="btn" style={{ padding: "0.4rem", color: "var(--primary)", backgroundColor: "#eef2ff" }} onClick={() => handleResetPassword(student)} title="학부모 비밀번호 초기화">
                                                 리셋
                                             </button>
                                             <button className="btn" style={{ padding: "0.4rem", color: "#ef4444", backgroundColor: "#fef2f2" }} onClick={() => handleDelete(student.id)}>

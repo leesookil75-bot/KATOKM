@@ -174,7 +174,7 @@ export default function TuitionPage() {
                 </div>
             ) : (
                 /* Table Container */
-                <div className="flex-1 overflow-auto p-4 table-container relative">
+                <div id="tour-tuition-table" className="flex-1 overflow-auto p-4 table-container relative">
                     <table className="table text-sm w-full" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
                         <thead className="sticky top-0 z-20 bg-gray-50 shadow-sm">
                             <tr>
