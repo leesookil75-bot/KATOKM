@@ -5,28 +5,29 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { STATUS } from 'react-joyride';
 
-// 안전한 dynamic import 로직 (버전에 따른 export 형태 완벽 대응)
-const Joyride = dynamic(() => import('react-joyride').then((mod: any) => {
-    if (typeof mod.default === 'function') return mod.default;
-    if (mod.default && typeof mod.default.Joyride === 'function') return mod.default.Joyride;
-    return mod.Joyride;
-}), { ssr: false }) as any;
+// 가장 안정적인 default extraction 로직
+const Joyride = dynamic(
+  () => import('react-joyride').then(mod => (mod as any).default || (mod as any).Joyride),
+  { ssr: false }
+) as any;
 
 export default function OnboardingTour() {
   const [run, setRun] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showIntroOverlay, setShowIntroOverlay] = useState(false);
-  const [tourKey, setTourKey] = useState(0);
+  const [stepIndex, setStepIndex] = useState(0);
   const pathname = usePathname();
 
   useEffect(() => {
     setIsMounted(true);
-    const hasSeenOverlay = localStorage.getItem(`aipass_overlay_${pathname}`);
+    // V2 키로 변경하여 사용자에게 오버레이 강제 재노출
+    const hasSeenOverlay = localStorage.getItem(`aipass_tourOverlay_v2_${pathname}`);
     if (!hasSeenOverlay) {
         setShowIntroOverlay(true);
     }
-    // 페이지 이동 시 이전 페이지의 실행 상태를 강제로 꺼줌
+    // 페이지 이동 시 투어 중단 및 스텝 초기화
     setRun(false);
+    setStepIndex(0);
   }, [pathname]);
 
   // 비관리자 접근 페이지(로그인창, 회원가입, 키오스크뷰)에서는 가이드 투어를 완전히 끔
@@ -215,11 +216,21 @@ export default function OnboardingTour() {
   }
 
   const handleJoyrideCallback = (data: any) => {
-    const { status } = data;
+    const { status, type, index, action } = data;
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+
+    // 사용자가 다음/이전 버튼을 누르거나 스텝이 변경되었을 때 stepIndex 강제 동기화
+    if (type === 'step:after') {
+      if (action === 'next' || action === 'primary') {
+         setStepIndex(index + 1);
+      } else if (action === 'prev') {
+         setStepIndex(index - 1);
+      }
+    }
 
     if (finishedStatuses.includes(status)) {
       setRun(false);
+      setStepIndex(0); // 투어 종료 시 다음을 위해 0으로 초기화
     }
   };
 
@@ -227,15 +238,12 @@ export default function OnboardingTour() {
     // 배경 어두워짐 효과 해제
     if (showIntroOverlay) {
         setShowIntroOverlay(false);
-        localStorage.setItem(`aipass_overlay_${pathname}`, 'true');
+        localStorage.setItem(`aipass_tourOverlay_v2_${pathname}`, 'true');
     }
     
-    // 컴포넌트를 강제 언마운트/리마운트 시켜 내부 상태(stepIndex) 초기화 유도
-    setRun(false);
-    setTimeout(() => {
-        setTourKey(prev => prev + 1);
-        setRun(true);
-    }, 50);
+    // 강제 스텝 리셋 후 구동
+    setStepIndex(0);
+    setRun(true);
   };
 
   if (!isMounted) return null;
@@ -274,7 +282,7 @@ export default function OnboardingTour() {
 
       {/* @ts-ignore */}
       <Joyride
-        key={`${pathname}-${tourKey}`}
+        stepIndex={stepIndex}
         disableBeacon={true}
         callback={handleJoyrideCallback}
         continuous={true}
