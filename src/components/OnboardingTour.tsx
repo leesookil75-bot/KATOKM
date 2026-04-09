@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { STATUS } from 'react-joyride';
 
-// 가장 안정적인 default extraction 로직
+// 완전히 안정적인 로딩 방식
 const Joyride = dynamic(
   () => import('react-joyride').then(mod => (mod as any).default || (mod as any).Joyride),
   { ssr: false }
@@ -16,27 +15,27 @@ export default function OnboardingTour() {
   const [isMounted, setIsMounted] = useState(false);
   const [showIntroOverlay, setShowIntroOverlay] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const [tourKey, setTourKey] = useState(0);
   const pathname = usePathname();
 
   useEffect(() => {
     setIsMounted(true);
-    // V2 키로 변경하여 사용자에게 오버레이 강제 재노출
-    const hasSeenOverlay = localStorage.getItem(`aipass_tourOverlay_v2_${pathname}`);
+    // V3 키로 리셋 보장
+    const hasSeenOverlay = localStorage.getItem(`aipass_tourOverlay_v3_${pathname}`);
     if (!hasSeenOverlay) {
         setShowIntroOverlay(true);
     }
-    // 페이지 이동 시 투어 중단 및 스텝 초기화
+    
+    // 경로 변경 시 초기화
     setRun(false);
     setStepIndex(0);
   }, [pathname]);
 
-  // 비관리자 접근 페이지(로그인창, 회원가입, 키오스크뷰)에서는 가이드 투어를 완전히 끔
   const noTourPaths = ['/login', '/signup', '/admin-login', '/kiosk'];
   if (noTourPaths.includes(pathname)) return null;
 
   let steps: any[] = [];
 
-  // (Steps are defined inside)...
   if (pathname === '/') {
     steps = [
       {
@@ -217,9 +216,8 @@ export default function OnboardingTour() {
 
   const handleJoyrideCallback = (data: any) => {
     const { status, type, index, action } = data;
-    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
-
-    // 사용자가 다음/이전 버튼을 누르거나 스텝이 변경되었을 때 stepIndex 강제 동기화
+    
+    // 강제 동기화 회피 상수 안전 처리
     if (type === 'step:after') {
       if (action === 'next' || action === 'primary') {
          setStepIndex(index + 1);
@@ -228,26 +226,28 @@ export default function OnboardingTour() {
       }
     }
 
-    if (finishedStatuses.includes(status)) {
+    if (status === 'finished' || status === 'skipped') {
       setRun(false);
-      setStepIndex(0); // 투어 종료 시 다음을 위해 0으로 초기화
+      setStepIndex(0);
     }
   };
 
   const handleHelpClick = () => {
-    // 배경 어두워짐 효과 해제
     if (showIntroOverlay) {
         setShowIntroOverlay(false);
-        localStorage.setItem(`aipass_tourOverlay_v2_${pathname}`, 'true');
+        localStorage.setItem(`aipass_tourOverlay_v3_${pathname}`, 'true');
     }
     
-    // 강제 스텝 리셋 후 구동
-    setStepIndex(0);
-    setRun(true);
+    // 리액트 사이클과 완전 분리하여 렌더링 강제 안정화
+    setRun(false);
+    setTimeout(() => {
+        setTourKey(prev => prev + 1);
+        setStepIndex(0);
+        setRun(true);
+    }, 50);
   };
 
   if (!isMounted) return null;
-  // 등록된 투어가 없는 페이지라면 보이지 않음
   if (steps.length === 0) return null;
 
   return (
@@ -262,13 +262,14 @@ export default function OnboardingTour() {
             animation: pulse-ring 2s infinite !important;
             box-shadow: 0 0 20px rgba(79, 70, 229, 0.8) !important;
         }
-        /* react-joyride 검은 점 강제 삭제 */
+        button[class*="beacon"], div[class*="beacon"], .react-joyride__spotlight {
+            /* spotlight can be manipulated via options */
+        }
         button[class*="beacon"], div[class*="beacon"] {
           display: none !important;
         }
       `}} />
       
-      {/* 화면 전체를 어둡게 가리는 오버레이 */}
       {showIntroOverlay && (
         <div style={{
             position: 'fixed',
@@ -282,6 +283,7 @@ export default function OnboardingTour() {
 
       {/* @ts-ignore */}
       <Joyride
+        key={`${pathname}-${tourKey}`}
         stepIndex={stepIndex}
         disableBeacon={true}
         callback={handleJoyrideCallback}
@@ -326,7 +328,6 @@ export default function OnboardingTour() {
         }}
       />
 
-      {/* 설명서(가이드) 버튼 (우측 하단) */}
       <button
         onClick={handleHelpClick}
         className={showIntroOverlay ? "help-pulse" : ""}
@@ -344,11 +345,10 @@ export default function OnboardingTour() {
             gap: '8px',
             boxShadow: '0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.15)',
             cursor: 'pointer',
-            zIndex: 9990, /* 오버레이보다 높게 설정 */
+            zIndex: 9990,
             fontWeight: '600',
             fontSize: '15px',
             transition: 'transform 0.2s, box-shadow 0.2s',
-            // 오버레이가 있을 땐 클래스로 애니메이션 덮어씌움
             animation: !showIntroOverlay ? 'pulse-ring 3s infinite' : 'none',
         }}
         onMouseOver={(e) => {
