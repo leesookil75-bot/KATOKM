@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 
-// 완전히 안정적인 로딩 방식
 const Joyride = dynamic(
   () => import('react-joyride').then(mod => (mod as any).default || (mod as any).Joyride),
   { ssr: false }
@@ -32,7 +31,7 @@ export default function OnboardingTour() {
   }, [pathname]);
 
   const noTourPaths = ['/login', '/signup', '/admin-login', '/kiosk'];
-  if (noTourPaths.includes(pathname)) return null;
+  if (noTourPaths.includes(pathname || '')) return null;
 
   let steps: any[] = [];
 
@@ -216,6 +215,7 @@ export default function OnboardingTour() {
 
   const handleJoyrideCallback = (data: any) => {
     const { status, type, index, action } = data;
+    console.log('[Joyride Callback]', data);
     
     // 강제 동기화 회피 상수 안전 처리
     if (type === 'step:after') {
@@ -233,18 +233,22 @@ export default function OnboardingTour() {
   };
 
   const handleHelpClick = () => {
+    console.log('[OnboardingTour] Help button clicked');
     if (showIntroOverlay) {
         setShowIntroOverlay(false);
         localStorage.setItem(`aipass_tourOverlay_v3_${pathname}`, 'true');
     }
     
     // 리액트 사이클과 완전 분리하여 렌더링 강제 안정화
+    // dynamic import 컴포넌트의 경우 50ms는 너무 짧아 렌더링 전 이벤트가 증발할 수 있음
     setRun(false);
+    setTourKey(prev => prev + 1);
+    
     setTimeout(() => {
-        setTourKey(prev => prev + 1);
+        console.log('[OnboardingTour] Start trigger fired');
         setStepIndex(0);
         setRun(true);
-    }, 50);
+    }, 300);
   };
 
   if (!isMounted) return null;

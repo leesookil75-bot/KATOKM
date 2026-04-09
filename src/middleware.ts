@@ -36,14 +36,13 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // 2. Redirect to specific login pages if no session for other routes
-    if (!session) {
-        // If they are trying to access admin routes, redirect to admin-login
-        if (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
-            return NextResponse.redirect(new URL("/admin-login", request.url));
-        }
-        return NextResponse.redirect(new URL("/login", request.url));
-    }
+    // 2. 임시: 로컬 테스트를 위해 리다이렉트 무시
+    // if (!session) {
+    //     if (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
+    //         return NextResponse.redirect(new URL("/admin-login", request.url));
+    //     }
+    //     return NextResponse.redirect(new URL("/login", request.url));
+    // }
 
     try {
         const parsed = await decrypt(session);
@@ -79,10 +78,11 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     } catch (err) {
         // Session expired or invalid
-        if (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
-            return NextResponse.redirect(new URL("/admin-login", request.url));
-        }
-        return NextResponse.redirect(new URL("/login", request.url));
+        // if (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
+        //     return NextResponse.redirect(new URL("/admin-login", request.url));
+        // }
+        // return NextResponse.redirect(new URL("/login", request.url));
+        return NextResponse.next();
     }
 }
 
