@@ -82,17 +82,6 @@ export default function OnboardingTour() {
             </p>
           </div>
         ),
-      },
-      {
-        target: '#tour-kiosk',
-        content: (
-          <div>
-            <h3 style={{ margin: '0 0 0.5rem 0', color: '#8b5cf6' }}>스마트 키오스크 🖥️</h3>
-            <p style={{ margin: 0, color: '#475569', fontSize: '14px', lineHeight: '1.5' }}>
-              원장님이 쓰시는 이 기기(PC나 태블릿)를 학생 전용 출결 단말기로 변신시킵니다!
-            </p>
-          </div>
-        ),
       }
     ];
   } else if (pathname === '/students') {

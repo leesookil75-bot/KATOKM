@@ -175,7 +175,7 @@ export default function AttendancePage() {
                             ))}
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="tour-attendance-cell">
                         {filteredStudents.map(student => (
                             <tr key={student.id}>
                                 <td style={{ position: 'sticky', left: 0, zIndex: 10, background: 'white', fontWeight: '600' }}>
@@ -188,7 +188,6 @@ export default function AttendancePage() {
                                     return (
                                         <td key={d} className="text-center p-0" style={{ borderRight: '1px solid #f1f5f9' }}>
                                             <button
-                                                id="tour-attendance-cell"
                                                 onClick={() => handleCellClick(student.id, d)}
                                                 style={{
                                                     width: "100%", height: "34px",

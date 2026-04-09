@@ -32,7 +32,7 @@ export default async function Home() {
           <p>실시간 등하원 체크 및 요약 통계</p>
         </Link>
 
-        <Link href="/message" className={styles.card}>
+        <Link href="/message" className={styles.card} id="tour-message">
           <MessageCircle size={48} color="#10b981" style={{ marginBottom: "1.5rem" }} />
           <h2>알림 전송</h2>
           <p>학부모님 카톡/문자 자동 알림</p>

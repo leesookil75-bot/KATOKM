@@ -196,7 +196,7 @@ export default function StudentManager() {
                             <th style={{ minWidth: "80px" }}>약정일</th>
                             <th style={{ minWidth: "100px" }}>출석코드</th>
                             <th style={{ width: "30%" }}>메모</th>
-                            <th style={{ width: "120px", textAlign: "center" }}>관리</th>
+                            <th id="tour-student-reset" style={{ width: "120px", textAlign: "center" }}>관리</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -295,7 +295,7 @@ export default function StudentManager() {
                                     </td>
                                     <td>
                                         <div className="flex-center gap-xs" style={{ justifyContent: "center" }}>
-                                            <button id="tour-student-reset" className="btn" style={{ padding: "0.4rem", color: "var(--primary)", backgroundColor: "#eef2ff" }} onClick={() => handleResetPassword(student)} title="학부모 비밀번호 초기화">
+                                            <button className="btn" style={{ padding: "0.4rem", color: "var(--primary)", backgroundColor: "#eef2ff" }} onClick={() => handleResetPassword(student)} title="학부모 비밀번호 초기화">
                                                 리셋
                                             </button>
                                             <button className="btn" style={{ padding: "0.4rem", color: "#ef4444", backgroundColor: "#fef2f2" }} onClick={() => handleDelete(student.id)}>
