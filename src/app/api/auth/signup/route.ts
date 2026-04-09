@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
+import { getAdminAuth } from '@/lib/firebase/adminApp';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,11 +10,24 @@ export async function POST(request: Request) {
         const {
             academyName,
             adminName,
-            phone,
+            idToken,
             address,
             username,
             password
         } = body;
+
+        if (!idToken) {
+            return NextResponse.json({ error: '휴대폰 본인인증이 완료되지 않았습니다.' }, { status: 400 });
+        }
+
+        // Verify the Firebase idToken
+        const adminAuth = getAdminAuth();
+        const decodedToken = await adminAuth.verifyIdToken(idToken);
+        const verifiedPhone = decodedToken.phone_number;
+
+        if (!verifiedPhone) {
+            return NextResponse.json({ error: '유효한 전화번호 정보가 없습니다.' }, { status: 400 });
+        }
 
         // Check if username exists
         const { rows: existingUser } = await sql`
@@ -41,7 +55,7 @@ export async function POST(request: Request) {
                 'ACADEMY', 
                 ${academyName}, 
                 ${adminName}, 
-                ${phone}, 
+                ${verifiedPhone}, 
                 ${address}, 
                 'PENDING'
             )
