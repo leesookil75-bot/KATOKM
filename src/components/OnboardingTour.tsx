@@ -15,10 +15,18 @@ export default function OnboardingTour() {
   const [showIntroOverlay, setShowIntroOverlay] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [tourKey, setTourKey] = useState(0);
+  const [viewPrefix, setViewPrefix] = useState('.pc-view '); // 기본 fallback
   const pathname = usePathname();
 
   useEffect(() => {
     setIsMounted(true);
+    // 뷰포트 크기에 따른 타겟 프리픽스 설정 (모바일뷰 / PC뷰 돔 중복 회피)
+    const handleResize = () => {
+        setViewPrefix(window.innerWidth < 1024 ? '.mobile-view ' : '.pc-view ');
+    };
+    handleResize(); // 초기 설정
+    window.addEventListener('resize', handleResize);
+
     // V3 키로 리셋 보장
     const hasSeenOverlay = localStorage.getItem(`aipass_tourOverlay_v3_${pathname}`);
     if (!hasSeenOverlay) {
@@ -28,17 +36,20 @@ export default function OnboardingTour() {
     // 경로 변경 시 초기화
     setRun(false);
     setStepIndex(0);
+
+    return () => window.removeEventListener('resize', handleResize);
   }, [pathname]);
 
   const noTourPaths = ['/login', '/signup', '/admin-login', '/kiosk'];
   if (noTourPaths.includes(pathname || '')) return null;
 
   let steps: any[] = [];
+  const pf = viewPrefix;
 
   if (pathname === '/') {
     steps = [
       {
-        target: '#tour-welcome',
+        target: `${pf}#tour-welcome`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#1e293b' }}>환영합니다, 원장님! 🎉</h3>
@@ -51,7 +62,7 @@ export default function OnboardingTour() {
         disableBeacon: true,
       },
       {
-        target: '#tour-student-management',
+        target: `${pf}#tour-student-management`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#ec4899' }}>학생 관리 메뉴</h3>
@@ -62,7 +73,7 @@ export default function OnboardingTour() {
         ),
       },
       {
-        target: '#tour-attendance',
+        target: `${pf}#tour-attendance`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#f59e0b' }}>출석부 메뉴</h3>
@@ -73,7 +84,7 @@ export default function OnboardingTour() {
         ),
       },
       {
-        target: '#tour-message',
+        target: `${pf}#tour-message`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#10b981' }}>알림 전송 메뉴</h3>
@@ -84,7 +95,7 @@ export default function OnboardingTour() {
         ),
       },
       {
-        target: '#tour-tuition',
+        target: `${pf}#tour-tuition`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#06b6d4' }}>수강료 관리 💰</h3>
@@ -99,7 +110,7 @@ export default function OnboardingTour() {
   } else if (pathname === '/students') {
     steps = [
       {
-        target: '#tour-student-add',
+        target: `${pf}#tour-student-add`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#3b82f6' }}>학생 추가하기</h3>
@@ -111,7 +122,7 @@ export default function OnboardingTour() {
         disableBeacon: true,
       },
       {
-        target: '#tour-student-table',
+        target: `${pf}#tour-student-table`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#6366f1' }}>실시간 표 수정</h3>
@@ -122,7 +133,7 @@ export default function OnboardingTour() {
         ),
       },
       {
-        target: '#tour-student-reset',
+        target: `${pf}#tour-student-reset`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#f43f5e' }}>비밀번호 강제 초기화</h3>
@@ -136,7 +147,7 @@ export default function OnboardingTour() {
   } else if (pathname === '/attendance') {
     steps = [
       {
-        target: '#tour-attendance-mode',
+        target: `${pf}#tour-attendance-mode`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#3b82f6' }}>주간/월간 모드</h3>
@@ -148,7 +159,7 @@ export default function OnboardingTour() {
         disableBeacon: true,
       },
       {
-        target: '#tour-attendance-cell',
+        target: `${pf}#tour-attendance-cell`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#ef4444' }}>간편 결석/지각 처리</h3>
@@ -162,7 +173,7 @@ export default function OnboardingTour() {
   } else if (pathname === '/message') {
     steps = [
       {
-        target: '#tour-msg-filter',
+        target: `${pf}#tour-msg-filter`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#8b5cf6' }}>스마트 대상 선택</h3>
@@ -174,7 +185,7 @@ export default function OnboardingTour() {
         disableBeacon: true,
       },
       {
-        target: '#tour-msg-template',
+        target: `${pf}#tour-msg-template`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#2dd4bf' }}>템플릿 즐겨찾기</h3>
@@ -185,7 +196,7 @@ export default function OnboardingTour() {
         ),
       },
       {
-        target: '#tour-msg-send',
+        target: `${pf}#tour-msg-send`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#3b82f6' }}>최종 발송</h3>
@@ -199,7 +210,7 @@ export default function OnboardingTour() {
   } else if (pathname === '/tuition') {
     steps = [
       {
-        target: '#tour-tuition-table',
+        target: `${pf}#tour-tuition-table`,
         content: (
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#f59e0b' }}>원터치 수납표</h3>
