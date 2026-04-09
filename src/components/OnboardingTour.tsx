@@ -1,20 +1,28 @@
-"use client";
-
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { STATUS } from 'react-joyride';
 
-const Joyride = dynamic(() => import('react-joyride').then(mod => (mod as any).default || (mod as any).Joyride), { ssr: false }) as any;
+// 안전한 dynamic import 로직 (버전에 따른 export 형태 완벽 대응)
+const Joyride = dynamic(() => import('react-joyride').then((mod: any) => {
+    if (typeof mod.default === 'function') return mod.default;
+    if (mod.default && typeof mod.default.Joyride === 'function') return mod.default.Joyride;
+    return mod.Joyride;
+}), { ssr: false }) as any;
 
 export default function OnboardingTour() {
   const [run, setRun] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [showIntroOverlay, setShowIntroOverlay] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    const hasSeenOverlay = localStorage.getItem(`aipass_overlay_${pathname}`);
+    if (!hasSeenOverlay) {
+        setShowIntroOverlay(true);
+    }
+  }, [pathname]);
 
   // 비관리자 접근 페이지(로그인창, 회원가입, 키오스크뷰)에서는 가이드 투어를 완전히 끔
   const noTourPaths = ['/login', '/signup', '/admin-login', '/kiosk'];
@@ -22,7 +30,7 @@ export default function OnboardingTour() {
 
   let steps: any[] = [];
 
-  // 페이지 경로에 따라 다른 시나리오(Steps) 로드
+  // (Steps are defined inside)...
   if (pathname === '/') {
     steps = [
       {
@@ -210,6 +218,15 @@ export default function OnboardingTour() {
     }
   };
 
+  const handleHelpClick = () => {
+    // 배경 어두워짐 효과 해제
+    if (showIntroOverlay) {
+        setShowIntroOverlay(false);
+        localStorage.setItem(`aipass_overlay_${pathname}`, 'true');
+    }
+    setRun(true);
+  };
+
   if (!isMounted) return null;
   // 등록된 투어가 없는 페이지라면 보이지 않음
   if (steps.length === 0) return null;
@@ -219,15 +236,31 @@ export default function OnboardingTour() {
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes pulse-ring {
           0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
-          70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+          70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(79, 70, 229, 0); }
           100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
         }
-        /* 어떤 경우에도 react-joyride의 검은 점(Beacon)이 화면에 나타나지 않도록 강제 삭제 */
+        .help-pulse {
+            animation: pulse-ring 2s infinite !important;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.8) !important;
+        }
+        /* react-joyride 검은 점 강제 삭제 */
         button[class*="beacon"], div[class*="beacon"] {
           display: none !important;
         }
       `}} />
       
+      {/* 화면 전체를 어둡게 가리는 오버레이 */}
+      {showIntroOverlay && (
+        <div style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            zIndex: 9980,
+            backdropFilter: 'blur(2px)',
+            transition: 'opacity 0.3s ease-out'
+        }} />
+      )}
+
       {/* @ts-ignore */}
       <Joyride
         disableBeacon={true}
@@ -246,7 +279,7 @@ export default function OnboardingTour() {
             textColor: '#1e293b',
             backgroundColor: '#ffffff',
             arrowColor: '#ffffff',
-            overlayColor: 'rgba(0, 0, 0, 0.5)',
+            overlayColor: 'rgba(0, 0, 0, 0.65)',
           },
           buttonNext: {
             backgroundColor: '#4f46e5',
@@ -272,11 +305,11 @@ export default function OnboardingTour() {
           skip: '가이드 종료',
         }}
       />
+
       {/* 설명서(가이드) 버튼 (우측 하단) */}
       <button
-        onClick={() => {
-            setRun(true);
-        }}
+        onClick={handleHelpClick}
+        className={showIntroOverlay ? "help-pulse" : ""}
         style={{
             position: 'fixed',
             bottom: '24px',
@@ -291,23 +324,23 @@ export default function OnboardingTour() {
             gap: '8px',
             boxShadow: '0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.15)',
             cursor: 'pointer',
-            zIndex: 9990,
+            zIndex: 9990, /* 오버레이보다 높게 설정 */
             fontWeight: '600',
             fontSize: '15px',
             transition: 'transform 0.2s, box-shadow 0.2s',
-            animation: 'pulse-ring 2s infinite',
+            // 오버레이가 있을 땐 클래스로 애니메이션 덮어씌움
+            animation: !showIntroOverlay ? 'pulse-ring 3s infinite' : 'none',
         }}
         onMouseOver={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 15px 20px -3px rgba(79, 70, 229, 0.4), 0 4px 6px -2px rgba(79, 70, 229, 0.2)';
         }}
         onMouseOut={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.15)';
         }}
-        title="화면 설명서 다시 보기"
+        title="도움말 보기"
       >
-        <span>💡</span> 도움말 보기
+        <span style={{ fontSize: '18px' }}>💡</span> 
+        {showIntroOverlay ? '여기를 눌러 투어 시작!' : '도움말 보기'}
       </button>
     </>
   );
