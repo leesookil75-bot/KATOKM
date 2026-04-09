@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-// @ts-ignore
-import Joyride, { STATUS } from 'react-joyride';
+import { Joyride, STATUS } from 'react-joyride';
 
 export default function OnboardingTour() {
   const [run, setRun] = useState(false);
