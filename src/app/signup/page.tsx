@@ -249,6 +249,8 @@ export default function SignupPage() {
           color: #475569;
         }
         .form-group input, .form-group textarea {
+          width: 100%;
+          box-sizing: border-box;
           padding: 0.75rem 1rem;
           border: 1px solid #cbd5e1;
           border-radius: 0.75rem;
