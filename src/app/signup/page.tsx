@@ -67,7 +67,7 @@ export default function SignupPage() {
                             <CheckCircle2 size={64} color="#10b981" />
                         </div>
                         <h1>회원가입 신청 완료</h1>
-                        <p>슈퍼관리자의 승인 후 출결 매니저를 사용할 수 있습니다.</p>
+                        <p>슈퍼관리자의 승인 후 AI-PASS를 사용할 수 있습니다.</p>
                     </div>
                     <button onClick={() => router.push("/login")} className="btn btn-primary auth-btn">
                         로그인 화면으로 이동
@@ -128,7 +128,7 @@ export default function SignupPage() {
                         <ArrowLeft size={20} />
                     </Link>
                     <h1>학원 관리자 회원가입</h1>
-                    <p>출결 매니저 v2.0 시작하기</p>
+                    <p>AI-PASS 원장님 시작하기</p>
                 </div>
 
                 <form onSubmit={handleSignup} className="auth-form">

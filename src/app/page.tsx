@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const session = await getSession();
-  const academyName = session?.user?.academy_name || session?.user?.admin_name || "출결 매니저";
+  const academyName = session?.user?.academy_name || session?.user?.admin_name || "AI-PASS";
 
   return (
     <main className={styles.main}>

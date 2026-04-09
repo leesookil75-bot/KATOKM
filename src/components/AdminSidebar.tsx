@@ -24,7 +24,7 @@ export default function AdminSidebar() {
         <aside className="pc-sidebar">
             <div className="sidebar-logo">
                 <LayoutDashboard size={24} color="var(--primary)" />
-                <span>출결 매니저 v2.0</span>
+                <span>AI-PASS 원장님</span>
             </div>
 
             <nav className="sidebar-nav">
