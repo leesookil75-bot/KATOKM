@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { STATUS } from 'react-joyride';
 
-const Joyride = dynamic(() => import('react-joyride').then(mod => mod.default || (mod as any).Joyride), { ssr: false }) as any;
+const Joyride = dynamic(() => import('react-joyride').then(mod => (mod as any).default || (mod as any).Joyride), { ssr: false }) as any;
 
 export default function OnboardingTour() {
   const [run, setRun] = useState(false);
@@ -12,14 +12,7 @@ export default function OnboardingTour() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Check if the user has completed the tour before
-    const hasSeenTour = localStorage.getItem('aipass_tour_completed');
-    if (!hasSeenTour) {
-      // Delay slightly so the UI finishes rendering
-      setTimeout(() => {
-        setRun(true);
-      }, 1000);
-    }
+    // 자동 시작 기능을 완전히 끄고 하단 애니메이션 버튼 클릭으로만 시작되게 함
   }, []);
 
   const steps: any[] = [
@@ -97,8 +90,21 @@ export default function OnboardingTour() {
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes pulse-ring {
+          0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+          70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+          100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+        /* 어떤 경우에도 react-joyride의 검은 점(Beacon)이 화면에 나타나지 않도록 강제 삭제 */
+        button[class*="beacon"], div[class*="beacon"] {
+          display: none !important;
+        }
+      `}} />
+      
       {/* @ts-ignore */}
       <Joyride
+        disableBeacon={true}
         callback={handleJoyrideCallback}
         continuous={true}
         hideCloseButton={false}
@@ -164,6 +170,7 @@ export default function OnboardingTour() {
             fontWeight: '600',
             fontSize: '15px',
             transition: 'transform 0.2s, box-shadow 0.2s',
+            animation: 'pulse-ring 2s infinite',
         }}
         onMouseOver={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)';
