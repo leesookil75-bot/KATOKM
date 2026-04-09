@@ -78,8 +78,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
                         flex: 1;
                         padding: 2rem;
                         background: #f8fafc;
-                        overflow-y: auto;
-                        max-height: 100vh;
+                        /* Joyride 호환성을 위해 개별 스크롤 대신 브라우저 기본 스크롤 사용 */
                     }
                 }
             `}</style>

@@ -301,7 +301,12 @@ export default function OnboardingTour() {
             textColor: '#1e293b',
             backgroundColor: '#ffffff',
             arrowColor: '#ffffff',
-            overlayColor: 'rgba(0, 0, 0, 0.65)',
+            overlayColor: 'rgba(0, 0, 0, 0.75)',
+          },
+          spotlight: {
+            backgroundColor: 'transparent',
+            borderRadius: '8px',
+            boxShadow: '0 0 0 4px rgba(79, 70, 229, 0.5)', // 파란색 은은한 테두리로 강조 타겟 선명화
           },
           buttonNext: {
             backgroundColor: '#4f46e5',
