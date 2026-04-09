@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-// @ts-ignore
-import Joyride, { STATUS } from 'react-joyride';
+import dynamic from 'next/dynamic';
+import { STATUS } from 'react-joyride';
+
+const Joyride = dynamic(() => import('react-joyride').then(mod => mod.default || (mod as any).Joyride), { ssr: false }) as any;
 
 export default function OnboardingTour() {
   const [run, setRun] = useState(false);
