@@ -16,6 +16,7 @@ export default function OnboardingTour() {
   const [run, setRun] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showIntroOverlay, setShowIntroOverlay] = useState(false);
+  const [tourKey, setTourKey] = useState(0);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -24,6 +25,8 @@ export default function OnboardingTour() {
     if (!hasSeenOverlay) {
         setShowIntroOverlay(true);
     }
+    // 페이지 이동 시 이전 페이지의 실행 상태를 강제로 꺼줌
+    setRun(false);
   }, [pathname]);
 
   // 비관리자 접근 페이지(로그인창, 회원가입, 키오스크뷰)에서는 가이드 투어를 완전히 끔
@@ -226,7 +229,13 @@ export default function OnboardingTour() {
         setShowIntroOverlay(false);
         localStorage.setItem(`aipass_overlay_${pathname}`, 'true');
     }
-    setRun(true);
+    
+    // 컴포넌트를 강제 언마운트/리마운트 시켜 내부 상태(stepIndex) 초기화 유도
+    setRun(false);
+    setTimeout(() => {
+        setTourKey(prev => prev + 1);
+        setRun(true);
+    }, 50);
   };
 
   if (!isMounted) return null;
@@ -265,6 +274,7 @@ export default function OnboardingTour() {
 
       {/* @ts-ignore */}
       <Joyride
+        key={`${pathname}-${tourKey}`}
         disableBeacon={true}
         callback={handleJoyrideCallback}
         continuous={true}
