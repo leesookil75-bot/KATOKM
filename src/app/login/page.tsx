@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Phone, Lock, ChevronRight, ShieldCheck, RefreshCw } from "lucide-react";
 import { auth } from "@/lib/firebase/clientApp";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
@@ -246,6 +247,13 @@ export default function LoginPage() {
 
                 <div className="login-footer">
                     <p>학원 시스템에 등록된 번호만<br/><span>로그인이 가능합니다.</span></p>
+                    
+                    <div className="parent-link-box">
+                        <Link href="/admin-login" className="admin-login-link">
+                            <ShieldCheck size={18} style={{ marginRight: '6px' }} />
+                            원장님(관리자) 로그인 가기
+                        </Link>
+                    </div>
                 </div>
             </div>
 
@@ -462,6 +470,23 @@ export default function LoginPage() {
                     0%, 100% { transform: translateX(0); }
                     25% { transform: translateX(-5px); }
                     75% { transform: translateX(5px); }
+                }
+                .admin-login-link {
+                    color: #64748b;
+                    font-size: 0.9rem;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: transparent;
+                    padding: 0.5rem 1rem;
+                    border-radius: 99px;
+                    transition: all 0.2s;
+                    border: 1px solid #cbd5e1;
+                }
+                .admin-login-link:hover {
+                    background: #f1f5f9;
+                    color: #334155;
                 }
             `}</style>
         </div>
