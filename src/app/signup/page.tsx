@@ -286,9 +286,6 @@ export default function SignupPage() {
                             </div>
                         )}
 
-                        {/* Invisible recaptcha */}
-                        <div id="signup-recaptcha-container"></div>
-
                         <div className="form-group">
                             <label>아이디</label>
                             <input name="username" value={formData.username} onChange={handleChange} placeholder="아이디를 정해주세요" required />
@@ -302,6 +299,9 @@ export default function SignupPage() {
                             <textarea name="address" value={formData.address} onChange={handleChange} placeholder="학원 주소를 상세히 입력해주세요" required rows={2} />
                         </div>
                     </div>
+
+                    {/* Invisible recaptcha */}
+                    <div id="signup-recaptcha-container"></div>
 
                     {error && (
                         <div className="error-message">
