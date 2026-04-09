@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { UserPlus, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { UserPlus, ArrowLeft, CheckCircle2, Search, X } from "lucide-react";
 import { auth } from "@/lib/firebase/clientApp";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import DaumPostcodeEmbed from 'react-daum-postcode';
 
 declare global {
   interface Window {
@@ -19,7 +20,9 @@ export default function SignupPage() {
         academyName: "",
         adminName: "",
         phone: "",
-        address: "",
+        zipCode: "",
+        baseAddress: "",
+        detailAddress: "",
         username: "",
         password: "",
     });
@@ -35,6 +38,9 @@ export default function SignupPage() {
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
     const [idToken, setIdToken] = useState("");
     const [otpLoading, setOtpLoading] = useState(false);
+
+    // Modal state for Address
+    const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -115,15 +121,30 @@ export default function SignupPage() {
             setError("휴대폰 번호를 먼저 인증해주세요.");
             return;
         }
+        
+        if (!formData.zipCode || !formData.baseAddress) {
+            setError("우편번호 검색을 통해 학원 주소를 입력해주세요.");
+            return;
+        }
 
         setIsLoading(true);
         setError("");
+
+        // 주소를 조합합니다.
+        const fullAddress = `(${formData.zipCode}) ${formData.baseAddress} ${formData.detailAddress}`.trim();
 
         try {
             const res = await fetch("/api/auth/signup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...formData, idToken }),
+                body: JSON.stringify({ 
+                    academyName: formData.academyName,
+                    adminName: formData.adminName,
+                    username: formData.username,
+                    password: formData.password,
+                    address: fullAddress, 
+                    idToken 
+                }),
             });
 
             const data = await res.json();
@@ -294,9 +315,45 @@ export default function SignupPage() {
                             <label>비밀번호</label>
                             <input name="password" type="password" value={formData.password} onChange={handleChange} placeholder="비밀번호" required />
                         </div>
+                        
+                        {/* Address Section */}
                         <div className="form-group full-width">
                             <label>학원 주소</label>
-                            <textarea name="address" value={formData.address} onChange={handleChange} placeholder="학원 주소를 상세히 입력해주세요" required rows={2} />
+                            <div className="phone-verify-container" style={{ marginBottom: '0.5rem' }}>
+                                <input 
+                                    name="zipCode" 
+                                    value={formData.zipCode} 
+                                    placeholder="우편번호" 
+                                    readOnly 
+                                    onClick={() => setIsPostcodeOpen(true)}
+                                    style={{ flex: 0.5, cursor: 'pointer', background: '#f8fafc' }}
+                                />
+                                <button 
+                                    type="button" 
+                                    className="verify-btn" 
+                                    onClick={() => setIsPostcodeOpen(true)}
+                                    style={{ display: 'flex', alignItems: 'center' }}
+                                >
+                                    <Search size={16} style={{ marginRight: '4px' }} />
+                                    주소 검색
+                                </button>
+                            </div>
+                            
+                            <input 
+                                name="baseAddress" 
+                                value={formData.baseAddress} 
+                                placeholder="기본 주소 (검색 시 자동 입력)" 
+                                readOnly 
+                                style={{ marginBottom: '0.5rem', background: '#f8fafc' }}
+                            />
+                            
+                            <input 
+                                name="detailAddress" 
+                                value={formData.detailAddress} 
+                                onChange={handleChange} 
+                                placeholder="상세 주소를 입력해주세요 (예: 101동 202호)" 
+                                required={!!formData.baseAddress}
+                            />
                         </div>
                     </div>
 
@@ -325,6 +382,40 @@ export default function SignupPage() {
                     </button>
                 </form>
             </div>
+
+            {/* Address Search Modal */}
+            {isPostcodeOpen && (
+                <div className="modal-overlay" onClick={() => setIsPostcodeOpen(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>주소 검색</h3>
+                            <button onClick={() => setIsPostcodeOpen(false)} className="close-btn">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <DaumPostcodeEmbed 
+                            onComplete={(data) => {
+                                let fullAddress = data.address;
+                                let extraAddress = '';
+
+                                if (data.addressType === 'R') {
+                                    if (data.bname !== '') extraAddress += data.bname;
+                                    if (data.buildingName !== '') extraAddress += (extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName);
+                                    fullAddress += (extraAddress !== '' ? ` (${extraAddress})` : '');
+                                }
+
+                                setFormData({
+                                    ...formData,
+                                    zipCode: data.zonecode,
+                                    baseAddress: fullAddress
+                                });
+                                setIsPostcodeOpen(false);
+                            }} 
+                            style={{ height: '400px' }}
+                        />
+                    </div>
+                </div>
+            )}
 
             <style jsx global>{`
                 .grecaptcha-badge { visibility: hidden; }
@@ -493,6 +584,59 @@ export default function SignupPage() {
           opacity: 0.6;
           background: #94a3b8;
           cursor: not-allowed;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+            backdrop-filter: blur(2px);
+            animation: fadeIn 0.2s ease-out;
+        }
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #1e293b;
+            font-weight: 700;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #64748b;
+            display: flex;
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            color: #0f172a;
+            background: #e2e8f0;
         }
 
         @keyframes slideDown {
