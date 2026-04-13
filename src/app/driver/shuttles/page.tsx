@@ -137,7 +137,7 @@ export default function DriverShuttlePage() {
                 </select>
 
                 <div className="status-indicator">
-                    <div className={\`status-dot \${isDriving ? 'driving' : 'stopped'}\`}></div>
+                    <div className={`status-dot ${isDriving ? 'driving' : 'stopped'}`}></div>
                     <span>{isDriving ? '현재 운행 중 (GPS 송신 중)' : '운행 대기 중'}</span>
                 </div>
 
@@ -161,7 +161,7 @@ export default function DriverShuttlePage() {
                 </div>
             </div>
 
-            <style jsx>{\`
+            <style jsx>{`
                 .driver-container { padding: 1.5rem; max-width: 600px; margin: 0 auto; }
                 .controls-card {
                     background: white; border-radius: 12px; padding: 2rem;
@@ -181,7 +181,7 @@ export default function DriverShuttlePage() {
                 .status-dot.stopped { background: #9ca3af; }
                 .location-info { display: flex; align-items: center; gap: 4px; margin-top: 1rem; color: #6b7280; font-size: 0.9rem; }
                 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-            \`}</style>
+            `}</style>
         </div>
     );
 }
