@@ -7,12 +7,15 @@ export default function ShuttleManagerPage() {
     const [mapLoaded, setMapLoaded] = useState(false);
 
     useEffect(() => {
-        // Checking if kakao is loaded globally
-        if (window.kakao && window.kakao.maps) {
-            window.kakao.maps.load(() => {
-                setMapLoaded(true);
-            });
-        }
+        const checkKakao = setInterval(() => {
+            if (window.kakao && window.kakao.maps) {
+                window.kakao.maps.load(() => {
+                    setMapLoaded(true);
+                });
+                clearInterval(checkKakao);
+            }
+        }, 100);
+        return () => clearInterval(checkKakao);
     }, []);
 
     useEffect(() => {
