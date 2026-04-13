@@ -124,9 +124,16 @@ export async function GET(request: Request) {
         route_name VARCHAR(255) NOT NULL,
         driver_name VARCHAR(100),
         driver_phone VARCHAR(50),
+        current_lat DOUBLE PRECISION,
+        current_lng DOUBLE PRECISION,
+        last_location_time TIMESTAMP WITH TIME ZONE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
+    await client.sql`ALTER TABLE shuttle_routes ADD COLUMN IF NOT EXISTS current_lat DOUBLE PRECISION;`;
+    await client.sql`ALTER TABLE shuttle_routes ADD COLUMN IF NOT EXISTS current_lng DOUBLE PRECISION;`;
+    await client.sql`ALTER TABLE shuttle_routes ADD COLUMN IF NOT EXISTS last_location_time TIMESTAMP WITH TIME ZONE;`;
+
     await client.sql`
       CREATE TABLE IF NOT EXISTS shuttle_stops (
         id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
