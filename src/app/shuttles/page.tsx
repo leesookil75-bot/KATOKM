@@ -6,7 +6,7 @@ import { Map, useKakaoLoader } from "react-kakao-maps-sdk";
 
 export default function ShuttleManagerPage() {
     const [loading, error] = useKakaoLoader({
-        appkey: "0b341d186347a5bd2f2212bcd0cb0be1",
+        appkey: "b83d43f50c5de0c7aa03c0828d9f5f46",
         libraries: ["clusterer", "services"],
     });
 
