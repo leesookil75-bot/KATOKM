@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, CalendarCheck, MessageCircle, Monitor, CreditCard, LogOut } from "lucide-react";
+import { Home, CalendarCheck, MessageCircle, Monitor, CreditCard, LogOut, Bus } from "lucide-react";
 
 export default function NavBar() {
     const pathname = usePathname();
@@ -19,6 +19,7 @@ export default function NavBar() {
         { name: "출석부", path: "/attendance", icon: <CalendarCheck size={20} /> },
         { name: "수강료", path: "/tuition", icon: <CreditCard size={20} /> },
         { name: "알림", path: "/message", icon: <MessageCircle size={20} /> },
+        { name: "셔틀", path: "/shuttles", icon: <Bus size={20} /> },
         { name: "키오스크", path: "/kiosk", icon: <Monitor size={20} /> },
         { name: "로그아웃", path: "logout", icon: <LogOut size={20} />, action: handleLogout },
     ];
