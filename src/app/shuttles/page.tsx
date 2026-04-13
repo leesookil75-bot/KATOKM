@@ -1,42 +1,17 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Script from 'next/script';
 import { Plus, Trash2, MapPin } from 'lucide-react';
+import { Map, useKakaoLoader } from "react-kakao-maps-sdk";
 
 export default function ShuttleManagerPage() {
-    const [mapLoaded, setMapLoaded] = useState(false);
-
-    // The script loading happens via the <Script> component now.
-    // We don't need a polling useEffect anymore.
-
-    useEffect(() => {
-        if (!mapLoaded) return;
-        const container = document.getElementById('map');
-        if (!container) return;
-
-        const options = {
-            center: new window.kakao.maps.LatLng(37.566826, 126.9786567), // Default to seoul city hall
-            level: 3
-        };
-
-        const map = new window.kakao.maps.Map(container, options);
-        // Basic map instance ready
-    }, [mapLoaded]);
+    const [loading, error] = useKakaoLoader({
+        appkey: "0b341d186347a5bd2f2212bcd0cb0be1",
+        libraries: ["clusterer", "services"],
+    });
 
     return (
         <div className="shuttles-container">
-            <Script 
-                src="//dapi.kakao.com/v2/maps/sdk.js?appkey=0b341d186347a5bd2f2212bcd0cb0be1&libraries=services,clusterer&autoload=false"
-                strategy="afterInteractive"
-                onLoad={() => {
-                    if (window.kakao && window.kakao.maps) {
-                        window.kakao.maps.load(() => {
-                            setMapLoaded(true);
-                        });
-                    }
-                }}
-            />
 
             <header className="page-header">
                 <div>
@@ -88,13 +63,22 @@ export default function ShuttleManagerPage() {
 
                 {/* Right Panel: Kakao Map */}
                 <div className="map-panel">
-                    <div id="map" className="kakao-map">
-                        {!mapLoaded && (
-                            <div className="map-loading-overlay">
-                                <span>카카오맵을 불러오는 중이거나 API 키가 필요합니다...</span>
-                            </div>
-                        )}
-                    </div>
+                    {loading ? (
+                        <div className="map-loading-overlay">
+                            <span>카카오맵을 불러오는 중입니다...</span>
+                        </div>
+                    ) : error ? (
+                        <div className="map-loading-overlay">
+                            <span>카카오맵 로드 실패 (API 키 또는 도메인을 확인하세요)</span>
+                        </div>
+                    ) : (
+                        <Map
+                            center={{ lat: 37.566826, lng: 126.9786567 }}
+                            style={{ width: "100%", height: "100%" }}
+                            level={3}
+                            className="kakao-map"
+                        />
+                    )}
                 </div>
             </div>
 
