@@ -1,22 +1,14 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import Script from 'next/script';
 import { Plus, Trash2, MapPin } from 'lucide-react';
 
 export default function ShuttleManagerPage() {
     const [mapLoaded, setMapLoaded] = useState(false);
 
-    useEffect(() => {
-        const checkKakao = setInterval(() => {
-            if (window.kakao && window.kakao.maps) {
-                window.kakao.maps.load(() => {
-                    setMapLoaded(true);
-                });
-                clearInterval(checkKakao);
-            }
-        }, 100);
-        return () => clearInterval(checkKakao);
-    }, []);
+    // The script loading happens via the <Script> component now.
+    // We don't need a polling useEffect anymore.
 
     useEffect(() => {
         if (!mapLoaded) return;
@@ -34,6 +26,18 @@ export default function ShuttleManagerPage() {
 
     return (
         <div className="shuttles-container">
+            <Script 
+                src="//dapi.kakao.com/v2/maps/sdk.js?appkey=0b341d186347a5bd2f2212bcd0cb0be1&libraries=services,clusterer&autoload=false"
+                strategy="afterInteractive"
+                onLoad={() => {
+                    if (window.kakao && window.kakao.maps) {
+                        window.kakao.maps.load(() => {
+                            setMapLoaded(true);
+                        });
+                    }
+                }}
+            />
+
             <header className="page-header">
                 <div>
                     <h1 className="page-title">차량 운행 관리 (안심 셔틀)</h1>
