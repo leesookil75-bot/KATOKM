@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, CalendarCheck, CreditCard, MessageCircle, Monitor, Settings, LogOut, LayoutDashboard, Home } from "lucide-react";
+import { Users, CalendarCheck, CreditCard, MessageCircle, Monitor, Settings, LogOut, LayoutDashboard, Home, Bus } from "lucide-react";
 
 export default function AdminSidebar() {
     const pathname = usePathname();
@@ -12,6 +12,7 @@ export default function AdminSidebar() {
         { name: "학생 관리", path: "/students", icon: <Users size={22} color="#ec4899" /> },
         { name: "출석부", path: "/attendance", icon: <CalendarCheck size={22} color="#f59e0b" /> },
         { name: "수강료 관리", path: "/tuition", icon: <CreditCard size={22} color="#06b6d4" /> },
+        { name: "차량 운행", path: "/shuttles", icon: <Bus size={22} color="#8b5cf6" /> },
         { name: "알림 전송", path: "/message", icon: <MessageCircle size={22} color="#10b981" /> },
     ];
 

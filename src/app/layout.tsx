@@ -57,6 +57,10 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#4f46e5" />
+        <script 
+          type="text/javascript" 
+          src="//dapi.kakao.com/v2/maps/sdk.js?appkey=0b341d186347a5bd2f2212bcd0cb0be1&libraries=services,clusterer"
+        ></script>
       </head>
       <body className={notoSansKr.className}>
         <InstallPrompt />

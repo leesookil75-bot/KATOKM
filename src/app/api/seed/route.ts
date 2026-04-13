@@ -116,6 +116,39 @@ export async function GET(request: Request) {
     `;
     results.tuitionTable = "OK";
 
+    // Shuttle Tables
+    await client.sql`
+      CREATE TABLE IF NOT EXISTS shuttle_routes (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        academy_id UUID REFERENCES admins(id) ON DELETE CASCADE,
+        route_name VARCHAR(255) NOT NULL,
+        driver_name VARCHAR(100),
+        driver_phone VARCHAR(50),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    await client.sql`
+      CREATE TABLE IF NOT EXISTS shuttle_stops (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        route_id UUID REFERENCES shuttle_routes(id) ON DELETE CASCADE,
+        stop_name VARCHAR(255) NOT NULL,
+        lat DOUBLE PRECISION NOT NULL,
+        lng DOUBLE PRECISION NOT NULL,
+        arrival_time VARCHAR(20),
+        order_index INTEGER NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    await client.sql`
+      CREATE TABLE IF NOT EXISTS shuttle_assignments (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        stop_id UUID REFERENCES shuttle_stops(id) ON DELETE CASCADE,
+        student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+        UNIQUE(stop_id, student_id)
+      );
+    `;
+    results.shuttleTables = "OK";
+
     // 9. Push Subscriptions Table
     try {
       await client.sql`DROP TABLE IF EXISTS push_subscriptions;`;
