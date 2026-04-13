@@ -2,13 +2,34 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, MapPin } from 'lucide-react';
-import { Map, useKakaoLoader } from "react-kakao-maps-sdk";
+import { Map, MapMarker, CustomOverlayMap, useKakaoLoader } from "react-kakao-maps-sdk";
 
 export default function ShuttleManagerPage() {
+    const [liveRoutes, setLiveRoutes] = useState<any[]>([]);
+
     const [loading, error] = useKakaoLoader({
         appkey: "b83d43f50c5de0c7aa03c0828d9f5f46",
         libraries: ["clusterer", "services"],
     });
+
+    // Poll live shuttle locations every 5 seconds
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const res = await fetch('/api/shuttles/location');
+                const data = await res.json();
+                if (data.routes) {
+                    setLiveRoutes(data.routes.filter((r: any) => r.current_lat && r.current_lng));
+                }
+            } catch (err) {
+                console.error("Failed to fetch live locations");
+            }
+        };
+
+        fetchLocations();
+        const interval = setInterval(fetchLocations, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="shuttles-container">
@@ -77,7 +98,26 @@ export default function ShuttleManagerPage() {
                             style={{ width: "100%", height: "100%" }}
                             level={3}
                             className="kakao-map"
-                        />
+                        >
+                            {/* Render live bus locations */}
+                            {liveRoutes.map((route) => (
+                                <div key={route.id}>
+                                    <MapMarker
+                                        position={{ lat: route.current_lat, lng: route.current_lng }}
+                                        image={{
+                                            src: "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png", // Example bus icon
+                                            size: { width: 24, height: 35 }
+                                        }}
+                                    />
+                                    <CustomOverlayMap
+                                        position={{ lat: route.current_lat, lng: route.current_lng }}
+                                        yAnchor={2}
+                                    >
+                                        <div className="bus-label">{route.route_name}</div>
+                                    </CustomOverlayMap>
+                                </div>
+                            ))}
+                        </Map>
                     )}
                 </div>
             </div>
