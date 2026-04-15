@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, MapPin } from 'lucide-react';
-import { Map, MapMarker, CustomOverlayMap, useKakaoLoader } from "react-kakao-maps-sdk";
+import dynamic from 'next/dynamic';
+
+const ShuttleMap = dynamic(() => import('@/components/ShuttleMap'), {
+    ssr: false,
+    loading: () => <div className="map-loading-overlay"><span>오픈 지도를 불러오는 중입니다...</span></div>
+});
 
 export default function ShuttleManagerPage() {
     const [liveRoutes, setLiveRoutes] = useState<any[]>([]);
 
-    const [loading, error] = useKakaoLoader({
-        appkey: "b83d43f50c5de0c7aa03c0828d9f5f46",
-        libraries: ["clusterer", "services"],
-    });
+    // 카카오맵 로더 삭제됨
 
     // Poll live shuttle locations every 5 seconds
     useEffect(() => {
@@ -37,7 +39,7 @@ export default function ShuttleManagerPage() {
             <header className="page-header">
                 <div>
                     <h1 className="page-title">차량 운행 관리 (안심 셔틀)</h1>
-                    <p className="page-description">차량 노선을 설정하고 정류장을 등록하세요. (카카오맵 API 연동 완료)</p>
+                    <p className="page-description">차량 노선을 설정하고 정류장을 등록하세요. (OpenStreetMap 무료 지도)</p>
                 </div>
                 <button className="primary-btn">
                     <Plus size={20} />
@@ -82,43 +84,9 @@ export default function ShuttleManagerPage() {
                     </div>
                 </div>
 
-                {/* Right Panel: Kakao Map */}
+                {/* Right Panel: OpenStreetMap */}
                 <div className="map-panel">
-                    {loading ? (
-                        <div className="map-loading-overlay">
-                            <span>카카오맵을 불러오는 중입니다...</span>
-                        </div>
-                    ) : error ? (
-                        <div className="map-loading-overlay">
-                            <span>카카오맵 로드 실패 (API 키 또는 도메인을 확인하세요)</span>
-                        </div>
-                    ) : (
-                        <Map
-                            center={{ lat: 37.566826, lng: 126.9786567 }}
-                            style={{ width: "100%", height: "100%" }}
-                            level={3}
-                            className="kakao-map"
-                        >
-                            {/* Render live bus locations */}
-                            {liveRoutes.map((route) => (
-                                <div key={route.id}>
-                                    <MapMarker
-                                        position={{ lat: route.current_lat, lng: route.current_lng }}
-                                        image={{
-                                            src: "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png", // Example bus icon
-                                            size: { width: 24, height: 35 }
-                                        }}
-                                    />
-                                    <CustomOverlayMap
-                                        position={{ lat: route.current_lat, lng: route.current_lng }}
-                                        yAnchor={2}
-                                    >
-                                        <div className="bus-label">{route.route_name}</div>
-                                    </CustomOverlayMap>
-                                </div>
-                            ))}
-                        </Map>
-                    )}
+                    <ShuttleMap liveRoutes={liveRoutes} />
                 </div>
             </div>
 
