@@ -8,7 +8,7 @@ export async function GET() {
         await sql`
             CREATE TABLE IF NOT EXISTS contact_logs (
                 id SERIAL PRIMARY KEY,
-                student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+                student_id VARCHAR(255) NOT NULL,
                 academy_id VARCHAR(255) NOT NULL,
                 contact_type VARCHAR(50) NOT NULL, -- PUSH, CALL, SMS
                 action_status VARCHAR(50) NOT NULL DEFAULT 'SENT', -- SENT, FAILED, ANSWERED
