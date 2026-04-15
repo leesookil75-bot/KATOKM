@@ -280,6 +280,7 @@ export default function ShuttleManagerPage() {
                     border: 1px solid #e2e8f0;
                     overflow: hidden;
                     position: relative;
+                    min-height: 500px;
                 }
                 .kakao-map {
                     width: 100%;

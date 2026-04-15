@@ -1,0 +1,141 @@
+.widgetContainer {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.widgetContainer.safe {
+    border-color: #10b981;
+    background-color: #f0fdf4;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.titleIcon {
+    color: #ef4444;
+}
+
+.badge {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.item {
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.redItem {
+    background-color: #fef2f2;
+    border-left: 4px solid #ef4444;
+}
+
+.yellowItem {
+    background-color: #fffbeb;
+    border-left: 4px solid #f59e0b;
+}
+
+.itemHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.studentName {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.redItem .studentName {
+    color: #b91c1c;
+}
+
+.yellowItem .studentName {
+    color: #b45309;
+}
+
+.score {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #4b5563;
+}
+
+.reasons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.reasonTag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.7);
+    color: #4b5563;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.more {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+    padding-top: 0.5rem;
+}
+
+.safeMessage {
+    color: #047857;
+    font-weight: 500;
+}
+
+.skeleton {
+    color: #9ca3af;
+    text-align: center;
+    padding: 2rem 0;
+    font-weight: 500;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .5;
+    }
+}

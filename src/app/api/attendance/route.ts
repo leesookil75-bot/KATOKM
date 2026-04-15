@@ -90,6 +90,16 @@ export async function POST(request: Request) {
                         title: '출결 알림',
                         body: body
                     });
+
+                    // Log the PUSH contact
+                    try {
+                        await sql`
+                            INSERT INTO contact_logs (student_id, academy_id, contact_type, action_status)
+                            VALUES (${studentId}, ${academyId}, 'PUSH', 'SENT')
+                        `;
+                    } catch (logErr) {
+                        console.error('[Contact Log] Failed:', logErr);
+                    }
                 }
             } catch (pushErr) {
                 console.error('[Push-Admin] Failed:', pushErr);

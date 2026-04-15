@@ -2,6 +2,7 @@ import styles from "./page.module.css";
 import { Users, CheckCircle, MessageCircle, CreditCard, Monitor, Plus } from "lucide-react";
 import Link from 'next/link';
 import { getSession } from "@/lib/auth";
+import RiskAnalysisWidget from "@/components/RiskAnalysisWidget";
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,8 @@ export default async function Home() {
         </h1>
         <p className="text-sub">지능형 학생 출결 및 학원 관리 서비스</p>
       </header>
+
+      <RiskAnalysisWidget />
 
       <div className={styles.grid}>
         <Link href="/students" className={styles.card} id="tour-student-management">
