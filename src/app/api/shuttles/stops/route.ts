@@ -60,3 +60,26 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
+export async function PUT(request: Request) {
+    try {
+        const body = await request.json();
+        const { stop_id, lat, lng } = body;
+
+        if (!stop_id || lat === undefined || lng === undefined) {
+            return NextResponse.json({ error: '필수 입력값이 누락되었습니다.' }, { status: 400 });
+        }
+
+        const { rows } = await sql`
+            UPDATE shuttle_stops
+            SET lat = ${lat}, lng = ${lng}
+            WHERE id = ${stop_id}
+            RETURNING *
+        `;
+
+        return NextResponse.json({ success: true, stop: rows[0] });
+    } catch (error: any) {
+        console.error('[Stops-Put-Error]', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}

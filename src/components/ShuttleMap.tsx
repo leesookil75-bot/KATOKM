@@ -10,7 +10,14 @@ const iconRetinaUrl = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/imag
 const iconUrl = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png';
 const shadowUrl = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png';
 
-export default function ShuttleMap({ liveRoutes, activeStops = [] }: { liveRoutes: any[], activeStops?: any[] }) {
+interface ShuttleMapProps {
+    liveRoutes: any[];
+    activeStops?: any[];
+    editingLocationStopId?: number | null;
+    onLocationUpdated?: (stopId: number, lat: number, lng: number) => void;
+}
+
+export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocationStopId, onLocationUpdated }: ShuttleMapProps) {
     useEffect(() => {
         // Fix for missing default markers in react-leaflet
         delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -66,18 +73,33 @@ export default function ShuttleMap({ liveRoutes, activeStops = [] }: { liveRoute
             ))}
 
             {/* Render Stops */}
-            {activeStops.map((stop, idx) => (
-                <Marker 
-                    key={`stop-${stop.id || idx}`} 
-                    position={[stop.lat || 37.566, stop.lng || 126.978]}
-                    icon={stopIcon}
-                >
-                    <Popup>
-                        <strong>{stop.stop_name}</strong><br/>
-                        예정 시간: {stop.arrival_time}
-                    </Popup>
-                </Marker>
-            ))}
+            {activeStops.map((stop, idx) => {
+                const isEditing = editingLocationStopId === stop.id;
+                
+                return (
+                    <Marker 
+                        key={`stop-${stop.id || idx}`} 
+                        position={[stop.lat || 37.566, stop.lng || 126.978]}
+                        icon={stopIcon}
+                        draggable={isEditing}
+                        eventHandlers={{
+                            dragend: (e) => {
+                                const marker = e.target;
+                                const pos = marker.getLatLng();
+                                if (onLocationUpdated) {
+                                    onLocationUpdated(stop.id, pos.lat, pos.lng);
+                                }
+                            }
+                        }}
+                    >
+                        <Popup>
+                            <strong>{stop.stop_name}</strong><br/>
+                            예정 시간: {stop.arrival_time}
+                            {isEditing && <div style={{color:'red', marginTop:'5px'}}>📍 핀을 드래그해서 옮기세요!</div>}
+                        </Popup>
+                    </Marker>
+                );
+            })}
         </MapContainer>
     );
 }

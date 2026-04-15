@@ -25,6 +25,14 @@ export default function ShuttleManagerPage() {
     const [isSavingStop, setIsSavingStop] = useState(false);
     const [stopsDict, setStopsDict] = useState<Record<number, any[]>>({});
 
+    // 탑승자 및 지도 수정(Map Edit) 상태
+    const [editingLocationStopId, setEditingLocationStopId] = useState<number | null>(null);
+    const [isPassengerModalOpen, setIsPassengerModalOpen] = useState(false);
+    const [selectedStopIdForPassenger, setSelectedStopIdForPassenger] = useState<number | null>(null);
+    const [students, setStudents] = useState<any[]>([]);
+    const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
+    const [isSavingPassengers, setIsSavingPassengers] = useState(false);
+
     // Load saved database routes periodically (if needed, or just once)
     const fetchSavedRoutes = async () => {
         try {
@@ -56,6 +64,12 @@ export default function ShuttleManagerPage() {
     useEffect(() => {
         fetchSavedRoutes(); // 초기 DB 로드
         
+        // Load global students
+        fetch('/api/students')
+            .then(res => res.json())
+            .then(data => { if(Array.isArray(data)) setStudents(data); })
+            .catch(e => console.error(e));
+
         const fetchLocations = async () => {
             try {
                 const res = await fetch('/api/shuttles/location');
@@ -127,6 +141,66 @@ export default function ShuttleManagerPage() {
         }
     };
 
+    const handleLocationUpdated = async (stopId: number, lat: number, lng: number) => {
+        try {
+            const res = await fetch('/api/shuttles/stops', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stop_id: stopId, lat, lng })
+            });
+            if(res.ok) {
+                // 부드럽게 UI 갱신
+                setStopsDict(prev => {
+                    const newDict = {...prev};
+                    for(const routeId in newDict) {
+                        const idx = newDict[routeId].findIndex(s => s.id === stopId);
+                        if(idx > -1) {
+                            newDict[routeId][idx].lat = lat;
+                            newDict[routeId][idx].lng = lng;
+                        }
+                    }
+                    return newDict;
+                });
+                alert('📍 정류장 위치가 성공적으로 변경되었습니다!');
+                setEditingLocationStopId(null);
+            }
+        } catch(e) {
+            alert('위치 저장에 실패했습니다.');
+        }
+    };
+
+    const openPassengerModal = async (stopId: number) => {
+        setSelectedStopIdForPassenger(stopId);
+        setIsPassengerModalOpen(true);
+        try {
+            const res = await fetch(`/api/shuttles/passengers?stopId=${stopId}`);
+            if(res.ok) {
+                const data = await res.json();
+                setSelectedStudentIds(data.studentIds || []);
+            }
+        } catch(e) {}
+    };
+
+    const handleSavePassengers = async () => {
+        if(!selectedStopIdForPassenger) return;
+        setIsSavingPassengers(true);
+        try {
+            const res = await fetch('/api/shuttles/passengers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stop_id: selectedStopIdForPassenger, student_ids: selectedStudentIds })
+            });
+            if(res.ok) {
+                setIsPassengerModalOpen(false);
+                alert('탑승 명단이 성공적으로 저장되었습니다.');
+            }
+        } catch(e) {
+            alert('명단 저장에 실패했습니다.');
+        } finally {
+            setIsSavingPassengers(false);
+        }
+    };
+
     return (
         <div className="shuttles-container">
             {/* Modal Popup */}
@@ -186,6 +260,47 @@ export default function ShuttleManagerPage() {
                 </div>
             )}
 
+            {/* Passenger Selection Modal */}
+            {isPassengerModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{width:'500px'}}>
+                        <h2>👪 탑승 관원 배정</h2>
+                        <p style={{fontSize:'0.85rem', color:'#64748b', marginBottom:'1.5rem'}}>
+                            이 정류장에서 승하차 할 관원들을 선택해주세요.
+                        </p>
+                        
+                        <div className="student-list-scrollable" style={{maxHeight:'300px', overflowY:'auto', border:'1px solid #e2e8f0', borderRadius:'0.5rem', padding:'1rem', marginBottom:'1rem'}}>
+                            {students.length === 0 ? (
+                                <p style={{textAlign:'center', color:'#94a3b8'}}>등록된 관원이 없습니다.</p>
+                            ) : (
+                                students.map(s => (
+                                    <label key={s.id} style={{display:'flex', alignItems:'center', padding:'0.5rem 0', borderBottom:'1px solid #f1f5f9', cursor:'pointer'}}>
+                                        <input 
+                                            type="checkbox" 
+                                            style={{marginRight:'10px', transform:'scale(1.2)'}}
+                                            checked={selectedStudentIds.includes(s.id)}
+                                            onChange={(e) => {
+                                                if(e.target.checked) setSelectedStudentIds([...selectedStudentIds, s.id]);
+                                                else setSelectedStudentIds(selectedStudentIds.filter(id => id !== s.id));
+                                            }}
+                                        />
+                                        <span style={{fontWeight:'500'}}>{s.name}</span>
+                                        <span style={{color:'#64748b', marginLeft:'auto', fontSize:'0.85rem'}}>{s.className || '미분류'}</span>
+                                    </label>
+                                ))
+                            )}
+                        </div>
+
+                        <div className="modal-actions">
+                            <button className="cancel-btn" onClick={() => setIsPassengerModalOpen(false)}>닫기</button>
+                            <button className="confirm-btn" disabled={isSavingPassengers} onClick={handleSavePassengers}>
+                                {isSavingPassengers ? '저장 중...' : '명단 확정하기'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <header className="page-header">
                 <div>
                     <h1 className="page-title">차량 운행 관리 (안심 셔틀)</h1>
@@ -225,7 +340,18 @@ export default function ShuttleManagerPage() {
                                                 <div className="stop-marker"></div>
                                                 <div className="stop-content">
                                                     <div className="stop-name">{stop.stop_name}</div>
-                                                    <button className="text-secondary"><MapPin size={16} /> 좌표</button>
+                                                    <div style={{display:'flex', gap:'5px', marginTop:'5px'}}>
+                                                        <button 
+                                                            className="text-secondary" 
+                                                            onClick={(e) => { e.stopPropagation(); setEditingLocationStopId(editingLocationStopId === stop.id ? null : stop.id); }}
+                                                            style={{background: editingLocationStopId === stop.id ? '#fef08a' : 'transparent', padding:'2px 4px', borderRadius:'4px'}}
+                                                        >
+                                                            <MapPin size={16} /> {editingLocationStopId === stop.id ? '수정 중 (지도 확인)' : '위치 수정'}
+                                                        </button>
+                                                        <button className="text-secondary" onClick={(e) => { e.stopPropagation(); openPassengerModal(stop.id); }}>
+                                                            👨‍👩‍👧 명단 관리
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -249,6 +375,8 @@ export default function ShuttleManagerPage() {
                     <ShuttleMap 
                         liveRoutes={liveRoutes} 
                         activeStops={activeRouteId ? stopsDict[activeRouteId] : undefined}
+                        editingLocationStopId={editingLocationStopId}
+                        onLocationUpdated={handleLocationUpdated}
                     />
                 </div>
             </div>
