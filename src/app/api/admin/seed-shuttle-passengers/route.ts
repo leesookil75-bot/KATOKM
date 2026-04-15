@@ -8,7 +8,7 @@ export async function GET() {
         await sql`
             CREATE TABLE IF NOT EXISTS shuttle_passengers (
                 stop_id INTEGER NOT NULL REFERENCES shuttle_stops(id) ON DELETE CASCADE,
-                student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+                student_id VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (stop_id, student_id)
             );
