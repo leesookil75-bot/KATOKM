@@ -51,7 +51,7 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
             if (editingLocationStopId && activeStops.length > 0) {
                 const stop = activeStops.find(s => s.id === editingLocationStopId);
                 if (stop) {
-                    map.flyTo([stop.lat || 37.566, stop.lng || 126.978], 16, { animate: true, duration: 1 });
+                    map.flyTo([stop.lat || 37.566, stop.lng || 126.978], 17, { animate: true, duration: 1 });
                 }
             }
         }, [editingLocationStopId, activeStops, map]);
@@ -68,7 +68,7 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
     return (
         <MapContainer 
             center={[centerLat, centerLng]} 
-            zoom={14} 
+            zoom={17} 
             style={{ width: "100%", height: "100%", zIndex: 0 }}
         >
             <TileLayer
