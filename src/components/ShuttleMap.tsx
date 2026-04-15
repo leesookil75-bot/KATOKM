@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect } from 'react';
 import L from 'leaflet';
@@ -28,19 +28,35 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
         });
     }, []);
 
-    const busIcon = new L.Icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448339.png', // A free bus icon URL
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32],
+    const busIcon = new L.divIcon({
+        html: `<div style="font-size: 30px; filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.4));">🚌</div>`,
+        className: '',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -15],
     });
 
-    const stopIcon = new L.Icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/1055/1055034.png', // A free map pin icon URL
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
-        popupAnchor: [0, -28],
+    const createStopIcon = (isEditing: boolean) => new L.divIcon({
+        html: `<div style="font-size: ${isEditing ? '40px' : '30px'}; filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.5)); transform: translate(-50%, -100%);">📍</div>`,
+        className: '',
+        iconSize: [0, 0],
+        iconAnchor: [0, 0],
+        popupAnchor: [0, -30],
     });
+
+    // Auto Pan Component
+    const AutoPanManager = () => {
+        const map = useMap();
+        useEffect(() => {
+            if (editingLocationStopId && activeStops.length > 0) {
+                const stop = activeStops.find(s => s.id === editingLocationStopId);
+                if (stop) {
+                    map.flyTo([stop.lat || 37.566, stop.lng || 126.978], 16, { animate: true, duration: 1 });
+                }
+            }
+        }, [editingLocationStopId, activeStops, map]);
+        return null;
+    };
 
     // Default center
     // 1. If bus is live, center on bus
@@ -59,6 +75,9 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            
+            <AutoPanManager />
+
             {liveRoutes.map((route, idx) => (
                 <Marker 
                     key={route.id || idx} 
@@ -80,7 +99,7 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
                     <Marker 
                         key={`stop-${stop.id || idx}`} 
                         position={[stop.lat || 37.566, stop.lng || 126.978]}
-                        icon={stopIcon}
+                        icon={createStopIcon(isEditing)}
                         draggable={isEditing}
                         eventHandlers={{
                             dragend: (e) => {
