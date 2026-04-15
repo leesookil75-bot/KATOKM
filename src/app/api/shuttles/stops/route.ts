@@ -13,10 +13,15 @@ export async function GET(request: Request) {
         }
         
         const { rows } = await sql`
-            SELECT id, stop_name, lat, lng, arrival_time, order_index
-            FROM shuttle_stops
-            WHERE route_id = ${routeId}
-            ORDER BY order_index ASC
+            SELECT 
+                s.id, s.stop_name, s.lat, s.lng, s.arrival_time, s.order_index,
+                COALESCE(json_agg(st.name) FILTER (WHERE st.name IS NOT NULL), '[]') as passenger_names
+            FROM shuttle_stops s
+            LEFT JOIN shuttle_passengers sp ON s.id = sp.stop_id
+            LEFT JOIN students st ON sp.student_id = st.id
+            WHERE s.route_id = ${routeId}
+            GROUP BY s.id
+            ORDER BY s.order_index ASC
         `;
 
         return NextResponse.json({ stops: rows });

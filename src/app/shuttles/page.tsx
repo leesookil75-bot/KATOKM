@@ -193,6 +193,7 @@ export default function ShuttleManagerPage() {
             if(res.ok) {
                 setIsPassengerModalOpen(false);
                 alert('탑승 명단이 성공적으로 저장되었습니다.');
+                if (activeRouteId) fetchStopsForRoute(activeRouteId);
             }
         } catch(e) {
             alert('명단 저장에 실패했습니다.');
@@ -339,7 +340,12 @@ export default function ShuttleManagerPage() {
                                                 <div className="stop-time">{stop.arrival_time}</div>
                                                 <div className="stop-marker"></div>
                                                 <div className="stop-content">
-                                                    <div className="stop-name">{stop.stop_name}</div>
+                                                    <div>
+                                                        <div className="stop-name">{stop.stop_name}</div>
+                                                        <div style={{fontSize:'0.8rem', color:'#8b5cf6', marginTop:'4px', fontWeight:500}}>
+                                                            {stop.passenger_names?.length > 0 ? `👩‍👦 ${stop.passenger_names.join(', ')}` : <span style={{color:'#94a3b8'}}>탑승자 미지정</span>}
+                                                        </div>
+                                                    </div>
                                                     <div style={{display:'flex', gap:'5px', marginTop:'5px'}}>
                                                         <button 
                                                             className="text-secondary" 
