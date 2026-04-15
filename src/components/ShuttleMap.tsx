@@ -10,7 +10,7 @@ const iconRetinaUrl = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/imag
 const iconUrl = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png';
 const shadowUrl = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png';
 
-export default function ShuttleMap({ liveRoutes }: { liveRoutes: any[] }) {
+export default function ShuttleMap({ liveRoutes, activeStops = [] }: { liveRoutes: any[], activeStops?: any[] }) {
     useEffect(() => {
         // Fix for missing default markers in react-leaflet
         delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -28,9 +28,19 @@ export default function ShuttleMap({ liveRoutes }: { liveRoutes: any[] }) {
         popupAnchor: [0, -32],
     });
 
-    // Default center to a location in Seoul if no routes, else center on the first route
-    const centerLat = liveRoutes.length > 0 ? liveRoutes[0].current_lat : 37.566826;
-    const centerLng = liveRoutes.length > 0 ? liveRoutes[0].current_lng : 126.9786567;
+    const stopIcon = new L.Icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/1055/1055034.png', // A free map pin icon URL
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -28],
+    });
+
+    // Default center
+    // 1. If bus is live, center on bus
+    // 2. Else if stops exist, center on first stop
+    // 3. Defaults to Seoul Center
+    const centerLat = liveRoutes.length > 0 ? liveRoutes[0].current_lat : (activeStops.length > 0 ? activeStops[0].lat : 37.566826);
+    const centerLng = liveRoutes.length > 0 ? liveRoutes[0].current_lng : (activeStops.length > 0 ? activeStops[0].lng : 126.9786567);
 
     return (
         <MapContainer 
@@ -51,6 +61,20 @@ export default function ShuttleMap({ liveRoutes }: { liveRoutes: any[] }) {
                     <Popup>
                         <strong>{route.route_name || '운행 차량'}</strong><br/>
                         속도: {route.speed || 0} km/h
+                    </Popup>
+                </Marker>
+            ))}
+
+            {/* Render Stops */}
+            {activeStops.map((stop, idx) => (
+                <Marker 
+                    key={`stop-${stop.id || idx}`} 
+                    position={[stop.lat || 37.566, stop.lng || 126.978]}
+                    icon={stopIcon}
+                >
+                    <Popup>
+                        <strong>{stop.stop_name}</strong><br/>
+                        예정 시간: {stop.arrival_time}
                     </Popup>
                 </Marker>
             ))}

@@ -19,6 +19,12 @@ export default function ShuttleManagerPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [activeRouteId, setActiveRouteId] = useState<number | null>(null);
 
+    // 정류장용 상태 (Stops State)
+    const [isStopModalOpen, setIsStopModalOpen] = useState(false);
+    const [stopFormData, setStopFormData] = useState({ stop_name: '', arrival_time: '' });
+    const [isSavingStop, setIsSavingStop] = useState(false);
+    const [stopsDict, setStopsDict] = useState<Record<number, any[]>>({});
+
     // Load saved database routes periodically (if needed, or just once)
     const fetchSavedRoutes = async () => {
         try {
@@ -26,7 +32,22 @@ export default function ShuttleManagerPage() {
             if(res.ok) {
                 const data = await res.json();
                 setRoutes(data);
-                if(data.length > 0 && activeRouteId === null) setActiveRouteId(data[0].id);
+                if(data.length > 0 && activeRouteId === null) {
+                    setActiveRouteId(data[0].id);
+                }
+                
+                // Fetch stops for all routes
+                data.forEach((r: any) => fetchStopsForRoute(r.id));
+            }
+        } catch(e) {}
+    };
+
+    const fetchStopsForRoute = async (routeId: number) => {
+        try {
+            const res = await fetch(`/api/shuttles/stops?routeId=${routeId}`);
+            if(res.ok) {
+                const data = await res.json();
+                setStopsDict(prev => ({...prev, [routeId]: data.stops}));
             }
         } catch(e) {}
     };
@@ -67,11 +88,42 @@ export default function ShuttleManagerPage() {
                 setIsModalOpen(false);
                 setFormData({ route_name: '', driver_name: '', driver_phone: '', vehicle_number: '' });
                 if(!activeRouteId) setActiveRouteId(data.route.id);
+                setStopsDict(prev => ({...prev, [data.route.id]: []}));
             }
         } catch(e) {
             alert('저장 중 오류가 발생했습니다.');
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleSaveStop = async () => {
+        if(!stopFormData.stop_name || !stopFormData.arrival_time) return alert('입력값을 모두 채워주세요.');
+        if(!activeRouteId) return;
+
+        setIsSavingStop(true);
+        try {
+            const res = await fetch('/api/shuttles/stops', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ route_id: activeRouteId, ...stopFormData })
+            });
+            if(res.ok) {
+                const data = await res.json();
+                setStopsDict(prev => ({
+                    ...prev,
+                    [activeRouteId]: [...(prev[activeRouteId] || []), data.stop]
+                }));
+                setIsStopModalOpen(false);
+                setStopFormData({ stop_name: '', arrival_time: '' });
+            } else {
+                const err = await res.json();
+                alert(err.error || '저장 오류');
+            }
+        } catch(e) {
+            alert('저장 중 시스템 오류가 발생했습니다.');
+        } finally {
+            setIsSavingStop(false);
         }
     };
 
@@ -102,6 +154,32 @@ export default function ShuttleManagerPage() {
                             <button className="cancel-btn" onClick={() => setIsModalOpen(false)}>취소</button>
                             <button className="confirm-btn" disabled={isSaving} onClick={handleSaveRoute}>
                                 {isSaving ? '저장 중...' : '저장하기'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Stops Modal Popup */}
+            {isStopModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>📌 새 정류장 추가</h2>
+                        <p style={{fontSize:'0.85rem', color:'#64748b', marginBottom:'1.5rem'}}>
+                            시간과 이름을 입력하면 추후 자동 알림 기능에서 활용됩니다.<br/>(좌표 지정 및 지도 수정 기능은 곧 추가됩니다.)
+                        </p>
+                        <div className="form-group">
+                            <label>도착 예정 시간 (필수)</label>
+                            <input type="time" placeholder="예: 08:30" value={stopFormData.arrival_time} onChange={e => setStopFormData({...stopFormData, arrival_time: e.target.value})} />
+                        </div>
+                        <div className="form-group">
+                            <label>정류장 명칭 (필수)</label>
+                            <input placeholder="예: 래미안 파크빌 앞" value={stopFormData.stop_name} onChange={e => setStopFormData({...stopFormData, stop_name: e.target.value})} />
+                        </div>
+                        <div className="modal-actions">
+                            <button className="cancel-btn" onClick={() => setIsStopModalOpen(false)}>취소</button>
+                            <button className="confirm-btn" disabled={isSavingStop} onClick={handleSaveStop}>
+                                {isSavingStop ? '저장 중...' : '저장하기'}
                             </button>
                         </div>
                     </div>
@@ -141,7 +219,24 @@ export default function ShuttleManagerPage() {
                                     {r.vehicle_number && <p className="driver-info" style={{marginTop:'-10px'}}>🏷️ 차량번호: {r.vehicle_number}</p>}
                                     
                                     <div className="stops-timeline">
-                                        <button className="add-stop-btn">+ 정류장 추가</button>
+                                        {(stopsDict[r.id] || []).map((stop: any) => (
+                                            <div key={stop.id} className="stop-item">
+                                                <div className="stop-time">{stop.arrival_time}</div>
+                                                <div className="stop-marker"></div>
+                                                <div className="stop-content">
+                                                    <div className="stop-name">{stop.stop_name}</div>
+                                                    <button className="text-secondary"><MapPin size={16} /> 좌표</button>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        <button className="add-stop-btn" onClick={(e) => {
+                                            e.stopPropagation(); // 카드 선택 이벤트를 막음
+                                            if (activeRouteId !== r.id) setActiveRouteId(r.id);
+                                            setIsStopModalOpen(true);
+                                        }}>
+                                            + 정류장 추가
+                                        </button>
                                     </div>
                                 </div>
                             ))
@@ -151,7 +246,10 @@ export default function ShuttleManagerPage() {
 
                 {/* Right Panel: OpenStreetMap */}
                 <div className="map-panel">
-                    <ShuttleMap liveRoutes={liveRoutes} />
+                    <ShuttleMap 
+                        liveRoutes={liveRoutes} 
+                        activeStops={activeRouteId ? stopsDict[activeRouteId] : undefined}
+                    />
                 </div>
             </div>
 
