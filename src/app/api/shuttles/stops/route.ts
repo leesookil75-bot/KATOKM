@@ -18,7 +18,7 @@ export async function GET(request: Request) {
                 COALESCE(json_agg(st.name) FILTER (WHERE st.name IS NOT NULL), '[]') as passenger_names
             FROM shuttle_stops s
             LEFT JOIN shuttle_passengers sp ON s.id = sp.stop_id
-            LEFT JOIN students st ON sp.student_id = st.id
+            LEFT JOIN students st ON sp.student_id = CAST(st.id AS VARCHAR)
             WHERE s.route_id = ${routeId}
             GROUP BY s.id
             ORDER BY s.order_index ASC
