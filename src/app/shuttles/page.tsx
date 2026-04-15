@@ -378,6 +378,16 @@ export default function ShuttleManagerPage() {
 
                 {/* Right Panel: OpenStreetMap */}
                 <div className="map-panel">
+                    {editingLocationStopId && (
+                        <div style={{
+                            position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+                            background: '#ef4444', color: 'white', padding: '10px 20px', borderRadius: '30px',
+                            fontWeight: 'bold', zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                            pointerEvents: 'none', textAlign: 'center', width: '80%'
+                        }}>
+                            👇 정류장 핀(위치 마커)을 마우스로 꾹 누른 채 원하는 곳으로 끌어다 놓으세요! (Drag & Drop)
+                        </div>
+                    )}
                     <ShuttleMap 
                         liveRoutes={liveRoutes} 
                         activeStops={activeRouteId ? stopsDict[activeRouteId] : undefined}
@@ -515,15 +525,21 @@ export default function ShuttleManagerPage() {
                     padding: 0.75rem;
                     border-radius: 0.5rem;
                     display: flex;
-                    justify-content: space-between;
-                    align-items: center;
+                    flex-direction: column;
+                    gap: 0.5rem;
                 }
-                .stop-name { font-weight: 600; color: #1e293b; }
+                .stop-name { font-weight: 600; color: #1e293b; word-break: break-all; }
                 
                 .icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; padding: 0.25rem; border-radius: 0.25rem; }
                 .icon-btn:hover { background: #f1f5f9; }
                 .text-red { color: #ef4444; }
-                .text-secondary { color: #64748b; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem;}
+                .text-secondary { 
+                    color: #64748b; background: none; border: 1px solid #e2e8f0; 
+                    cursor: pointer; display: flex; align-items: center; justify-content: center;
+                    gap: 0.25rem; font-size: 0.75rem; padding: 0.4rem; border-radius: 6px;
+                    flex: 1; min-width: 0; white-space: nowrap; font-weight: 500;
+                }
+                .text-secondary:hover { background: #f8fafc; color: #1e293b; border-color: #cbd5e1; }
                 
                 .add-stop-btn {
                     margin-left: 2.5rem;
