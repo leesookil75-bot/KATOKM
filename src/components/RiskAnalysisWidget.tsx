@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertTriangle, AlertCircle, TrendingDown } from 'lucide-react';
+import { AlertTriangle, AlertCircle, Activity } from 'lucide-react';
 import styles from './RiskAnalysisWidget.module.css';
 
 interface RiskStudent {
@@ -51,7 +51,7 @@ export default function RiskAnalysisWidget() {
         return (
             <div className={`${styles.widgetContainer} ${styles.safe}`}>
                 <div className={styles.header}>
-                    <h3>관원 이탈 위험 분석</h3>
+                    <h3>스마트 케어 리포트</h3>
                 </div>
                 <div className={styles.safeMessage}>
                     🎉 현재 등록된 관원들의 출결 및 납부 상태가 매우 안정적입니다.
@@ -64,8 +64,8 @@ export default function RiskAnalysisWidget() {
         <div className={styles.widgetContainer}>
             <div className={styles.header}>
                 <h3 className={styles.title}>
-                    <TrendingDown className={styles.titleIcon} size={20} />
-                    관원 이탈 위험 경보
+                    <Activity className={styles.titleIcon} size={20} />
+                    스마트 케어 리포트
                 </h3>
                 <span className={styles.badge}>
                     집중 케어 대상: {atRiskStudents.length}명 (위험 {redStudents.length} / 주의 {yellowStudents.length})
