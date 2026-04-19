@@ -36,13 +36,30 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
         popupAnchor: [0, -15],
     });
 
-    const createStopIcon = (isEditing: boolean) => new L.divIcon({
-        html: `<div style="font-size: ${isEditing ? '40px' : '30px'}; filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.5)); transform: translate(-50%, -100%);">📍</div>`,
-        className: '',
-        iconSize: [0, 0],
-        iconAnchor: [0, 0],
-        popupAnchor: [0, -30],
-    });
+    const createStopIcon = (stop: any) => {
+        const passengers = stop.passengers || [];
+        const hasPassengers = passengers.length > 0;
+        const passengerText = hasPassengers ? passengers.map((p: any) => p.name).join(', ') : '미지정';
+        const bgColor = hasPassengers ? '#8b5cf6' : '#94a3b8';
+
+        const html = `
+            <div style="position: relative; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%);">
+                <div style="background: ${bgColor}; color: white; padding: 4px 10px; border-radius: 8px; font-size: 13px; font-weight: bold; white-space: nowrap; box-shadow: 0 3px 6px rgba(0,0,0,0.15); text-align: center; margin-bottom: 2px;">
+                    👩‍👦 ${passengerText}
+                </div>
+                <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid ${bgColor}; margin-bottom: 2px;"></div>
+                <div style="font-size: 30px; filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.5));">📍</div>
+            </div>
+        `;
+
+        return new L.divIcon({
+            html: html,
+            className: '',
+            iconSize: [0, 0],
+            iconAnchor: [0, 0],
+            popupAnchor: [0, -50],
+        });
+    };
 
     // Auto Pan Component
     const AutoPanManager = () => {
@@ -81,15 +98,28 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
         }, [editingLocationStopId, map]);
 
         if (!editingLocationStopId) return null;
+        const stop = activeStops.find(s => s.id === editingLocationStopId);
+        const passengers = stop?.passengers || [];
+        const hasPassengers = passengers.length > 0;
+        const passengerText = hasPassengers ? passengers.map((p: any) => p.name).join(', ') : '미지정';
+        const bgColor = hasPassengers ? '#8b5cf6' : '#ef4444'; // Red when editing empty stop for better visibility
 
         return (
             <>
                 <div style={{
                     position: 'absolute', top: '50%', left: '50%', transform: `translate(-50%, calc(-100% - ${isMapMoving ? '15px' : '0px'}))`,
-                    fontSize: '45px', filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.5))', 
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
                     zIndex: 1000, pointerEvents: 'none', transition: 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)'
                 }}>
-                    📍
+                    <div style={{
+                        background: bgColor, color: 'white', padding: '6px 12px', borderRadius: '8px', 
+                        fontSize: '14px', fontWeight: 'bold', whiteSpace: 'nowrap', 
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)', textAlign: 'center', marginBottom: '2px'
+                    }}>
+                        {stop?.stop_name} (👩‍👦 {passengerText})
+                    </div>
+                    <div style={{ width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: \`8px solid \${bgColor}\`, marginBottom: '4px' }}></div>
+                    <div style={{ fontSize: '45px', filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }}>📍</div>
                 </div>
                 <div style={{
                     position: 'absolute', bottom: '30px', left: '50%', transform: 'translateX(-50%)',
@@ -179,7 +209,7 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
                     <Marker 
                         key={`stop-${stop.id || idx}`} 
                         position={[stop.lat || 37.566, stop.lng || 126.978]}
-                        icon={createStopIcon(false)}
+                        icon={createStopIcon(stop)}
                     >
                         <Popup>
                             <strong>{stop.stop_name}</strong><br/>
