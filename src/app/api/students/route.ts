@@ -19,7 +19,9 @@ export async function GET() {
             passcode: row.passcode,
             memo: row.memo,
             className: row.class_name,
-            tuition_due_day: row.tuition_due_day
+            className: row.class_name,
+            tuition_due_day: row.tuition_due_day,
+            studentPhone: row.student_phone
         }));
         return NextResponse.json(students);
     } catch (error: any) {
@@ -35,14 +37,14 @@ export async function POST(request: Request) {
 
         const academyId = session.user.id;
         const body = await request.json();
-        const { name, parentPhone, passcode, memo, className, tuition_due_day } = body;
+        const { name, parentPhone, studentPhone, passcode, memo, className, tuition_due_day } = body;
 
-        // Initial password is last 4 digits of phone
+        // Initial password is last 4 digits of parent phone
         const initialPassword = parentPhone.replace(/[^0-9]/g, '').slice(-4);
 
         const { rows } = await sql`
-      INSERT INTO students (name, parent_phone, passcode, memo, class_name, academy_id, tuition_due_day, parent_password)
-      VALUES (${name}, ${parentPhone}, ${passcode}, ${memo}, ${className || ''}, ${academyId}, ${tuition_due_day || null}, ${initialPassword})
+      INSERT INTO students (name, parent_phone, student_phone, passcode, memo, class_name, academy_id, tuition_due_day, parent_password)
+      VALUES (${name}, ${parentPhone}, ${studentPhone || null}, ${passcode}, ${memo}, ${className || ''}, ${academyId}, ${tuition_due_day || null}, ${initialPassword})
       RETURNING *;
     `;
 

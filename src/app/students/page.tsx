@@ -6,6 +6,7 @@ type Student = {
     id: string;
     name: string;
     parentPhone: string;
+    studentPhone?: string; // 학원생 본인(승차) 전화번호
     passcode: string;
     memo: string;
     className?: string;
@@ -20,6 +21,7 @@ export default function StudentManager() {
         id: "",
         name: "",
         parentPhone: "",
+        studentPhone: "",
         passcode: "",
         memo: "",
         className: "",
@@ -103,7 +105,7 @@ export default function StudentManager() {
 
     const closeForm = () => {
         setIsFormOpen(false);
-        setFormData({ id: "", name: "", parentPhone: "", memo: "", passcode: "", className: "", tuition_due_day: 0 });
+        setFormData({ id: "", name: "", parentPhone: "", studentPhone: "", memo: "", passcode: "", className: "", tuition_due_day: 0 });
     };
 
     const handleResetPassword = async (student: Student) => {
@@ -192,7 +194,8 @@ export default function StudentManager() {
                         <tr>
                             <th className="sticky-col-class" style={{ backgroundColor: "#f3f4f6" }}>수업</th>
                             <th className="sticky-col-name" style={{ backgroundColor: "#f3f4f6" }}>이름</th>
-                            <th style={{ minWidth: "100px" }}>연락처</th>
+                            <th style={{ minWidth: "120px" }}>부모님 연락처</th>
+                            <th style={{ minWidth: "120px" }}>학생(승차) 연락처</th>
                             <th style={{ minWidth: "80px" }}>약정일</th>
                             <th style={{ minWidth: "100px" }}>출석코드</th>
                             <th style={{ width: "30%" }}>메모</th>
@@ -239,7 +242,24 @@ export default function StudentManager() {
                                     <td className="sticky-col-name" style={{ backgroundColor: "white" }}>
                                         <span style={{ fontWeight: 600 }}>{student.name}</span>
                                     </td>
-                                    <td><a href={`tel:${student.parentPhone}`}>{student.parentPhone}</a></td>
+                                    <td><a href={`tel:${student.parentPhone}`} className="text-secondary">{student.parentPhone}</a></td>
+                                    <td onClick={() => startEditing(student, 'studentPhone')}>
+                                        {editingCell?.id === student.id && editingCell.field === 'studentPhone' ? (
+                                            <input
+                                                type="tel"
+                                                className="input text-sm p-1 w-full"
+                                                value={tempValue}
+                                                onChange={e => setTempValue(e.target.value)}
+                                                onBlur={saveEdit}
+                                                onKeyDown={handleKeyDown}
+                                                autoFocus
+                                            />
+                                        ) : (
+                                            <span className="text-sm cursor-pointer hover:bg-gray-100 p-1 rounded block text-center" >
+                                                {student.studentPhone ? <a href={`tel:${student.studentPhone}`}>{student.studentPhone}</a> : <span className="text-gray-300">-</span>}
+                                            </span>
+                                        )}
+                                    </td>
                                     <td onClick={() => startEditing(student, 'tuition_due_day')}>
                                         {editingCell?.id === student.id && editingCell.field === 'tuition_due_day' ? (
                                             <input
@@ -345,9 +365,14 @@ export default function StudentManager() {
                                     onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="홍길동" />
                             </div>
                             <div>
-                                <label className="text-sm text-sub block mb-1">부모님 연락처</label>
+                                <label className="text-sm text-sub block mb-1">부모님 연락처 (필수)</label>
                                 <input type="tel" required className="input" value={formData.parentPhone}
                                     onChange={e => setFormData({ ...formData, parentPhone: e.target.value })} placeholder="010-1234-5678" />
+                            </div>
+                            <div>
+                                <label className="text-sm text-sub block mb-1">학생 본인 연락처 (선택)</label>
+                                <input type="tel" className="input" value={formData.studentPhone || ''}
+                                    onChange={e => setFormData({ ...formData, studentPhone: e.target.value })} placeholder="010-9876-5432" />
                             </div>
                             <div>
                                 <label className="text-sm text-sub block mb-1">출석체크 비밀번호 (4자리)</label>

@@ -12,12 +12,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         const id = params.id;
 
         const body = await request.json();
-        const { name, parentPhone, passcode, memo, className, tuition_due_day } = body;
+        const { name, parentPhone, studentPhone, passcode, memo, className, tuition_due_day } = body;
 
         const { rows } = await sql`
       UPDATE students
       SET name = ${name}, 
           parent_phone = ${parentPhone}, 
+          student_phone = ${studentPhone || null},
           passcode = ${passcode}, 
           memo = ${memo}, 
           class_name = ${className || ''},
