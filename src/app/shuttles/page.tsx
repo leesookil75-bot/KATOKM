@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, MapPin } from 'lucide-react';
+import { Plus, Trash2, MapPin, Bus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const ShuttleMap = dynamic(() => import('@/components/ShuttleMap'), {
@@ -315,6 +315,19 @@ export default function ShuttleManagerPage() {
                         >
                             <Plus size={20} />
                         </button>
+                        
+                        <a 
+                            href="/driver/shuttles" 
+                            target="_blank" 
+                            style={{
+                                marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.25rem', 
+                                background: '#f8fafc', border: '1px solid #cbd5e1', padding: '0.4rem 0.8rem', 
+                                borderRadius: '0.5rem', fontSize: '0.85rem', color: '#475569', 
+                                textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s'
+                            }}
+                        >
+                            <Bus size={16} /> 기사용 앱(탑승 버튼) 열기
+                        </a>
                     </div>
                     <div className="route-list">
                         {routes.length === 0 ? (
