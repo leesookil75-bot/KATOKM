@@ -83,14 +83,14 @@ export async function POST(request: Request) {
         // Update Dream Energy if status changed
         if (oldStatus !== status) {
             let energyDelta = 0;
-            if (status === '출석') energyDelta = 0.5;
+            if (status === '출석') energyDelta = 0.2;
             else if (status === '결석') energyDelta = -1.0;
             
             // If they changed from attendance to absence (revert + penalize)
-            if (oldStatus === '출석' && status === '하원') energyDelta = -0.5; // just revert
-            if (oldStatus === '결석' && status === '출석') energyDelta = 1.5; // revert penalty + reward
+            if (oldStatus === '출석' && status === '하원') energyDelta = -0.2; // just revert
+            if (oldStatus === '결석' && status === '출석') energyDelta = 1.2; // revert penalty + reward
             if (oldStatus === '결석' && status !== '결석' && status !== '출석') energyDelta = 1.0; // revert penalty
-            if (oldStatus === '출석' && status === '결석') energyDelta = -1.5; // revert reward + penalize
+            if (oldStatus === '출석' && status === '결석') energyDelta = -1.2; // revert reward + penalize
 
             if (energyDelta !== 0) {
                 await sql`
