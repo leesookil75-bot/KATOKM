@@ -43,17 +43,18 @@ export async function POST(request: Request) {
         // Remove strictly any remaining non-numeric
         cleanPhone = cleanPhone.replace(/[^0-9]/g, '');
 
-        // Find student and academy name using ONLY the verified phone number (password no longer needed)
+        // Find student and academy name using verified phone number (parent or student phone)
         const { rows } = await sql`
-            SELECT s.id, s.name, s.parent_phone, s.academy_id, a.academy_name
+            SELECT s.id, s.name, s.parent_phone, s.student_phone, s.academy_id, a.academy_name
             FROM students s
             JOIN admins a ON s.academy_id = a.id
             WHERE REGEXP_REPLACE(s.parent_phone, '[^0-9]', '', 'g') = ${cleanPhone}
+               OR REGEXP_REPLACE(s.student_phone, '[^0-9]', '', 'g') = ${cleanPhone}
             LIMIT 1;
         `;
 
         if (rows.length === 0) {
-            return NextResponse.json({ error: '시스템에 등록된 학부모 번호가 아닙니다. 학원에 문의해주세요.' }, { status: 401 });
+            return NextResponse.json({ error: '시스템에 등록된 학부모/학생 번호가 아닙니다. 학원에 문의해주세요.' }, { status: 401 });
         }
 
         const student = rows[0];
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
         // Create parent session via our standard jose JWT
         await login({
             id: student.academy_id,
-            username: student.parent_phone,
+            username: cleanPhone,
             role: 'PARENT',
             student_id: student.id,
             student_name: student.name,

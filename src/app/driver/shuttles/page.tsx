@@ -76,6 +76,12 @@ function DriverShuttlePageInner() {
         setNotifiedStops(new Set()); // Reset automatic stop notifications
         setBoardedStudents(new Set()); // Reset boardings for a fresh run
 
+        fetch('/api/driver/shuttles/status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ routeId: selectedRouteId, isDriving: true })
+        }).catch(err => console.error("운행 상태 업데이트 실패", err));
+
         watchIdRef.current = navigator.geolocation.watchPosition(
             async (position) => {
                 const lat = position.coords.latitude;
@@ -125,6 +131,14 @@ function DriverShuttlePageInner() {
             watchIdRef.current = null;
         }
         setCurrentLocation(null);
+
+        if (selectedRouteId) {
+            fetch('/api/driver/shuttles/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ routeId: selectedRouteId, isDriving: false })
+            }).catch(err => console.error("운행 상태 강제 중지 실패", err));
+        }
     };
 
     const handleBoard = async (studentId: string, stopName: string) => {

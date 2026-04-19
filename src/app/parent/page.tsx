@@ -14,8 +14,9 @@ import {
     AlertCircle,
     Circle,
     Triangle,
-    X,
-    Bell
+    Bell,
+    BusFront,
+    MapPin
 } from "lucide-react";
 import Link from "next/link";
 
@@ -51,6 +52,7 @@ export default function ParentDashboard() {
     const [session, setSession] = useState<Session | null>(null);
     const [todayAttendance, setTodayAttendance] = useState<any>(null);
     const [tuitionSummary, setTuitionSummary] = useState<any>(null);
+    const [shuttleInfo, setShuttleInfo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -112,9 +114,10 @@ export default function ParentDashboard() {
                 const today = now.toLocaleDateString('sv');
                 const currentYear = now.getFullYear();
 
-                const [attendanceRes, tuitionRes] = await Promise.all([
+                const [attendanceRes, tuitionRes, shuttleRes] = await Promise.all([
                     fetch(`/api/attendance`),
-                    fetch(`/api/tuition?year=${currentYear}`)
+                    fetch(`/api/tuition?year=${currentYear}`),
+                    fetch(`/api/parent/shuttle`)
                 ]);
 
                 if (attendanceRes.ok) {
@@ -129,6 +132,13 @@ export default function ParentDashboard() {
                 if (tuitionRes.ok) {
                     const tuitionData = await tuitionRes.json();
                     setTuitionSummary(tuitionData);
+                }
+
+                if (shuttleRes.ok) {
+                    const shuttleData = await shuttleRes.json();
+                    if (shuttleData.assigned) {
+                         setShuttleInfo(shuttleData.info);
+                    }
                 }
 
                 await fetchNotifications();
@@ -252,6 +262,44 @@ export default function ParentDashboard() {
             </header>
 
             <main className="dashboard-content">
+                {/* Shuttle Card */}
+                <section className="status-card highlight-card">
+                    <div className="card-header">
+                        <div className="icon-wrapper shuttle">
+                            <BusFront size={24} />
+                        </div>
+                        <h3>실시간 셔틀 위치 확인</h3>
+                        <Link href="/parent/shuttle" className="more-link">
+                            실시간 지도 <ChevronRight size={16} />
+                        </Link>
+                    </div>
+                    <div className="card-body">
+                        {loading ? (
+                            <div className="skeleton-row"></div>
+                        ) : shuttleInfo ? (
+                            <div className="shuttle-info-box">
+                                <div className="info-row">
+                                    <span className="shuttle-label">내 정류장</span>
+                                    <span className="shuttle-value">📍 {shuttleInfo.stop_name}</span>
+                                </div>
+                                <div className="info-row">
+                                    <span className="shuttle-label">승차 예상시간</span>
+                                    <span className="shuttle-value time-val">{shuttleInfo.arrival_time}</span>
+                                </div>
+                                {shuttleInfo.is_driving ? (
+                                     <div className="driving-status active">🚌 차량 운행 중</div>
+                                ) : (
+                                     <div className="driving-status standby">차량 대기(이동 전)</div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="no-data">
+                                <p>현재 배정된 셔틀 노선이 없습니다.</p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
                 {/* Today's Attendance Card */}
                 <section className="status-card">
                     <div className="card-header">
@@ -477,6 +525,8 @@ export default function ParentDashboard() {
                 }
                 .icon-wrapper.attendance { background: #e0e7ff; color: #4338ca; }
                 .icon-wrapper.tuition { background: #fef3c7; color: #d97706; }
+                .icon-wrapper.shuttle { background: #fee2e2; color: #ef4444; }
+                .highlight-card { border: 2px solid #ef4444; position: relative; overflow: hidden; }
                 .card-header h3 {
                     font-size: 1.05rem;
                     font-weight: 700;
@@ -537,6 +587,35 @@ export default function ParentDashboard() {
                     color: #94a3b8;
                     font-size: 0.95rem;
                 }
+                .shuttle-info-box {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.8rem;
+                    background: #fff5f5;
+                    padding: 1.25rem;
+                    border-radius: 1rem;
+                }
+                .info-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .shuttle-label { font-size: 0.9rem; color: #64748b; }
+                .shuttle-value { font-weight: 700; color: #1e293b; font-size: 1.05rem; }
+                .time-val { color: #ef4444; font-size: 1.2rem; }
+                .driving-status { 
+                    margin-top: 0.5rem; text-align: center; padding: 0.75rem; 
+                    border-radius: 0.75rem; font-weight: 800; font-size: 1rem;
+                }
+                .driving-status.active { background: #ef4444; color: white; animation: pulse-bg 2s infinite; }
+                .driving-status.standby { background: #f1f5f9; color: #64748b; }
+
+                @keyframes pulse-bg {
+                    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+                    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+                }
+
                 .tuition-summary {
                     display: flex;
                     flex-direction: column;
