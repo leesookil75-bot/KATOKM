@@ -58,6 +58,19 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
         return null;
     };
 
+    // Auto Resize Component
+    const MapResizer = () => {
+        const map = useMap();
+        useEffect(() => {
+            const resizeObserver = new ResizeObserver(() => {
+                map.invalidateSize();
+            });
+            resizeObserver.observe(map.getContainer());
+            return () => resizeObserver.disconnect();
+        }, [map]);
+        return null;
+    };
+
     // Default center
     // 1. If bus is live, center on bus
     // 2. Else if stops exist, center on first stop
@@ -76,6 +89,7 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             
+            <MapResizer />
             <AutoPanManager />
 
             {liveRoutes.map((route, idx) => (

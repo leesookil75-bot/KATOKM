@@ -303,18 +303,18 @@ export default function ShuttleManagerPage() {
                 </div>
             )}
 
-            <div className="control-bar" style={{justifyContent: 'flex-end', paddingBottom: '0.5rem'}}>
-                <button className="primary-btn shrink-0" onClick={() => setIsModalOpen(true)}>
-                    <Plus size={20} />
-                    <span>새 노선 추가</span>
-                </button>
-            </div>
-
             <div className={`layout-grid ${isMapOpen ? 'map-open' : ''}`}>
                 {/* Left Panel: Routes & Stops List */}
                 <div className="list-panel">
-                    <div className="panel-header">
+                    <div className="panel-header" style={{ display: 'flex', alignItems: 'center' }}>
                         <h2>운행 노선표</h2>
+                        <button 
+                            className="add-route-btn"
+                            onClick={() => setIsModalOpen(true)}
+                            title="새 노선 추가"
+                        >
+                            <Plus size={20} />
+                        </button>
                     </div>
                     <div className="route-list">
                         {routes.length === 0 ? (
@@ -408,27 +408,25 @@ export default function ShuttleManagerPage() {
                     gap: 1.5rem;
                     height: calc(100vh - 4rem);
                 }
-                .control-bar {
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    gap: 0.5rem;
-                    flex-wrap: wrap;
-                }
-                .primary-btn {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
+                .add-route-btn {
                     background: #8b5cf6;
                     color: white;
                     border: none;
-                    padding: 0.75rem 1.25rem;
-                    border-radius: 0.5rem;
-                    font-weight: 600;
+                    border-radius: 50%;
+                    width: 36px;
+                    height: 36px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                     cursor: pointer;
-                    transition: background 0.2s;
+                    box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.4);
+                    transition: all 0.2s;
+                    margin-left: 0.75rem;
                 }
-                .primary-btn:hover { background: #7c3aed; }
+                .add-route-btn:hover {
+                    background: #7c3aed;
+                    transform: scale(1.1);
+                }
                 
                 .layout-grid {
                     display: flex;
@@ -582,11 +580,15 @@ export default function ShuttleManagerPage() {
                     border: none;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
+                .layout-grid.map-open .list-panel {
+                    display: none;
+                }
                 .layout-grid.map-open .map-panel {
-                    height: 50vh;
-                    min-height: 300px;
+                    height: 100%;
+                    min-height: calc(100vh - 12rem);
                     border: 1px solid #e2e8f0;
-                    margin-top: 1rem;
+                    margin-top: 0;
+                    border-radius: 1rem;
                 }
                 .fab-map-btn {
                     position: fixed;
