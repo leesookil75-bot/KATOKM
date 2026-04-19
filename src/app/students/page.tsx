@@ -242,7 +242,27 @@ export default function StudentManager() {
                                     <td className="sticky-col-name" style={{ backgroundColor: "white" }}>
                                         <span style={{ fontWeight: 600 }}>{student.name}</span>
                                     </td>
-                                    <td><a href={`tel:${student.parentPhone}`} className="text-secondary">{student.parentPhone}</a></td>
+                                    <td onClick={() => startEditing(student, 'parentPhone')}>
+                                        {editingCell?.id === student.id && editingCell.field === 'parentPhone' ? (
+                                            <input
+                                                type="tel"
+                                                className="input text-sm p-1 w-full"
+                                                value={tempValue}
+                                                onChange={e => setTempValue(e.target.value)}
+                                                onBlur={saveEdit}
+                                                onKeyDown={handleKeyDown}
+                                                autoFocus
+                                            />
+                                        ) : (
+                                            <span className="text-sm cursor-pointer hover:bg-gray-100 p-1 rounded block text-center">
+                                                {student.parentPhone ? (
+                                                    <a href={`tel:${student.parentPhone}`} className="text-secondary" onClick={(e) => e.stopPropagation()}>
+                                                        {student.parentPhone}
+                                                    </a>
+                                                ) : <span className="text-gray-300">-</span>}
+                                            </span>
+                                        )}
+                                    </td>
                                     <td onClick={() => startEditing(student, 'studentPhone')}>
                                         {editingCell?.id === student.id && editingCell.field === 'studentPhone' ? (
                                             <input
@@ -256,7 +276,11 @@ export default function StudentManager() {
                                             />
                                         ) : (
                                             <span className="text-sm cursor-pointer hover:bg-gray-100 p-1 rounded block text-center" >
-                                                {student.studentPhone ? <a href={`tel:${student.studentPhone}`}>{student.studentPhone}</a> : <span className="text-gray-300">-</span>}
+                                                {student.studentPhone ? (
+                                                    <a href={`tel:${student.studentPhone}`} onClick={(e) => e.stopPropagation()}>
+                                                        {student.studentPhone}
+                                                    </a>
+                                                ) : <span className="text-gray-300">-</span>}
                                             </span>
                                         )}
                                     </td>
