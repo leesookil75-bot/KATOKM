@@ -118,7 +118,7 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
                     }}>
                         {stop?.stop_name} (👩‍👦 {passengerText})
                     </div>
-                    <div style={{ width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: \`8px solid \${bgColor}\`, marginBottom: '4px' }}></div>
+                    <div style={{ width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: `8px solid ${bgColor}`, marginBottom: '4px' }}></div>
                     <div style={{ fontSize: '45px', filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }}>📍</div>
                 </div>
                 <div style={{
