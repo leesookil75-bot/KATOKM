@@ -36,10 +36,14 @@ export default function DriverShuttlePage() {
 
     // Fetch routes
     useEffect(() => {
-        fetch('/api/shuttles/location')
+        fetch('/api/shuttles/routes')
             .then(res => res.json())
             .then(data => {
-                if (data.routes) setRoutes(data.routes);
+                if (Array.isArray(data)) {
+                    setRoutes(data);
+                } else if (data.routes) {
+                    setRoutes(data.routes);
+                }
             })
             .catch(err => console.error("Failed to fetch routes", err));
     }, []);
