@@ -354,7 +354,9 @@ export default function ShuttleManagerPage() {
                                                         <div className="stop-name">{stop.stop_name}</div>
                                                         <div style={{fontSize:'0.8rem', color:'#8b5cf6', marginTop:'4px', fontWeight:500}}>
                                                             {(() => {
-                                                                const ps = typeof stop.passengers === 'string' ? JSON.parse(stop.passengers) : (stop.passengers || []);
+                                                                let ps: any[] = [];
+                                                                try { ps = typeof stop.passengers === 'string' ? JSON.parse(stop.passengers) : (stop.passengers || []); } catch(e) { ps = []; }
+                                                                if (!Array.isArray(ps)) ps = [];
                                                                 return ps.length > 0 ? `👩‍👦 ${ps.map((p: any) => p.name).join(', ')}` : <span style={{color:'#94a3b8'}}>탑승자 미지정</span>;
                                                             })()}
                                                         </div>

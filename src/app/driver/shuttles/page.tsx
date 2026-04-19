@@ -199,7 +199,9 @@ export default function DriverShuttlePage() {
                             <div className="stop-name">{idx + 1}. {stop.stop_name}</div>
                             
                             {(() => {
-                                const ps = typeof stop.passengers === 'string' ? JSON.parse(stop.passengers) : (stop.passengers || []);
+                                let ps: any[] = [];
+                                try { ps = typeof stop.passengers === 'string' ? JSON.parse(stop.passengers) : (stop.passengers || []); } catch(e) { ps = []; }
+                                if (!Array.isArray(ps)) ps = [];
                                 return ps.length > 0 ? (
                                     <div className="passenger-list">
                                         {ps.map((p: any) => {
