@@ -47,15 +47,78 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
     // Auto Pan Component
     const AutoPanManager = () => {
         const map = useMap();
+        const prevEditingIdRef = useRef<number | null>(null);
+        
         useEffect(() => {
-            if (editingLocationStopId && activeStops.length > 0) {
+            if (editingLocationStopId && editingLocationStopId !== prevEditingIdRef.current && activeStops.length > 0) {
                 const stop = activeStops.find(s => s.id === editingLocationStopId);
                 if (stop) {
-                    map.flyTo([stop.lat || 37.566, stop.lng || 126.978], 17, { animate: true, duration: 1 });
+                    map.flyTo([stop.lat || 37.566, stop.lng || 126.978], 17, { animate: true, duration: 0.5 });
                 }
             }
+            prevEditingIdRef.current = editingLocationStopId || null;
         }, [editingLocationStopId, activeStops, map]);
         return null;
+    };
+    
+    // Crosshair & Save Button Component for Map Editing
+    const CrosshairOverlay = () => {
+        const map = useMap();
+        const [isMapMoving, setIsMapMoving] = useState(false);
+
+        useEffect(() => {
+            if (!editingLocationStopId) return;
+            const handleMoveStart = () => setIsMapMoving(true);
+            const handleMoveEnd = () => setIsMapMoving(false);
+            
+            map.on('movestart', handleMoveStart);
+            map.on('moveend', handleMoveEnd);
+            
+            return () => {
+                map.off('movestart', handleMoveStart);
+                map.off('moveend', handleMoveEnd);
+            };
+        }, [editingLocationStopId, map]);
+
+        if (!editingLocationStopId) return null;
+
+        return (
+            <>
+                <div style={{
+                    position: 'absolute', top: '50%', left: '50%', transform: `translate(-50%, calc(-100% - ${isMapMoving ? '15px' : '0px'}))`,
+                    fontSize: '45px', filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.5))', 
+                    zIndex: 1000, pointerEvents: 'none', transition: 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)'
+                }}>
+                    📍
+                </div>
+                <div style={{
+                    position: 'absolute', bottom: '30px', left: '50%', transform: 'translateX(-50%)',
+                    zIndex: 1000
+                }}>
+                    <button 
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const currentCenter = map.getCenter();
+                            if (onLocationUpdated) {
+                                onLocationUpdated(editingLocationStopId, currentCenter.lat, currentCenter.lng);
+                                alert("위치가 변경되었습니다!");
+                            }
+                        }}
+                        style={{
+                            background: '#8b5cf6', color: 'white', border: 'none', padding: '14px 28px',
+                            borderRadius: '30px', fontWeight: 'bold', fontSize: '1.2rem',
+                            boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)', cursor: 'pointer',
+                            transition: 'transform 0.1s'
+                        }}
+                        onMouseDown={e => e.currentTarget.style.transform = 'translateX(-50%) scale(0.95)'}
+                        onMouseUp={e => e.currentTarget.style.transform = 'translateX(-50%) scale(1)'}
+                    >
+                        ✓ 이 위치로 확정
+                    </button>
+                </div>
+            </>
+        );
     };
 
     // Auto Resize Component
@@ -105,30 +168,22 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
                 </Marker>
             ))}
 
+            <CrosshairOverlay />
+
             {/* Render Stops */}
             {activeStops.map((stop, idx) => {
                 const isEditing = editingLocationStopId === stop.id;
+                if (isEditing) return null; // 편집 중인 마커는 중앙의 고정된 크로스헤어로 대체됩니다.
                 
                 return (
                     <Marker 
                         key={`stop-${stop.id || idx}`} 
                         position={[stop.lat || 37.566, stop.lng || 126.978]}
-                        icon={createStopIcon(isEditing)}
-                        draggable={isEditing}
-                        eventHandlers={{
-                            dragend: (e) => {
-                                const marker = e.target;
-                                const pos = marker.getLatLng();
-                                if (onLocationUpdated) {
-                                    onLocationUpdated(stop.id, pos.lat, pos.lng);
-                                }
-                            }
-                        }}
+                        icon={createStopIcon(false)}
                     >
                         <Popup>
                             <strong>{stop.stop_name}</strong><br/>
                             예정 시간: {stop.arrival_time}
-                            {isEditing && <div style={{color:'red', marginTop:'5px'}}>📍 핀을 드래그해서 옮기세요!</div>}
                         </Popup>
                     </Marker>
                 );

@@ -395,7 +395,7 @@ export default function ShuttleManagerPage() {
                             fontWeight: 'bold', zIndex: 1000, boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
                             pointerEvents: 'none', textAlign: 'center', width: '80%'
                         }}>
-                            👇 정류장 핀(위치 마커)을 마우스로 꾹 누른 채 원하는 곳으로 끌어다 놓으세요! (Drag & Drop)
+                            👇 지도를 움직여 중앙 📍핀에 위치를 맞춘 후 '확정' 버튼을 누르세요!
                         </div>
                     )}
                     <ShuttleMap 
