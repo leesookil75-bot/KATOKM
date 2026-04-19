@@ -9,7 +9,14 @@ const ShuttleMap = dynamic(() => import('@/components/ShuttleMap'), {
     loading: () => <div className="map-loading-overlay"><span>오픈 지도를 불러오는 중입니다...</span></div>
 });
 
+import ShuttleManagerPageInner from './ShuttleManagerPageInner';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
 export default function ShuttleManagerPage() {
+    return <ErrorBoundary><ShuttleManagerPageInner /></ErrorBoundary>;
+}
+
+function ShuttleManagerPageInner() {
     const [liveRoutes, setLiveRoutes] = useState<any[]>([]);
     const [isMapOpen, setIsMapOpen] = useState(false);
     

@@ -19,7 +19,13 @@ function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: num
     return R * c; 
 }
 
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
 export default function DriverShuttlePage() {
+    return <ErrorBoundary><DriverShuttlePageInner /></ErrorBoundary>;
+}
+
+function DriverShuttlePageInner() {
     const [routes, setRoutes] = useState<any[]>([]);
     const [stops, setStops] = useState<any[]>([]);
     const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
