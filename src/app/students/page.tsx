@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit, Phone } from "lucide-react";
 
 type Student = {
     id: string;
@@ -242,47 +242,25 @@ export default function StudentManager() {
                                     <td className="sticky-col-name" style={{ backgroundColor: "white" }}>
                                         <span style={{ fontWeight: 600 }}>{student.name}</span>
                                     </td>
-                                    <td onClick={() => startEditing(student, 'parentPhone')}>
-                                        {editingCell?.id === student.id && editingCell.field === 'parentPhone' ? (
-                                            <input
-                                                type="tel"
-                                                className="input text-sm p-1 w-full"
-                                                value={tempValue}
-                                                onChange={e => setTempValue(e.target.value)}
-                                                onBlur={saveEdit}
-                                                onKeyDown={handleKeyDown}
-                                                autoFocus
-                                            />
-                                        ) : (
-                                            <span className="text-sm cursor-pointer hover:bg-gray-100 p-1 rounded block text-center">
-                                                {student.parentPhone ? (
-                                                    <a href={`tel:${student.parentPhone}`} className="text-secondary" onClick={(e) => e.stopPropagation()}>
-                                                        {student.parentPhone}
-                                                    </a>
-                                                ) : <span className="text-gray-300">-</span>}
-                                            </span>
-                                        )}
+                                    <td>
+                                        <div className="flex-center justify-between text-sm w-full h-full" style={{ padding: "0.25rem 0.5rem" }}>
+                                            <span>{student.parentPhone || <span className="text-gray-300">-</span>}</span>
+                                            {student.parentPhone && (
+                                                <a href={`tel:${student.parentPhone}`} className="text-secondary hover:bg-gray-100 p-1 rounded-full flex-center" title="학부모님께 전화걸기" onClick={(e) => e.stopPropagation()}>
+                                                    <Phone size={14} />
+                                                </a>
+                                            )}
+                                        </div>
                                     </td>
-                                    <td onClick={() => startEditing(student, 'studentPhone')}>
-                                        {editingCell?.id === student.id && editingCell.field === 'studentPhone' ? (
-                                            <input
-                                                type="tel"
-                                                className="input text-sm p-1 w-full"
-                                                value={tempValue}
-                                                onChange={e => setTempValue(e.target.value)}
-                                                onBlur={saveEdit}
-                                                onKeyDown={handleKeyDown}
-                                                autoFocus
-                                            />
-                                        ) : (
-                                            <span className="text-sm cursor-pointer hover:bg-gray-100 p-1 rounded block text-center" >
-                                                {student.studentPhone ? (
-                                                    <a href={`tel:${student.studentPhone}`} onClick={(e) => e.stopPropagation()}>
-                                                        {student.studentPhone}
-                                                    </a>
-                                                ) : <span className="text-gray-300">-</span>}
-                                            </span>
-                                        )}
+                                    <td>
+                                        <div className="flex-center justify-between text-sm w-full h-full" style={{ padding: "0.25rem 0.5rem" }}>
+                                            <span>{student.studentPhone || <span className="text-gray-300">-</span>}</span>
+                                            {student.studentPhone && (
+                                                <a href={`tel:${student.studentPhone}`} className="text-primary hover:bg-gray-100 p-1 rounded-full flex-center" title="학생에게 전화걸기" onClick={(e) => e.stopPropagation()}>
+                                                    <Phone size={14} />
+                                                </a>
+                                            )}
+                                        </div>
                                     </td>
                                     <td onClick={() => startEditing(student, 'tuition_due_day')}>
                                         {editingCell?.id === student.id && editingCell.field === 'tuition_due_day' ? (
@@ -339,6 +317,9 @@ export default function StudentManager() {
                                     </td>
                                     <td>
                                         <div className="flex-center gap-xs" style={{ justifyContent: "center" }}>
+                                            <button className="btn" style={{ padding: "0.4rem", color: "var(--text-sub)", backgroundColor: "#f3f4f6" }} onClick={() => openEdit(student)} title="수정">
+                                                <Edit size={16} />
+                                            </button>
                                             <button className="btn" style={{ padding: "0.4rem", color: "var(--primary)", backgroundColor: "#eef2ff" }} onClick={() => handleResetPassword(student)} title="학부모 비밀번호 초기화">
                                                 리셋
                                             </button>
