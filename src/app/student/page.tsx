@@ -112,7 +112,7 @@ export default function StudentDashboard() {
 
             <main className="dashboard-content">
                 {/* Dream Energy Bar */}
-                <section className="status-card energy-card" style={{ marginTop: "-3rem", position: "relative", zIndex: 10 }}>
+                <section className="status-card energy-card" style={{ position: "relative", zIndex: 10 }}>
                     <div className="energy-header">
                         <div className="flex-center gap-xs">
                             <span style={{ fontSize: "1.2rem" }}>⚡</span>
@@ -350,10 +350,10 @@ export default function StudentDashboard() {
                 }
                 
                 /* Dream Energy Styles */
-                .energy-card { border: 2px solid #e2e8f0; }
-                .energy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-                .energy-value { font-size: 1.25rem; font-weight: 800; color: #1e293b; }
-                .energy-bar-container { background: #f1f5f9; height: 28px; border-radius: 999px; overflow: hidden; position: relative; margin-bottom: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+                .energy-card { border: 2px solid #e2e8f0; padding: 1rem 1.25rem; }
+                .energy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+                .energy-value { font-size: 1.15rem; font-weight: 800; color: #1e293b; }
+                .energy-bar-container { background: #f1f5f9; height: 20px; border-radius: 999px; overflow: hidden; position: relative; margin-bottom: 0.75rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
                 .energy-bar-fill { height: 100%; border-radius: 999px; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
                 
                 /* Level Colors */
