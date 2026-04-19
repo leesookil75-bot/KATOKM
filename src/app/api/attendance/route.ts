@@ -83,7 +83,30 @@ export async function POST(request: Request) {
         // Update Dream Energy if status changed
         if (oldStatus !== status) {
             let energyDelta = 0;
-            if (status === '출석') energyDelta = 0.2;
+            if (status === '출석') {
+                energyDelta = 0.2;
+                
+                // 연속 출석 보너스 계산 (LIMIT 50으로 최근 기록 스캔)
+                try {
+                    const { rows: history } = await sql`
+                        SELECT status FROM attendance 
+                        WHERE student_id = ${studentId} 
+                        ORDER BY date DESC
+                        LIMIT 50
+                    `;
+                    let streak = 0;
+                    for (const row of history) {
+                        if (row.status === '결석') break; // 결석이 있으면 연속 출석 깨짐
+                        if (row.status === '출석' || row.status === '하원') streak++;
+                    }
+                    // 연속 5일 단위 (5, 10, 15...) 달성 시 0.1점 보너스
+                    if (streak > 0 && streak % 5 === 0) {
+                        energyDelta += 0.1;
+                    }
+                } catch (e) {
+                    console.error('[Streak Bonus Error]:', e);
+                }
+            }
             else if (status === '결석') energyDelta = -1.0;
             
             // If they changed from attendance to absence (revert + penalize)
