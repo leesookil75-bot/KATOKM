@@ -2,7 +2,7 @@
 
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
 
 // Fix for default marker icons in Leaflet with Next.js/Webpack
