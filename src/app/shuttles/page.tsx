@@ -353,7 +353,10 @@ export default function ShuttleManagerPage() {
                                                     <div>
                                                         <div className="stop-name">{stop.stop_name}</div>
                                                         <div style={{fontSize:'0.8rem', color:'#8b5cf6', marginTop:'4px', fontWeight:500}}>
-                                                            {stop.passengers?.length > 0 ? `👩‍👦 ${stop.passengers.map((p: any) => p.name).join(', ')}` : <span style={{color:'#94a3b8'}}>탑승자 미지정</span>}
+                                                            {(() => {
+                                                                const ps = typeof stop.passengers === 'string' ? JSON.parse(stop.passengers) : (stop.passengers || []);
+                                                                return ps.length > 0 ? `👩‍👦 ${ps.map((p: any) => p.name).join(', ')}` : <span style={{color:'#94a3b8'}}>탑승자 미지정</span>;
+                                                            })()}
                                                         </div>
                                                     </div>
                                                     <div style={{display:'flex', gap:'5px', marginTop:'5px'}}>

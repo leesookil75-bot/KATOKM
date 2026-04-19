@@ -37,7 +37,7 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
     });
 
     const createStopIcon = (stop: any) => {
-        const passengers = stop.passengers || [];
+        const passengers = typeof stop?.passengers === 'string' ? JSON.parse(stop.passengers) : (stop?.passengers || []);
         const hasPassengers = passengers.length > 0;
         const passengerText = hasPassengers ? passengers.map((p: any) => p.name).join(', ') : '미지정';
         const bgColor = hasPassengers ? '#8b5cf6' : '#94a3b8';
@@ -99,7 +99,7 @@ export default function ShuttleMap({ liveRoutes, activeStops = [], editingLocati
 
         if (!editingLocationStopId) return null;
         const stop = activeStops.find(s => s.id === editingLocationStopId);
-        const passengers = stop?.passengers || [];
+        const passengers = typeof stop?.passengers === 'string' ? JSON.parse(stop.passengers) : (stop?.passengers || []);
         const hasPassengers = passengers.length > 0;
         const passengerText = hasPassengers ? passengers.map((p: any) => p.name).join(', ') : '미지정';
         const bgColor = hasPassengers ? '#8b5cf6' : '#ef4444'; // Red when editing empty stop for better visibility

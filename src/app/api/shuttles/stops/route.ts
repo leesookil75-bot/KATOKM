@@ -23,7 +23,7 @@ export async function GET(request: Request) {
                             'parent_phone', st.parent_phone
                         )
                     ) FILTER (WHERE st.id IS NOT NULL), 
-                    '[]'
+                    '[]'::json
                 ) as passengers
             FROM shuttle_stops s
             LEFT JOIN shuttle_passengers sp ON s.id = sp.stop_id
