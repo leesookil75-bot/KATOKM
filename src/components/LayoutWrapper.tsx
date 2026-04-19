@@ -4,12 +4,14 @@ import { usePathname } from "next/navigation";
 import NavBar from "./NavBar";
 import AdminSidebar from "./AdminSidebar";
 import { useEffect, useState } from "react";
-import PullToRefresh from 'react-simple-pull-to-refresh';
+import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isAuthPage, setIsAuthPage] = useState(false);
     const [role, setRole] = useState<string | null>(null);
+
+    usePullToRefresh();
 
     useEffect(() => {
         const authPages = ['/login', '/signup', '/admin-login'];
@@ -50,17 +52,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
                 </main>
             </div>
             <div className="mobile-view">
-                <PullToRefresh 
-                    onRefresh={async () => {
-                        window.location.reload();
-                    }}
-                    pullingContent={<div style={{ textAlign: 'center', padding: '1rem', color: '#64748b' }}>아래로 당겨서 새로고침...</div>}
-                    refreshingContent={<div style={{ textAlign: 'center', padding: '1rem', color: '#64748b' }}>새로고침 중...</div>}
-                >
-                    <div className={`container ${isKioskPage ? 'kiosk-container' : ''}`} style={{ paddingBottom: showNav ? '80px' : '0', minHeight: '100vh' }}>
-                        {children}
-                    </div>
-                </PullToRefresh>
+                <div className={`container ${isKioskPage ? 'kiosk-container' : ''}`} style={{ paddingBottom: showNav ? '80px' : '0' }}>
+                    {children}
+                </div>
                 {showNav && <NavBar />}
             </div>
 
