@@ -11,6 +11,7 @@ const ShuttleMap = dynamic(() => import('@/components/ShuttleMap'), {
 
 export default function ShuttleManagerPage() {
     const [liveRoutes, setLiveRoutes] = useState<any[]>([]);
+    const [mobileTab, setMobileTab] = useState<'list'|'map'>('list');
     
     // 새 노선 모달용 상태 (State)
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -313,7 +314,12 @@ export default function ShuttleManagerPage() {
                 </button>
             </header>
 
-            <div className="layout-grid">
+            <div className="mobile-tabs">
+                <button className={mobileTab === 'list' ? 'active' : ''} onClick={() => setMobileTab('list')}>📝 운행 노선표</button>
+                <button className={mobileTab === 'map' ? 'active' : ''} onClick={() => setMobileTab('map')}>🗺️ 실시간 지도</button>
+            </div>
+
+            <div className={`layout-grid active-tab-${mobileTab}`}>
                 {/* Left Panel: Routes & Stops List */}
                 <div className="list-panel">
                     <div className="panel-header">
@@ -600,10 +606,52 @@ export default function ShuttleManagerPage() {
                     font-weight: 500;
                 }
 
+                .mobile-tabs {
+                    display: none;
+                }
                 @media (max-width: 1024px) {
+                    .mobile-tabs {
+                        display: flex;
+                        gap: 0.5rem;
+                        background: #e2e8f0;
+                        padding: 0.4rem;
+                        border-radius: 0.75rem;
+                        margin-bottom: 1rem;
+                    }
+                    .mobile-tabs button {
+                        flex: 1;
+                        padding: 0.75rem;
+                        border: none;
+                        border-radius: 0.5rem;
+                        background: transparent;
+                        color: #64748b;
+                        font-weight: 700;
+                        font-size: 1rem;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    }
+                    .mobile-tabs button.active {
+                        background: white;
+                        color: #8b5cf6;
+                        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+                    }
+                    
                     .layout-grid {
                         grid-template-columns: 1fr;
-                        grid-template-rows: 50vh 50vh;
+                        display: flex;
+                        flex-direction: column;
+                        flex: 1;
+                    }
+                    .layout-grid.active-tab-list .map-panel {
+                        display: none;
+                    }
+                    .layout-grid.active-tab-map .list-panel {
+                        display: none;
+                    }
+                    .layout-grid.active-tab-map .map-panel {
+                        flex: 1;
+                        display: block;
+                        height: calc(100vh - 12rem);
                     }
                 }
             `}</style>
