@@ -6,7 +6,8 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     try {
         await sql`ALTER TABLE shuttle_routes ADD COLUMN IF NOT EXISTS is_driving BOOLEAN DEFAULT FALSE`;
-        return NextResponse.json({ success: true, message: 'is_driving column added' });
+        await sql`ALTER TABLE students ADD COLUMN IF NOT EXISTS dream_energy NUMERIC(5, 1) DEFAULT 36.5`;
+        return NextResponse.json({ success: true, message: 'Migrations complete' });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

@@ -20,6 +20,7 @@ export default function StudentDashboard() {
     const [session, setSession] = useState<Session | null>(null);
     const [todayAttendance, setTodayAttendance] = useState<any>(null);
     const [shuttleInfo, setShuttleInfo] = useState<any>(null);
+    const [dreamEnergy, setDreamEnergy] = useState<number>(36.5);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -43,9 +44,10 @@ export default function StudentDashboard() {
                 const now = new Date();
                 const today = now.toLocaleDateString('sv'); // YYYY-MM-DD format based on local time
 
-                const [attendanceRes, shuttleRes] = await Promise.all([
+                const [attendanceRes, shuttleRes, profileRes] = await Promise.all([
                     fetch(`/api/attendance`),
-                    fetch(`/api/parent/shuttle`)
+                    fetch(`/api/parent/shuttle`),
+                    fetch(`/api/student/profile`)
                 ]);
 
                 if (attendanceRes.ok) {
@@ -58,6 +60,13 @@ export default function StudentDashboard() {
                     const shuttleData = await shuttleRes.json();
                     if (shuttleData.assigned) {
                          setShuttleInfo(shuttleData.info);
+                    }
+                }
+
+                if (profileRes.ok) {
+                    const profileData = await profileRes.json();
+                    if (profileData.success && profileData.student.dream_energy !== null) {
+                        setDreamEnergy(Number(profileData.student.dream_energy));
                     }
                 }
 
@@ -102,6 +111,31 @@ export default function StudentDashboard() {
             </header>
 
             <main className="dashboard-content">
+                {/* Dream Energy Bar */}
+                <section className="status-card energy-card" style={{ marginTop: "-3rem", position: "relative", zIndex: 10 }}>
+                    <div className="energy-header">
+                        <div className="flex-center gap-xs">
+                            <span style={{ fontSize: "1.2rem" }}>⚡</span>
+                            <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800 }}>나의 드림 에너지</h3>
+                        </div>
+                        <span className="energy-value">
+                            {dreamEnergy.toFixed(1)} <span style={{ fontSize: "0.8rem", color: "#64748b" }}>/ 100</span>
+                        </span>
+                    </div>
+                    <div className="energy-bar-container">
+                        <div 
+                            className={`energy-bar-fill ${dreamEnergy >= 90 ? 'level-dream' : dreamEnergy >= 60 ? 'level-passion' : dreamEnergy > 30 ? 'level-start' : 'level-low'}`}
+                            style={{ width: `${Math.min(dreamEnergy, 100)}%` }}
+                        />
+                    </div>
+                    <p className="energy-msg">
+                        {dreamEnergy >= 90 ? "🚀 완벽해요! 꿈에 거의 다다랐어요!" : 
+                         dreamEnergy >= 60 ? "🔥 열정이 넘쳐요! 지금처럼만 해요!" :
+                         dreamEnergy > 30 ? "💧 좋은 출발이에요. 꾸준히 모아봐요!" : 
+                         "💤 에너지가 조금 부족해요. 내일은 꼭 출석해요!"}
+                    </p>
+                </section>
+
                 {/* Shuttle Card (Primary Feature for Students) */}
                 <section className="status-card shuttle-card">
                     <div className="card-header">
@@ -313,6 +347,38 @@ export default function StudentDashboard() {
                     font-weight: 700;
                     font-size: 1.1rem;
                     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+                }
+                
+                /* Dream Energy Styles */
+                .energy-card { border: 2px solid #e2e8f0; }
+                .energy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+                .energy-value { font-size: 1.25rem; font-weight: 800; color: #1e293b; }
+                .energy-bar-container { background: #f1f5f9; height: 28px; border-radius: 999px; overflow: hidden; position: relative; margin-bottom: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+                .energy-bar-fill { height: 100%; border-radius: 999px; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+                
+                /* Level Colors */
+                .level-low { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+                .level-start { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+                .level-passion { background: linear-gradient(90deg, #fb923c, #f97316); }
+                .level-dream { background: linear-gradient(90deg, #ec4899, #8b5cf6, #3b82f6); background-size: 200% 200%; animation: gradientMove 3s ease infinite; }
+                
+                /* Shine effect */
+                .energy-bar-fill::after {
+                    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+                    animation: shine 2s infinite;
+                }
+                
+                .energy-msg { text-align: center; font-size: 0.95rem; font-weight: 600; color: #475569; margin: 0; }
+                
+                @keyframes shine {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+                @keyframes gradientMove {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
                 }
             `}</style>
         </div>

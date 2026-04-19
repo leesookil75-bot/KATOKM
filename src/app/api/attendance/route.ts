@@ -68,6 +68,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '접근 권한이 없는 학생입니다.' }, { status: 403 });
         }
 
+        // Check previous status
+        const { rows: oldAttendance } = await sql`SELECT status FROM attendance WHERE student_id = ${studentId} AND date = ${date}`;
+        const oldStatus = oldAttendance.length > 0 ? oldAttendance[0].status : null;
+
         const { rows } = await sql`
       INSERT INTO attendance (student_id, date, status, memo)
       VALUES (${studentId}, ${date}, ${status}, ${memo || ''})
@@ -75,6 +79,28 @@ export async function POST(request: Request) {
       DO UPDATE SET status = ${status}, memo = ${memo || ''}, created_at = CURRENT_TIMESTAMP
       RETURNING *;
     `;
+
+        // Update Dream Energy if status changed
+        if (oldStatus !== status) {
+            let energyDelta = 0;
+            if (status === '출석') energyDelta = 0.5;
+            else if (status === '결석') energyDelta = -1.0;
+            
+            // If they changed from attendance to absence (revert + penalize)
+            if (oldStatus === '출석' && status === '하원') energyDelta = -0.5; // just revert
+            if (oldStatus === '결석' && status === '출석') energyDelta = 1.5; // revert penalty + reward
+            if (oldStatus === '결석' && status !== '결석' && status !== '출석') energyDelta = 1.0; // revert penalty
+            if (oldStatus === '출석' && status === '결석') energyDelta = -1.5; // revert reward + penalize
+
+            if (energyDelta !== 0) {
+                await sql`
+                    UPDATE students 
+                    SET dream_energy = GREATEST(0, LEAST(100, COALESCE(dream_energy, 36.5) + ${energyDelta}))
+                    WHERE id = ${studentId}
+                `;
+            }
+        }
+
         // Send Push Notification if status changed
         if (status === '출석' || status === '결석') {
             try {
