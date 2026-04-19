@@ -105,9 +105,9 @@ export default function StudentDashboard() {
     }
 
     const getBadge = (tier: number) => {
-        if (tier === 0) return null;
-        const badges = ['', '🥉 브론즈', '🥈 실버', '🥇 골드', '💎 다이아'];
-        return <span className="tier-badge" title={`${tier}회 100점 달성!`}>{badges[Math.min(tier, 4)]}</span>;
+        const badges = ['🌱 새싹', '🥉 브론즈', '🥈 실버', '🥇 골드', '💎 다이아'];
+        const badgeName = badges[Math.min(tier, 4)];
+        return <span className="tier-badge" title={tier === 0 ? "100점을 향해 고고!" : `${tier}회 100점 달성!`}>{badgeName}</span>;
     };
 
     return (
