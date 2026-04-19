@@ -21,6 +21,7 @@ export default function StudentDashboard() {
     const [todayAttendance, setTodayAttendance] = useState<any>(null);
     const [shuttleInfo, setShuttleInfo] = useState<any>(null);
     const [dreamEnergy, setDreamEnergy] = useState<number>(36.5);
+    const [dreamTier, setDreamTier] = useState<number>(0);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -65,8 +66,13 @@ export default function StudentDashboard() {
 
                 if (profileRes.ok) {
                     const profileData = await profileRes.json();
-                    if (profileData.success && profileData.student.dream_energy !== null) {
-                        setDreamEnergy(Number(profileData.student.dream_energy));
+                    if (profileData.success) {
+                        if (profileData.student.dream_energy !== null) {
+                            setDreamEnergy(Number(profileData.student.dream_energy));
+                        }
+                        if (profileData.student.dream_tier !== null) {
+                            setDreamTier(Number(profileData.student.dream_tier));
+                        }
                     }
                 }
 
@@ -98,11 +104,19 @@ export default function StudentDashboard() {
         );
     }
 
+    const getBadge = (tier: number) => {
+        if (tier === 0) return null;
+        const badges = ['', '🥉 브론즈', '🥈 실버', '🥇 골드', '💎 다이아'];
+        return <span className="tier-badge" title={`${tier}회 100점 달성!`}>{badges[Math.min(tier, 4)]}</span>;
+    };
+
     return (
         <div className="student-dashboard">
             <header className="dashboard-header">
                 <div>
-                    <h1 className="greeting">반가워요, {session.user.student_name} 학생! 👋</h1>
+                    <h1 className="greeting" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                        반가워요, {session.user.student_name} 학생! 👋 {getBadge(dreamTier)}
+                    </h1>
                     <p className="academy-name">{session.user.academy_name}</p>
                 </div>
                 <button onClick={handleLogout} className="logout-btn" title="로그아웃">
@@ -134,6 +148,11 @@ export default function StudentDashboard() {
                          dreamEnergy > 30 ? "💧 좋은 출발이에요. 꾸준히 모아봐요!" : 
                          "💤 에너지가 조금 부족해요. 내일은 꼭 출석해요!"}
                     </p>
+                    <div style={{ textAlign: 'center', marginTop: '0.25rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b', background: '#f8fafc', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
+                            💡 100점을 돌파하여 영광의 훈장을 모아보세요!
+                        </span>
+                    </div>
                 </section>
 
                 {/* Shuttle Card (Primary Feature for Students) */}
@@ -350,6 +369,7 @@ export default function StudentDashboard() {
                 }
                 
                 /* Dream Energy Styles */
+                .tier-badge { font-size: 0.95rem; background: #fffbeb; color: #b45309; padding: 0.2rem 0.6rem; border-radius: 999px; font-weight: 800; border: 1px solid #fde68a; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
                 .energy-card { border: 2px solid #e2e8f0; padding: 1rem 1.25rem; }
                 .energy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
                 .energy-value { font-size: 1.15rem; font-weight: 800; color: #1e293b; }

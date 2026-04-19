@@ -13,7 +13,7 @@ export async function GET() {
         if (!studentId) return NextResponse.json({ error: 'Student ID missing' }, { status: 400 });
 
         const { rows } = await sql`
-            SELECT id, name, dream_energy, class_name
+            SELECT id, name, dream_energy, dream_tier, class_name
             FROM students
             WHERE id = ${studentId}
             LIMIT 1;

@@ -118,7 +118,15 @@ export async function POST(request: Request) {
             if (energyDelta !== 0) {
                 await sql`
                     UPDATE students 
-                    SET dream_energy = GREATEST(0, LEAST(100, COALESCE(dream_energy, 36.5) + ${energyDelta}))
+                    SET 
+                        dream_tier = CASE 
+                            WHEN COALESCE(dream_energy, 36.5) + ${energyDelta} >= 100.0 THEN COALESCE(dream_tier, 0) + 1 
+                            ELSE COALESCE(dream_tier, 0) 
+                        END,
+                        dream_energy = CASE 
+                            WHEN COALESCE(dream_energy, 36.5) + ${energyDelta} >= 100.0 THEN 36.5 
+                            ELSE GREATEST(0.0, COALESCE(dream_energy, 36.5) + ${energyDelta}) 
+                        END
                     WHERE id = ${studentId}
                 `;
             }
