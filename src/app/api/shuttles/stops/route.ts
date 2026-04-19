@@ -15,7 +15,16 @@ export async function GET(request: Request) {
         const { rows } = await sql`
             SELECT 
                 s.id, s.stop_name, s.lat, s.lng, s.arrival_time, s.order_index,
-                COALESCE(json_agg(st.name) FILTER (WHERE st.name IS NOT NULL), '[]') as passenger_names
+                COALESCE(
+                    json_agg(
+                        json_build_object(
+                            'id', st.id,
+                            'name', st.name,
+                            'parent_phone', st.parent_phone
+                        )
+                    ) FILTER (WHERE st.id IS NOT NULL), 
+                    '[]'
+                ) as passengers
             FROM shuttle_stops s
             LEFT JOIN shuttle_passengers sp ON s.id = sp.stop_id
             LEFT JOIN students st ON sp.student_id = CAST(st.id AS VARCHAR)
