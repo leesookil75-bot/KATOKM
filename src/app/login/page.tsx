@@ -109,7 +109,12 @@ export default function LoginPage() {
             });
 
             if (res.ok) {
-                router.push("/parent");
+                const data = await res.json();
+                if (data.role === 'STUDENT') {
+                    router.push("/student");
+                } else {
+                    router.push("/parent");
+                }
             } else {
                 const data = await res.json();
                 setError(data.error || "학원 시스템에 등록되지 않은 번호입니다.");

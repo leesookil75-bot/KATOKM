@@ -58,18 +58,26 @@ export async function POST(request: Request) {
         }
 
         const student = rows[0];
+        const cleanParent = student.parent_phone ? student.parent_phone.replace(/[^0-9]/g, '') : '';
+        const cleanStudent = student.student_phone ? student.student_phone.replace(/[^0-9]/g, '') : '';
 
-        // Create parent session via our standard jose JWT
+        // Determine Role
+        let assignedRole = 'PARENT';
+        if (cleanPhone === cleanStudent && cleanPhone !== cleanParent) {
+            assignedRole = 'STUDENT';
+        }
+
+        // Create session via our standard jose JWT
         await login({
             id: student.academy_id,
             username: cleanPhone,
-            role: 'PARENT',
+            role: assignedRole,
             student_id: student.id,
             student_name: student.name,
             academy_name: student.academy_name
         });
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, role: assignedRole });
     } catch (error: any) {
         console.error('[ParentLogin] Error:', error);
         

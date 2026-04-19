@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const studentIdParam = searchParams.get('studentId') || session.user.student_id;
 
     try {
-        if (role === 'PARENT') {
+        if (role === 'PARENT' || role === 'STUDENT') {
             if (!studentIdParam) return NextResponse.json({ error: 'Student ID missing' }, { status: 400 });
 
             // Parent view: specific student history
