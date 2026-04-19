@@ -198,29 +198,32 @@ export default function DriverShuttlePage() {
                         <div key={stop.id} className="stop-boarding-card">
                             <div className="stop-name">{idx + 1}. {stop.stop_name}</div>
                             
-                            {stop.passengers && stop.passengers.length > 0 ? (
-                                <div className="passenger-list">
-                                    {stop.passengers.map((p: any) => {
-                                        const isBoarded = boardedStudents.has(p.id);
-                                        return (
-                                            <div key={p.id} className="passenger-row">
-                                                <div className="passenger-info">
-                                                    <span className="passenger-name">{p.name} 학생</span>
+                            {(() => {
+                                const ps = typeof stop.passengers === 'string' ? JSON.parse(stop.passengers) : (stop.passengers || []);
+                                return ps.length > 0 ? (
+                                    <div className="passenger-list">
+                                        {ps.map((p: any) => {
+                                            const isBoarded = boardedStudents.has(p.id);
+                                            return (
+                                                <div key={p.id} className="passenger-row">
+                                                    <div className="passenger-info">
+                                                        <span className="passenger-name">{p.name} 학생</span>
+                                                    </div>
+                                                    <button 
+                                                        className={`board-btn ${isBoarded ? 'boarded' : ''}`}
+                                                        onClick={() => handleBoard(p.id, stop.stop_name)}
+                                                        disabled={isBoarded || isBoarding === p.id}
+                                                    >
+                                                        {isBoarding === p.id ? '전송중...' : isBoarded ? '✅ 승차 완료' : '🚸 탑승 알림'}
+                                                    </button>
                                                 </div>
-                                                <button 
-                                                    className={`board-btn ${isBoarded ? 'boarded' : ''}`}
-                                                    onClick={() => handleBoard(p.id, stop.stop_name)}
-                                                    disabled={isBoarded || isBoarding === p.id}
-                                                >
-                                                    {isBoarding === p.id ? '전송중...' : isBoarded ? '✅ 승차 완료' : '🚸 탑승 알림'}
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ) : (
-                                <div className="no-passengers">해당 정류장 탑승 예정 없음</div>
-                            )}
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="no-passengers">해당 정류장 탑승 예정 없음</div>
+                                );
+                            })()}
                         </div>
                     ))}
                 </div>
