@@ -11,7 +11,7 @@ const ShuttleMap = dynamic(() => import('@/components/ShuttleMap'), {
 
 export default function ShuttleManagerPage() {
     const [liveRoutes, setLiveRoutes] = useState<any[]>([]);
-    const [mobileTab, setMobileTab] = useState<'list'|'map'>('list');
+    const [isMapOpen, setIsMapOpen] = useState(false);
     
     // 새 노선 모달용 상태 (State)
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -303,18 +303,14 @@ export default function ShuttleManagerPage() {
                 </div>
             )}
 
-            <div className="control-bar">
-                <div className="tab-group">
-                    <button className={mobileTab === 'list' ? 'tab-btn active' : 'tab-btn'} onClick={() => setMobileTab('list')}>📝 운행 노선표</button>
-                    <button className={mobileTab === 'map' ? 'tab-btn active' : 'tab-btn'} onClick={() => setMobileTab('map')}>🗺️ 실시간 지도</button>
-                </div>
+            <div className="control-bar" style={{justifyContent: 'flex-end', paddingBottom: '0.5rem'}}>
                 <button className="primary-btn shrink-0" onClick={() => setIsModalOpen(true)}>
                     <Plus size={20} />
                     <span>새 노선 추가</span>
                 </button>
             </div>
 
-            <div className={`layout-grid active-tab-${mobileTab}`}>
+            <div className={`layout-grid ${isMapOpen ? 'map-open' : ''}`}>
                 {/* Left Panel: Routes & Stops List */}
                 <div className="list-panel">
                     <div className="panel-header">
@@ -398,6 +394,13 @@ export default function ShuttleManagerPage() {
                 </div>
             </div>
 
+            <button 
+                className="fab-map-btn" 
+                onClick={() => setIsMapOpen(!isMapOpen)}
+            >
+                {isMapOpen ? '❌ 지도 닫기' : '🗺️ 지도 열기'}
+            </button>
+
             <style jsx>{`
                 .shuttles-container {
                     display: flex;
@@ -407,37 +410,10 @@ export default function ShuttleManagerPage() {
                 }
                 .control-bar {
                     display: flex;
-                    justify-content: space-between;
+                    justify-content: flex-end;
                     align-items: center;
                     gap: 0.5rem;
                     flex-wrap: wrap;
-                }
-                .tab-group {
-                    display: flex;
-                    gap: 0.5rem;
-                    background: #e2e8f0;
-                    padding: 0.4rem;
-                    border-radius: 0.75rem;
-                    flex: 1;
-                    min-width: 200px;
-                }
-                .tab-btn {
-                    flex: 1;
-                    padding: 0.75rem;
-                    border: none;
-                    border-radius: 0.5rem;
-                    background: transparent;
-                    color: #64748b;
-                    font-weight: 700;
-                    font-size: 1rem;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    white-space: nowrap;
-                }
-                .tab-btn.active {
-                    background: white;
-                    color: #8b5cf6;
-                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
                 }
                 .primary-btn {
                     display: flex;
@@ -460,20 +436,10 @@ export default function ShuttleManagerPage() {
                     flex: 1;
                     min-height: 0;
                 }
-                .layout-grid.active-tab-list .map-panel {
-                    display: none;
-                }
-                .layout-grid.active-tab-map .list-panel {
-                    display: none;
-                }
-                .layout-grid.active-tab-map .map-panel {
-                    flex: 1;
-                    display: block;
-                    height: calc(100vh - 12rem);
-                }
-
                 .list-panel {
                     background: white;
+                    flex: 1;
+                    transition: flex 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     border-radius: 1rem;
                     border: 1px solid #e2e8f0;
                     display: flex;
@@ -609,10 +575,45 @@ export default function ShuttleManagerPage() {
                 .map-panel {
                     background: white;
                     border-radius: 1rem;
-                    border: 1px solid #e2e8f0;
                     overflow: hidden;
                     position: relative;
-                    min-height: 500px;
+                    height: 0;
+                    min-height: 0;
+                    border: none;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                .layout-grid.map-open .map-panel {
+                    height: 50vh;
+                    min-height: 300px;
+                    border: 1px solid #e2e8f0;
+                    margin-top: 1rem;
+                }
+                .fab-map-btn {
+                    position: fixed;
+                    bottom: 2rem;
+                    right: 2rem;
+                    background: #1e293b;
+                    color: white;
+                    font-size: 1rem;
+                    font-weight: 700;
+                    padding: 1rem 1.5rem;
+                    border-radius: 2rem;
+                    border: none;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                    cursor: pointer;
+                    z-index: 9000;
+                    transition: transform 0.2s, background 0.2s;
+                }
+                .fab-map-btn:hover {
+                    transform: scale(1.05);
+                    background: #0f172a;
+                }
+                @media (max-width: 768px) {
+                    .fab-map-btn {
+                        bottom: 1.5rem;
+                        right: 1.5rem;
+                        padding: 0.875rem 1.25rem;
+                    }
                 }
                 .kakao-map {
                     width: 100%;
