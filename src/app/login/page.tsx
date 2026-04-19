@@ -74,7 +74,19 @@ export default function LoginPage() {
             setIsOtpSent(true);
         } catch (err: any) {
             console.error("SMS 전송 오류:", err);
-            setError("인증번호 발송에 실패했습니다. 번호를 확인해주세요.");
+            
+            // Firebase 상세 에러 메시지 추출
+            let errorMsg = "인증번호 발송에 실패했습니다. 번호를 확인해주세요.";
+            if (err.code === 'auth/unauthorized-domain') {
+                errorMsg = "개발 환경(도메인)이 Firebase 콘솔에 등록되지 않았습니다.";
+            } else if (err.code === 'auth/too-many-requests') {
+                errorMsg = "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
+            } else if (err.message) {
+                errorMsg = `발송 실패: ${err.message}`;
+            }
+
+            setError(errorMsg);
+            
             // Reset recaptcha if error
             if (window.recaptchaVerifier) {
                 window.recaptchaVerifier.render().then((widgetId: any) => {
