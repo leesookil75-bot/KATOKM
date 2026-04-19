@@ -36,9 +36,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         return <div className="auth-layout">{children}</div>;
     }
 
-    // Explicitly hide for PARENT role or KIOSK page
+    // Explicitly hide for PARENT, STUDENT role or KIOSK page
     const isKioskPage = pathname === '/kiosk';
-    const showNav = role !== 'PARENT' && !isKioskPage;
+    const showNav = role !== 'PARENT' && role !== 'STUDENT' && !isKioskPage;
 
     return (
         <div className="app-layout">
