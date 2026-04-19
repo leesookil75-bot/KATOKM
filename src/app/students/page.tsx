@@ -341,7 +341,7 @@ export default function StudentManager() {
                     position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)",
                     display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50
                 }}>
-                    <div className="card" style={{ width: "90%", maxWidth: "400px" }}>
+                    <div className="card" style={{ width: "90%", maxWidth: "400px", maxHeight: "90vh", overflowY: "auto" }}>
                         <h2 className="heading-md" style={{ marginBottom: "1rem" }}>{formData.id ? "학생 수정" : "학생 등록"}</h2>
                         <form onSubmit={handleSubmit} className="flex-col gap-md">
                             <div>
