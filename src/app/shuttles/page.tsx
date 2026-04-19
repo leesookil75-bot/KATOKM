@@ -303,20 +303,15 @@ export default function ShuttleManagerPage() {
                 </div>
             )}
 
-            <header className="page-header">
-                <div>
-                    <h1 className="page-title">차량 운행 관리 (안심 셔틀)</h1>
-                    <p className="page-description">차량 노선을 설정하고 정류장을 등록하세요. (OpenStreetMap 무료 지도)</p>
+            <div className="control-bar">
+                <div className="tab-group">
+                    <button className={mobileTab === 'list' ? 'tab-btn active' : 'tab-btn'} onClick={() => setMobileTab('list')}>📝 운행 노선표</button>
+                    <button className={mobileTab === 'map' ? 'tab-btn active' : 'tab-btn'} onClick={() => setMobileTab('map')}>🗺️ 실시간 지도</button>
                 </div>
-                <button className="primary-btn" onClick={() => setIsModalOpen(true)}>
+                <button className="primary-btn shrink-0" onClick={() => setIsModalOpen(true)}>
                     <Plus size={20} />
                     <span>새 노선 추가</span>
                 </button>
-            </header>
-
-            <div className="mobile-tabs">
-                <button className={mobileTab === 'list' ? 'active' : ''} onClick={() => setMobileTab('list')}>📝 운행 노선표</button>
-                <button className={mobileTab === 'map' ? 'active' : ''} onClick={() => setMobileTab('map')}>🗺️ 실시간 지도</button>
             </div>
 
             <div className={`layout-grid active-tab-${mobileTab}`}>
@@ -410,20 +405,39 @@ export default function ShuttleManagerPage() {
                     gap: 1.5rem;
                     height: calc(100vh - 4rem);
                 }
-                .page-header {
+                .control-bar {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    gap: 0.5rem;
+                    flex-wrap: wrap;
                 }
-                .page-title {
-                    font-size: 1.5rem;
-                    font-weight: 700;
-                    color: #1e293b;
-                    margin: 0 0 0.25rem 0;
+                .tab-group {
+                    display: flex;
+                    gap: 0.5rem;
+                    background: #e2e8f0;
+                    padding: 0.4rem;
+                    border-radius: 0.75rem;
+                    flex: 1;
+                    min-width: 200px;
                 }
-                .page-description {
+                .tab-btn {
+                    flex: 1;
+                    padding: 0.75rem;
+                    border: none;
+                    border-radius: 0.5rem;
+                    background: transparent;
                     color: #64748b;
-                    margin: 0;
+                    font-weight: 700;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    white-space: nowrap;
+                }
+                .tab-btn.active {
+                    background: white;
+                    color: #8b5cf6;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
                 }
                 .primary-btn {
                     display: flex;
@@ -441,11 +455,21 @@ export default function ShuttleManagerPage() {
                 .primary-btn:hover { background: #7c3aed; }
                 
                 .layout-grid {
-                    display: grid;
-                    grid-template-columns: 350px 1fr;
-                    gap: 1.5rem;
+                    display: flex;
+                    flex-direction: column;
                     flex: 1;
                     min-height: 0;
+                }
+                .layout-grid.active-tab-list .map-panel {
+                    display: none;
+                }
+                .layout-grid.active-tab-map .list-panel {
+                    display: none;
+                }
+                .layout-grid.active-tab-map .map-panel {
+                    flex: 1;
+                    display: block;
+                    height: calc(100vh - 12rem);
                 }
 
                 .list-panel {
@@ -606,54 +630,6 @@ export default function ShuttleManagerPage() {
                     font-weight: 500;
                 }
 
-                .mobile-tabs {
-                    display: none;
-                }
-                @media (max-width: 1024px) {
-                    .mobile-tabs {
-                        display: flex;
-                        gap: 0.5rem;
-                        background: #e2e8f0;
-                        padding: 0.4rem;
-                        border-radius: 0.75rem;
-                        margin-bottom: 1rem;
-                    }
-                    .mobile-tabs button {
-                        flex: 1;
-                        padding: 0.75rem;
-                        border: none;
-                        border-radius: 0.5rem;
-                        background: transparent;
-                        color: #64748b;
-                        font-weight: 700;
-                        font-size: 1rem;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                    }
-                    .mobile-tabs button.active {
-                        background: white;
-                        color: #8b5cf6;
-                        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-                    }
-                    
-                    .layout-grid {
-                        grid-template-columns: 1fr;
-                        display: flex;
-                        flex-direction: column;
-                        flex: 1;
-                    }
-                    .layout-grid.active-tab-list .map-panel {
-                        display: none;
-                    }
-                    .layout-grid.active-tab-map .list-panel {
-                        display: none;
-                    }
-                    .layout-grid.active-tab-map .map-panel {
-                        flex: 1;
-                        display: block;
-                        height: calc(100vh - 12rem);
-                    }
-                }
             `}</style>
         </div>
     );
