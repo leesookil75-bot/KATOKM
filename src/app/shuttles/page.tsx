@@ -625,7 +625,7 @@ export default function ShuttleManagerPage() {
                 }
                 @media (max-width: 768px) {
                     .fab-map-btn {
-                        bottom: 1.5rem;
+                        bottom: 6rem; /* 하단 네비게이션을 피하기 위해 위치 상향 */
                         right: 1.5rem;
                         padding: 0.875rem 1.25rem;
                     }
