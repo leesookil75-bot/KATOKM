@@ -61,11 +61,11 @@ export default function RiskAnalysisWidget() {
     }
 
     return (
-        <div className={styles.widgetContainer}>
+        <div className={styles.widgetContainer} onClick={() => window.location.href = '/smart-care'} style={{ cursor: 'pointer', transition: 'all 0.2s' }} title="스마트 케어 센터로 이동">
             <div className={styles.header}>
                 <h3 className={styles.title}>
                     <Activity className={styles.titleIcon} size={20} />
-                    스마트 케어 리포트
+                    스마트 케어 리포트 <span className="text-xs text-sub ml-2 opacity-60">터치하여 센터 열기 👉</span>
                 </h3>
                 <span className={styles.badge}>
                     집중 케어 대상: {atRiskStudents.length}명 (위험 {redStudents.length} / 주의 {yellowStudents.length})
@@ -91,7 +91,7 @@ export default function RiskAnalysisWidget() {
                 ))}
                 {atRiskStudents.length > 5 && (
                     <div className={styles.more}>
-                        + 그 외 {atRiskStudents.length - 5}명의 요주의 관원이 있습니다.
+                        + 그 외 {atRiskStudents.length - 5}명의 요주의 관원이 있습니다. 센터에서 확인!
                     </div>
                 )}
             </div>

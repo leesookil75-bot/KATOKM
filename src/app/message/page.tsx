@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { Send, Copy, Plus, Trash2, Users, Filter, ChevronDown, MessageCircle } from "lucide-react";
 import Link from 'next/link';
+import { useSearchParams } from "next/navigation";
 
 type Student = {
     id: string;
@@ -18,7 +19,10 @@ type Template = {
 
 type AttendanceStatus = "출석" | "결석" | "지각" | "조퇴" | "미처리";
 
-export default function MessagePage() {
+function MessageContent() {
+    const searchParams = useSearchParams();
+    const deepLinkStudentId = searchParams.get('studentId');
+
     // Data State
     const [students, setStudents] = useState<Student[]>([]);
     const [classes, setClasses] = useState<{ id: number, name: string }[]>([]);
@@ -55,6 +59,11 @@ export default function MessagePage() {
                 const data = await resStudents.json();
                 studentsData = data;
                 setStudents(data);
+                
+                // Deep link automatically select student
+                if (deepLinkStudentId && data.some((s: Student) => s.id === deepLinkStudentId)) {
+                    setSelectedStudentIds(new Set([deepLinkStudentId]));
+                }
             }
             if (resClasses.ok) setClasses(await resClasses.json());
             if (resTemplates.ok) setTemplates(await resTemplates.json());
@@ -386,5 +395,13 @@ export default function MessagePage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function MessagePage() {
+    return (
+        <Suspense fallback={<div className="flex-center" style={{ height: '100vh' }}>Loading...</div>}>
+            <MessageContent />
+        </Suspense>
     );
 }
