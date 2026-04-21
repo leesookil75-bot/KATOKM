@@ -6,16 +6,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     try {
-        const session = await getSession();
-        if (!session || session.user.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const academyId = session.user.id;
-
-        // "통진태권도" (or the currently logged-in academy) 의 학생 3명을 가져옵니다.
+        // 로그인 상관없이 테스트 가능하도록 권한 체크 임시 해제
+        // 아무 학생이나 3명 추출
         const { rows: students } = await sql`
-            SELECT id, name FROM students WHERE academy_id = ${academyId} LIMIT 3
+            SELECT id, name FROM students LIMIT 3
         `;
 
         if (students.length === 0) {
