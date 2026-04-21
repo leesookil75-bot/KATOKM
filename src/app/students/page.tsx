@@ -180,6 +180,14 @@ export default function StudentManager() {
             <header className="flex-center justify-between" style={{ marginBottom: "1.5rem" }}>
                 <h1 className="heading-lg">학생 관리</h1>
                 <div className="flex-center gap-sm">
+                    <button className="btn" style={{ padding: "0.5rem", color: "#f59e0b", backgroundColor: "#fef3c7" }} onClick={async () => {
+                        const res = await fetch('/api/admin/test-risk');
+                        const data = await res.json();
+                        alert(data.message || data.error);
+                        fetchStudents();
+                    }}>
+                        <span className="text-xs font-bold">🔥 시뮬레이션 조작</span>
+                    </button>
                     <button id="tour-student-add" className="btn btn-primary" onClick={() => setIsFormOpen(true)}>
                         <Plus size={20} />
                         <span>학생 추가</span>
