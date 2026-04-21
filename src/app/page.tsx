@@ -1,5 +1,5 @@
 import styles from "./page.module.css";
-import { Users, CheckCircle, MessageCircle, CreditCard, Monitor, Plus } from "lucide-react";
+import { Users, CheckCircle, MessageCircle, CreditCard, Monitor, Plus, Bus } from "lucide-react";
 import Link from 'next/link';
 import { getSession } from "@/lib/auth";
 import RiskAnalysisWidget from "@/components/RiskAnalysisWidget";
@@ -45,6 +45,12 @@ export default async function Home() {
           <CreditCard size={48} color="#06b6d4" style={{ marginBottom: "1.5rem" }} />
           <h2>수강료 관리</h2>
           <p>미납 내역 및 청구서 발송</p>
+        </Link>
+
+        <Link href="/shuttles" className={styles.card} id="tour-shuttle">
+          <Bus size={48} color="#3b82f6" style={{ marginBottom: "1.5rem" }} />
+          <h2>셔틀 관리</h2>
+          <p>실시간 셔틀 운행 및 학생 탑승 관리</p>
         </Link>
       </div>
 
