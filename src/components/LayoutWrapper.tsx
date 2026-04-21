@@ -41,7 +41,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
     // Explicitly hide for PARENT, STUDENT routes or KIOSK page
     const isKioskPage = pathname === '/kiosk';
-    const showNav = !pathname.startsWith('/parent') && !pathname.startsWith('/student') && !isKioskPage;
+    const isStudentApp = pathname === '/student' || pathname.startsWith('/student/');
+    const showNav = !pathname.startsWith('/parent') && !isStudentApp && !isKioskPage;
 
     return (
         <div className="app-layout">
